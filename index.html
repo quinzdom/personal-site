@@ -185,7 +185,23 @@
     function render(filter) {
       const grid = document.getElementById('grid');
       const filtered = filter === 'all' ? items : items.filter(i => i.type === filter);
-      const sorted = [...filtered].sort((a, b) => (a.ya ? 1 : 0) - (b.ya ? 1 : 0));
+      const sorted = filtered
+        .map((item, index) => ({ item, index }))
+        .sort((left, right) => {
+          const leftDate = left.item.date_read || '';
+          const rightDate = right.item.date_read || '';
+
+          if (leftDate !== rightDate) {
+            return rightDate.localeCompare(leftDate);
+          }
+
+          if (left.item.ya !== right.item.ya) {
+            return Number(left.item.ya) - Number(right.item.ya);
+          }
+
+          return left.index - right.index;
+        })
+        .map(({ item }) => item);
       document.getElementById('count').textContent = `${sorted.length} titles`;
 
       grid.innerHTML = sorted.map(item => {

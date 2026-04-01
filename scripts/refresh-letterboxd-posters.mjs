@@ -22,21 +22,6 @@ function slugifyId(id) {
   return id.replace(/[^a-zA-Z0-9._-]+/g, '-');
 }
 
-function inferExtension(url, contentType) {
-  const pathname = new URL(url).pathname;
-  const ext = path.extname(pathname).toLowerCase();
-  if (ext) return ext;
-
-  if (contentType?.includes('jpeg')) return '.jpg';
-  if (contentType?.includes('png')) return '.png';
-  if (contentType?.includes('webp')) return '.webp';
-  if (contentType?.includes('gif')) return '.gif';
-  if (contentType?.includes('svg')) return '.svg';
-  if (contentType?.includes('avif')) return '.avif';
-
-  return '.jpg';
-}
-
 function serializeItems(items) {
   const rows = items.map((item) => {
     return `{title:${escapeString(item.title)},author:${escapeString(item.author)},type:${escapeString(item.type)},date_read:${escapeString(item.date_read)},rating:${item.rating},cover:${escapeString(item.cover)},id:${escapeString(item.id)},ya:${item.ya}}`;
@@ -50,20 +35,23 @@ function extractBoxdCode(id) {
   return match ? match[1] : null;
 }
 
-function extractPosterUrl(html) {
-  const patterns = [
-    /<meta property="og:image" content="([^"]+)"/i,
-    /<meta property='og:image' content='([^']+)'/i,
-    /<meta property="og:image:secure_url" content="([^"]+)"/i,
-    /<meta name="twitter:image" content="([^"]+)"/i,
-  ];
+function extractFilmId(html) {
+  const match = html.match(/data-film-id="(\d+)"/);
+  return match ? match[1] : null;
+}
 
-  for (const pattern of patterns) {
-    const match = html.match(pattern);
-    if (match) return match[1];
+function extractPosterUrl(html, filmId) {
+  if (filmId) {
+    const escapedFilmId = filmId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const filmPosterPattern = new RegExp(`https://a\\.ltrbxd\\.com/resized/film-poster/[^"'\\s<]*?/${escapedFilmId}-[^"'\\s<]*`, 'i');
+    const filmPosterMatch = html.match(filmPosterPattern);
+    if (filmPosterMatch) return filmPosterMatch[0];
   }
 
-  return null;
+  const genericPosterMatches = [...html.matchAll(/https:\/\/a\.ltrbxd\.com\/[^"'\s<]*?-0-230-0-345-crop[^"'\s<]*/gi)]
+    .map((match) => match[0])
+    .filter((url) => !url.includes('/avatar/'));
+  return genericPosterMatches[0] || null;
 }
 
 async function fetchText(url) {
@@ -71,7 +59,7 @@ async function fetchText(url) {
     redirect: 'follow',
     signal: AbortSignal.timeout(15000),
     headers: {
-      'user-agent': 'Mozilla/5.0 (compatible; Codex cover filler)',
+      'user-agent': 'Mozilla/5.0 (compatible; Codex letterboxd poster refresher)',
       accept: 'text/html,application/xhtml+xml',
     },
   });
@@ -87,8 +75,9 @@ async function downloadFile(url, targetPath) {
   const response = await fetch(url, {
     signal: AbortSignal.timeout(20000),
     headers: {
-      'user-agent': 'Mozilla/5.0 (compatible; Codex cover filler)',
+      'user-agent': 'Mozilla/5.0 (compatible; Codex letterboxd poster refresher)',
       accept: 'image/*,*/*;q=0.8',
+      referer: 'https://letterboxd.com/',
     },
   });
 
@@ -96,12 +85,8 @@ async function downloadFile(url, targetPath) {
     throw new Error(`HTTP ${response.status}`);
   }
 
-  const contentType = response.headers.get('content-type') || '';
-  const extension = inferExtension(url, contentType);
-  const finalPath = targetPath.endsWith(extension) ? targetPath : `${targetPath}${extension}`;
   const bytes = Buffer.from(await response.arrayBuffer());
-  await fs.writeFile(finalPath, bytes);
-  return finalPath;
+  await fs.writeFile(targetPath, bytes);
 }
 
 async function processItem(item) {
@@ -110,16 +95,19 @@ async function processItem(item) {
     return { ok: false, reason: 'missing-boxd-code' };
   }
 
-  const pageHtml = await fetchText(`https://boxd.it/${code}`);
-  const posterUrl = extractPosterUrl(pageHtml);
+  const html = await fetchText(`https://boxd.it/${code}`);
+  const filmId = extractFilmId(html);
+  const posterUrl = extractPosterUrl(html, filmId);
   if (!posterUrl) {
     return { ok: false, reason: 'missing-poster-url' };
   }
 
-  const basePath = path.join(coversDir, `${slugifyId(item.id)}`);
-  const finalPath = await downloadFile(posterUrl, basePath);
-  item.cover = path.posix.join('images', 'covers', path.basename(finalPath));
-  return { ok: true, posterUrl, finalPath };
+  const filename = `${slugifyId(item.id)}.jpg`;
+  const absolutePath = path.join(coversDir, filename);
+  await downloadFile(posterUrl, absolutePath);
+  item.cover = path.posix.join('images', 'covers', filename);
+
+  return { ok: true, posterUrl, filename };
 }
 
 async function mapLimit(values, limit, iteratee) {
@@ -139,14 +127,24 @@ async function mapLimit(values, limit, iteratee) {
   return results;
 }
 
+async function removeExistingMovieCovers() {
+  const names = await fs.readdir(coversDir).catch(() => []);
+  const removals = names
+    .filter((name) => name.startsWith('lb-'))
+    .map((name) => fs.rm(path.join(coversDir, name), { force: true }));
+  await Promise.all(removals);
+  return removals.length;
+}
+
 async function main() {
   await fs.mkdir(coversDir, { recursive: true });
 
   const source = await fs.readFile(dataFile, 'utf8');
   const items = loadItems(source);
-  const blanks = items.filter((item) => item.type === 'movie' && !item.cover);
+  const movies = items.filter((item) => item.type === 'movie');
 
-  const results = await mapLimit(blanks, CONCURRENCY, async (item) => {
+  const removed = await removeExistingMovieCovers();
+  const results = await mapLimit(movies, CONCURRENCY, async (item) => {
     try {
       return { id: item.id, title: item.title, ...(await processItem(item)) };
     } catch (error) {
@@ -157,7 +155,8 @@ async function main() {
   await fs.writeFile(dataFile, serializeItems(items));
 
   const summary = {
-    totalBlankMovies: blanks.length,
+    removed,
+    processed: movies.length,
     downloaded: results.filter((result) => result.ok).length,
     failed: results.filter((result) => !result.ok).length,
     failures: results.filter((result) => !result.ok).slice(0, 20),
