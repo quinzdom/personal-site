@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.goodreads.com)",
+      "Bash(head -1 \"/Users/yuta/Downloads/goodreads_library_export \\(1\\).csv\")",
+      "Bash(python3 -c \":*)",
+      "WebFetch(domain:letterboxd.com)",
+      "Bash(curl -sL -A \"Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36\" \"https://letterboxd.com/quinzdom/rss/\")",
+      "Bash(curl -sL -A \"Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36\" \"https://letterboxd.com/quinzdom/films/\")"
+    ]
+  }
+}
