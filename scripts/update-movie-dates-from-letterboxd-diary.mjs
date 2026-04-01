@@ -4,7 +4,7 @@ import vm from 'node:vm';
 
 const workspaceDir = process.cwd();
 const dataFile = path.join(workspaceDir, 'items_data.js');
-const defaultCsvPath = path.join(workspaceDir, 'data-source', 'goodreads', 'goodreads_library_export.csv');
+const defaultCsvPath = path.join(workspaceDir, 'data-source', 'letterboxd', 'diary.csv');
 
 function loadItems(source) {
   const context = {};
@@ -68,10 +68,24 @@ function parseCsv(text) {
 }
 
 function normalizeDate(value) {
-  if (!value) return '';
-  const match = value.match(/^(\d{4})\/(\d{2})\/(\d{2})$/);
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (!match) return '';
   return `${match[1]}-${match[2]}-${match[3]}`;
+}
+
+function normalizeTitle(value) {
+  return value
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/['’]/g, '')
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function buildKey(title, year) {
+  return `${normalizeTitle(title)}|||${String(year).trim()}`;
 }
 
 async function main() {
@@ -84,17 +98,34 @@ async function main() {
 
   const items = loadItems(dataSource);
   const rows = parseCsv(csvSource);
-  const byId = new Map(rows.map((row) => [`gr-${row['Book Id']}`, normalizeDate(row['Date Added'])]));
+  const byKey = new Map();
+
+  for (const row of rows) {
+    const watchedDate = normalizeDate(row['Watched Date'] || '');
+    if (!watchedDate) continue;
+    const key = buildKey(row['Name'] || '', row['Year'] || '');
+    const previous = byKey.get(key);
+    if (!previous || watchedDate > previous) {
+      byKey.set(key, watchedDate);
+    }
+  }
 
   let updated = 0;
   let matched = 0;
+  const unmatched = [];
 
   for (const item of items) {
-    if (item.type !== 'book') continue;
-    if (!byId.has(item.id)) continue;
+    if (item.type !== 'movie') continue;
 
-    matched += 1;
-    const nextDate = byId.get(item.id) || '';
+    const key = buildKey(item.title, item.author);
+    const nextDate = byKey.get(key) || '';
+
+    if (nextDate) {
+      matched += 1;
+    } else {
+      unmatched.push({ title: item.title, year: item.author, id: item.id });
+    }
+
     if (item.date_read !== nextDate) {
       item.date_read = nextDate;
       updated += 1;
@@ -104,9 +135,11 @@ async function main() {
   await fs.writeFile(dataFile, serializeItems(items));
 
   console.log(JSON.stringify({
-    matched,
+    diaryRows: rows.length,
+    matchedMovies: matched,
+    unmatchedMovies: unmatched.length,
     updated,
-    unmatchedBooks: items.filter((item) => item.type === 'book' && !byId.has(item.id)).length,
+    unmatchedSample: unmatched.slice(0, 20),
   }, null, 2));
 }
 

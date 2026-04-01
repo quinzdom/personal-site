@@ -16,52 +16,191 @@
 
     header {
       max-width: 1200px;
-      margin: 0 auto;
-      padding: 48px 24px 32px;
+      margin: 24px auto 22px;
+      padding: 22px 24px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 22px;
+      position: relative;
+    }
+
+    .header-copy {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-main {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
     }
 
     header h1 {
       color: #fff;
-      font-size: 1.5rem;
+      font-size: 1.9rem;
       font-weight: 600;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.01em;
+      line-height: 1.05;
+      white-space: nowrap;
     }
 
     header p {
-      margin-top: 6px;
-      font-size: 0.85rem;
-      color: #678;
+      margin-top: 10px;
+      font-size: 0.74rem;
+      color: #718191;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .header-stats {
+      display: inline-flex;
+      align-items: flex-start;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      padding-top: 4px;
+      flex: 0 0 auto;
+      max-width: 520px;
+    }
+
+    .header-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+      min-width: 70px;
+    }
+
+    .header-stat-value {
+      color: #e4ebf2;
+      font-size: 0.84rem;
+      line-height: 1;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+
+    .header-stat-label {
+      color: #667787;
+      font-size: 0.54rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .header-stat-meta {
+      color: #e4ebf2;
+      font-size: 0.84rem;
+      line-height: 1;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+
+    .toolbar {
+      width: fit-content;
+      max-width: 100%;
+      margin: 0;
+      padding-right: 20px;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      flex: 0 0 auto;
+      border-right: 1px solid rgba(64, 76, 89, 0.7);
+      position: relative;
+      z-index: 1;
+    }
+
+    .toolbar-section {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .toolbar-label {
+      padding-left: 4px;
+      color: #667787;
+      font-size: 0.5rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
     }
 
     .filters {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px 24px;
-      display: flex;
-      gap: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px;
+      border: 1px solid rgba(56, 67, 79, 0.9);
+      border-radius: 999px;
+      background: rgba(18, 24, 30, 0.62);
     }
 
     .filters button {
+      border: 0;
       background: transparent;
-      border: 1px solid #2c3440;
-      color: #99aabb;
-      padding: 6px 16px;
-      border-radius: 3px;
-      font-size: 0.8rem;
+      color: #93a4b3;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.66rem;
+      letter-spacing: 0.05em;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: background 0.15s, color 0.15s;
     }
 
     .filters button:hover {
-      border-color: #678;
-      color: #fff;
+      color: #d6dee7;
     }
 
     .filters button.active {
-      background: #a67c52;
-      border-color: #a67c52;
-      color: #14181c;
+      background: linear-gradient(180deg, #b58a5f, #a67c52);
+      color: #12171b;
+      box-shadow: inset 0 0 0 1px rgba(255, 236, 216, 0.2);
       font-weight: 600;
+    }
+
+    .view-toggle,
+    .language-toggle,
+    .favorites-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px;
+      border: 1px solid rgba(56, 67, 79, 0.9);
+      border-radius: 999px;
+      background: rgba(18, 24, 30, 0.62);
+    }
+
+    .view-toggle button,
+    .language-toggle button,
+    .favorites-toggle button {
+      border: 0;
+      background: transparent;
+      color: #8393a2;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.64rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .view-toggle button:hover,
+    .language-toggle button:hover,
+    .favorites-toggle button:hover {
+      color: #d6dee7;
+    }
+
+    .view-toggle button.active,
+    .language-toggle button.active,
+    .favorites-toggle button.active {
+      background: rgba(237, 242, 247, 0.08);
+      color: #f1f4f7;
+      box-shadow: inset 0 0 0 1px rgba(160, 177, 193, 0.16);
     }
 
     .grid {
@@ -71,6 +210,36 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
       gap: 8px;
+      align-items: start;
+    }
+
+    .entry {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .month-marker {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      color: #678;
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .month-marker:first-child {
+      margin-top: 0;
+    }
+
+    .month-marker::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(82, 99, 115, 0.7), rgba(82, 99, 115, 0));
     }
 
     .item {
@@ -80,6 +249,15 @@
       overflow: hidden;
       background: #1f2830;
       cursor: pointer;
+    }
+
+    .item-period {
+      min-height: 0.75rem;
+      padding-left: 2px;
+      color: #5f6d7c;
+      font-size: 0.56rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
     }
 
     .item img {
@@ -122,13 +300,6 @@
       margin-top: 2px;
     }
 
-    .overlay .rating {
-      color: #a67c52;
-      font-size: 0.6rem;
-      margin-top: 4px;
-      letter-spacing: 1px;
-    }
-
     .overlay .date {
       color: #678;
       font-size: 0.58rem;
@@ -153,43 +324,318 @@
     }
 
     @media (max-width: 600px) {
+      header {
+        margin: 14px 16px 18px;
+        padding: 18px 16px;
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
       .grid {
         grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
         gap: 6px;
       }
-      header { padding: 32px 16px 24px; }
-      .filters { padding: 0 16px 16px; }
+      .toolbar {
+        padding-right: 0;
+        padding-bottom: 12px;
+        border-right: 0;
+        border-bottom: 1px solid rgba(64, 76, 89, 0.7);
+      }
+      header h1 {
+        font-size: 1.55rem;
+        white-space: normal;
+      }
+      .header-main {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .header-stats {
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        max-width: none;
+      }
+      .header-stat {
+        align-items: flex-start;
+        min-width: 0;
+      }
+      .toolbar {
+        display: inline-flex;
+        margin: 0;
+      }
       .grid { padding: 0 16px 32px; }
+      .filters,
+      .view-toggle,
+      .language-toggle,
+      .favorites-toggle {
+        flex-wrap: wrap;
+      }
+      .filters button,
+      .view-toggle button,
+      .language-toggle button,
+      .favorites-toggle button {
+        padding: 5px 9px;
+      }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Books & Movies I consumed</h1>
-    <p id="count"></p>
+    <div class="toolbar">
+      <div class="toolbar-section">
+        <div class="toolbar-label">Show</div>
+        <div class="filters">
+          <button class="active" data-filter="all">All</button>
+          <button data-filter="book">Books</button>
+          <button data-filter="movie">Movies</button>
+        </div>
+      </div>
+      <div class="toolbar-section">
+        <div class="toolbar-label">View</div>
+        <div class="view-toggle" aria-label="Sort view">
+          <button class="active" data-view="month">By Month</button>
+          <button data-view="timeline">Timeline</button>
+        </div>
+      </div>
+      <div class="toolbar-section">
+        <div class="toolbar-label">Language</div>
+        <div class="language-toggle" aria-label="Language filter">
+          <button class="active" data-language="all">All</button>
+          <button data-language="japanese">Japanese</button>
+        </div>
+      </div>
+      <div class="toolbar-section">
+        <div class="toolbar-label">Focus</div>
+        <div class="favorites-toggle" aria-label="Favorites filter">
+          <button class="active" data-favorites="all">All</button>
+          <button data-favorites="favorites">Favorites</button>
+        </div>
+      </div>
+    </div>
+    <div class="header-copy">
+      <div class="header-main">
+        <h1>Books & Movies I consumed</h1>
+        <div class="header-stats" aria-label="Consumption stats">
+          <div class="header-stat">
+            <span class="header-stat-value" id="reading-hours">--</span>
+            <span class="header-stat-label">Reading</span>
+            <span class="header-stat-meta" id="reading-days">--</span>
+          </div>
+          <div class="header-stat">
+            <span class="header-stat-value" id="watching-hours">--</span>
+            <span class="header-stat-label">Watching</span>
+            <span class="header-stat-meta" id="watching-days">--</span>
+          </div>
+          <div class="header-stat">
+            <span class="header-stat-value" id="total-hours">--</span>
+            <span class="header-stat-label">Total</span>
+            <span class="header-stat-meta" id="total-days">--</span>
+          </div>
+          <div class="header-stat">
+            <span class="header-stat-value" id="minimum-wage-value">--</span>
+            <span class="header-stat-label">Min Wage</span>
+            <span class="header-stat-meta" id="minimum-wage-rate">--</span>
+          </div>
+          <div class="header-stat">
+            <span class="header-stat-value" id="average-wage-value">--</span>
+            <span class="header-stat-label">Avg Wage</span>
+            <span class="header-stat-meta" id="average-wage-rate">--</span>
+          </div>
+        </div>
+      </div>
+      <p id="count"></p>
+    </div>
   </header>
-  <div class="filters">
-    <button class="active" data-filter="all">All</button>
-    <button data-filter="book">Books</button>
-    <button data-filter="movie">Movies</button>
-  </div>
   <div class="grid" id="grid"></div>
 
   <script src="items_data.js"></script>
+  <script src="likes_data.js"></script>
+  <script src="stats_data.js"></script>
   <script>
-    function renderStars(rating) {
-      if (!rating) return '';
-      return '\u2605'.repeat(rating);
+    const monthFormatter = new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+    const STORAGE_KEY = 'tracking-site-view';
+    const LANGUAGE_STORAGE_KEY = 'tracking-site-language';
+    const FAVORITES_STORAGE_KEY = 'tracking-site-favorites';
+    const JAPANESE_MOVIE_IDS = new Set([
+      'lb-https://boxd.it/16G4',
+      'lb-https://boxd.it/17uy',
+      'lb-https://boxd.it/19Ds',
+      'lb-https://boxd.it/1Bv2',
+      'lb-https://boxd.it/1CHe',
+      'lb-https://boxd.it/1DkK',
+      'lb-https://boxd.it/1GRM',
+      'lb-https://boxd.it/1HuY',
+      'lb-https://boxd.it/1iLA',
+      'lb-https://boxd.it/1JAY',
+      'lb-https://boxd.it/1JNS',
+      'lb-https://boxd.it/1Mn4',
+      'lb-https://boxd.it/1NyM',
+      'lb-https://boxd.it/1oDC',
+      'lb-https://boxd.it/1OPa',
+      'lb-https://boxd.it/1Qg2',
+      'lb-https://boxd.it/1ROu',
+      'lb-https://boxd.it/1RSc',
+      'lb-https://boxd.it/1RUM',
+      'lb-https://boxd.it/1S0A',
+      'lb-https://boxd.it/1sBA',
+      'lb-https://boxd.it/1SZe',
+      'lb-https://boxd.it/1Tp2',
+      'lb-https://boxd.it/1tqo',
+      'lb-https://boxd.it/1vkW',
+      'lb-https://boxd.it/1vsm',
+      'lb-https://boxd.it/1W4G',
+      'lb-https://boxd.it/1wvm',
+      'lb-https://boxd.it/1YYc',
+      'lb-https://boxd.it/20eA',
+      'lb-https://boxd.it/23De',
+      'lb-https://boxd.it/23wW',
+      'lb-https://boxd.it/251c',
+      'lb-https://boxd.it/252a',
+      'lb-https://boxd.it/25zS',
+      'lb-https://boxd.it/26E0',
+      'lb-https://boxd.it/28kc',
+      'lb-https://boxd.it/290C',
+      'lb-https://boxd.it/2a9K',
+      'lb-https://boxd.it/2axi',
+      'lb-https://boxd.it/2b1i',
+      'lb-https://boxd.it/2b4m',
+      'lb-https://boxd.it/2b4w',
+      'lb-https://boxd.it/2bc6',
+      'lb-https://boxd.it/2BwG',
+      'lb-https://boxd.it/2L3k',
+      'lb-https://boxd.it/2lkk',
+      'lb-https://boxd.it/2pZ2',
+      'lb-https://boxd.it/2sv0',
+      'lb-https://boxd.it/2VCa',
+      'lb-https://boxd.it/3Ipk',
+      'lb-https://boxd.it/4JQI',
+      'lb-https://boxd.it/4JQS',
+      'lb-https://boxd.it/4UG',
+      'lb-https://boxd.it/5nry',
+      'lb-https://boxd.it/5rQs',
+      'lb-https://boxd.it/5Ymq',
+      'lb-https://boxd.it/78pm',
+      'lb-https://boxd.it/7miO',
+      'lb-https://boxd.it/7oOi',
+      'lb-https://boxd.it/8LnQ',
+      'lb-https://boxd.it/8Vtu',
+      'lb-https://boxd.it/abBm',
+      'lb-https://boxd.it/AF4',
+      'lb-https://boxd.it/alaK',
+      'lb-https://boxd.it/AmDK',
+      'lb-https://boxd.it/CKrM',
+      'lb-https://boxd.it/cUqs',
+      'lb-https://boxd.it/d0HY',
+      'lb-https://boxd.it/D7Co',
+      'lb-https://boxd.it/d99c',
+      'lb-https://boxd.it/dj9c',
+      'lb-https://boxd.it/DJEM',
+      'lb-https://boxd.it/ffwA',
+      'lb-https://boxd.it/fqF4',
+      'lb-https://boxd.it/FSts',
+      'lb-https://boxd.it/g0rM',
+      'lb-https://boxd.it/gpVi',
+      'lb-https://boxd.it/hyNk',
+      'lb-https://boxd.it/iExu',
+      'lb-https://boxd.it/ifY6',
+      'lb-https://boxd.it/IpPA',
+      'lb-https://boxd.it/Kgyu',
+      'lb-https://boxd.it/kPxE',
+      'lb-https://boxd.it/l17I',
+      'lb-https://boxd.it/LjA6',
+      'lb-https://boxd.it/lTpw',
+      'lb-https://boxd.it/nrmo',
+      'lb-https://boxd.it/oL1s',
+      'lb-https://boxd.it/oL50',
+      'lb-https://boxd.it/pZDC',
+      'lb-https://boxd.it/qjuK',
+      'lb-https://boxd.it/R6yo',
+      'lb-https://boxd.it/ryCQ',
+      'lb-https://boxd.it/sBnQ',
+      'lb-https://boxd.it/sRiW',
+      'lb-https://boxd.it/sv94',
+      'lb-https://boxd.it/uRS',
+      'lb-https://boxd.it/vfZ0',
+      'lb-https://boxd.it/ViK',
+      'lb-https://boxd.it/XXA',
+      'lb-https://boxd.it/Y5u',
+      'lb-https://boxd.it/yzY8',
+      'lb-https://boxd.it/yZYe',
+    ]);
+    let activeFilter = 'all';
+    let activeView = localStorage.getItem(STORAGE_KEY) || 'month';
+    let activeLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'all';
+    let activeFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY) || 'all';
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0,
+      }).format(value);
     }
 
-    function render(filter) {
-      const grid = document.getElementById('grid');
-      const filtered = filter === 'all' ? items : items.filter(i => i.type === filter);
-      const sorted = filtered
+    function renderHeaderStats() {
+      const readingValue = document.getElementById('reading-hours');
+      const watchingValue = document.getElementById('watching-hours');
+      const totalValue = document.getElementById('total-hours');
+      const readingDays = document.getElementById('reading-days');
+      const watchingDays = document.getElementById('watching-days');
+      const totalDays = document.getElementById('total-days');
+      const minimumWageValue = document.getElementById('minimum-wage-value');
+      const minimumWageRate = document.getElementById('minimum-wage-rate');
+      const averageWageValue = document.getElementById('average-wage-value');
+      const averageWageRate = document.getElementById('average-wage-rate');
+
+      if (typeof stats === 'undefined') {
+        readingValue.textContent = '--';
+        watchingValue.textContent = '--';
+        totalValue.textContent = '--';
+        readingDays.textContent = '--';
+        watchingDays.textContent = '--';
+        totalDays.textContent = '--';
+        minimumWageValue.textContent = '--';
+        minimumWageRate.textContent = '--';
+        averageWageValue.textContent = '--';
+        averageWageRate.textContent = '--';
+        return;
+      }
+
+      readingValue.textContent = `~${stats.readingHours}h`;
+      watchingValue.textContent = `${stats.watchingHours}h`;
+      totalValue.textContent = `~${stats.totalHours}h`;
+      readingDays.textContent = `~${stats.readingDays} days`;
+      watchingDays.textContent = `~${stats.watchingDays} days`;
+      totalDays.textContent = `~${stats.totalDays} days`;
+      minimumWageValue.textContent = `~${formatCurrency(stats.minimumWageValue)}`;
+      minimumWageRate.textContent = `$${stats.minimumWageHourly}/hr`;
+      averageWageValue.textContent = `~${formatCurrency(stats.averageWageValue)}`;
+      averageWageRate.textContent = `$${stats.averageWageHourly}/hr`;
+      readingValue.title = `Estimated from page counts at ${stats.readingPagesPerHour} pages/hour`;
+      minimumWageValue.title = stats.wageSources.minimumWage;
+      averageWageValue.title = `${stats.wageSources.averageWage}; published ${stats.wageSources.averageWagePublished}`;
+    }
+
+    function renderMonth(dateString) {
+      if (!dateString) return '';
+      return monthFormatter.format(new Date(`${dateString}T00:00:00Z`));
+    }
+
+    function sortItems(collection) {
+      return collection
         .map((item, index) => ({ item, index }))
         .sort((left, right) => {
           const leftDate = left.item.date_read || '';
           const rightDate = right.item.date_read || '';
+          const leftHasDiaryDate = left.item.type !== 'movie' || Boolean(leftDate);
+          const rightHasDiaryDate = right.item.type !== 'movie' || Boolean(rightDate);
+
+          if (leftHasDiaryDate !== rightHasDiaryDate) {
+            return Number(rightHasDiaryDate) - Number(leftHasDiaryDate);
+          }
 
           if (leftDate !== rightDate) {
             return rightDate.localeCompare(leftDate);
@@ -202,34 +648,165 @@
           return left.index - right.index;
         })
         .map(({ item }) => item);
+    }
+
+    function isJapaneseLanguageItem(item) {
+      if (item.type === 'book') {
+        return item.id.startsWith('bm-');
+      }
+
+      if (item.type === 'movie') {
+        return JAPANESE_MOVIE_IDS.has(item.id);
+      }
+
+      return false;
+    }
+
+    function isFavoriteItem(item) {
+      if (item.type === 'movie') {
+        return typeof likedMovieIds !== 'undefined' && likedMovieIds.has(item.id);
+      }
+
+      if (item.type === 'book') {
+        return item.id.startsWith('gr-') && Number(item.rating) === 5;
+      }
+
+      return false;
+    }
+
+    function render(filter = activeFilter, view = activeView, language = activeLanguage, favorites = activeFavorites) {
+      activeFilter = filter;
+      activeView = view;
+      activeLanguage = language;
+      activeFavorites = favorites;
+
+      const grid = document.getElementById('grid');
+      const filtered = items.filter((item) => {
+        if (filter !== 'all' && item.type !== filter) {
+          return false;
+        }
+
+        if (language === 'japanese' && !isJapaneseLanguageItem(item)) {
+          return false;
+        }
+
+        if (favorites === 'favorites' && !isFavoriteItem(item)) {
+          return false;
+        }
+
+        return true;
+      });
+      const sorted = sortItems(filtered);
+
       document.getElementById('count').textContent = `${sorted.length} titles`;
 
-      grid.innerHTML = sorted.map(item => {
-        const img = item.cover
-          ? `<img src="${item.cover}" alt="${item.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">${item.title}</div>`
-          : `<div class="no-cover">${item.title}</div>`;
-        return `
-        <div class="item" title="${item.title} — ${item.author}">
-          ${img}
-          <div class="overlay">
-            <span class="title">${item.title}</span>
-            <span class="author">${item.author}</span>
-            ${item.rating ? `<span class="rating">${renderStars(item.rating)}</span>` : ''}
-            ${item.date_read ? `<span class="date">${item.date_read}</span>` : ''}
+      if (view === 'month') {
+        let previousMonth = '';
+        const fragments = [];
+
+        sorted.forEach(item => {
+          const currentMonth = renderMonth(item.date_read) || 'Undated';
+          if (currentMonth !== previousMonth) {
+            fragments.push(`<div class="month-marker">${currentMonth}</div>`);
+            previousMonth = currentMonth;
+          }
+
+          const img = item.cover
+            ? `<img src="${item.cover}" alt="${item.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">${item.title}</div>`
+            : `<div class="no-cover">${item.title}</div>`;
+          fragments.push(`
+          <div class="entry">
+            <div class="item" title="${item.title} — ${item.author}">
+              ${img}
+              <div class="overlay">
+                <span class="title">${item.title}</span>
+                <span class="author">${item.author}</span>
+                ${item.date_read ? `<span class="date">${item.date_read}</span>` : ''}
+              </div>
+            </div>
           </div>
-        </div>
-      `}).join('');
+        `);
+        });
+
+        grid.innerHTML = fragments.join('');
+      } else {
+        grid.innerHTML = sorted.map(item => {
+          const period = renderMonth(item.date_read);
+          const img = item.cover
+            ? `<img src="${item.cover}" alt="${item.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">${item.title}</div>`
+            : `<div class="no-cover">${item.title}</div>`;
+          return `
+          <div class="entry">
+            <div class="item" title="${item.title} — ${item.author}">
+              ${img}
+              <div class="overlay">
+                <span class="title">${item.title}</span>
+                <span class="author">${item.author}</span>
+                ${item.date_read ? `<span class="date">${item.date_read}</span>` : ''}
+              </div>
+            </div>
+            <div class="item-period">${period}</div>
+          </div>
+        `;
+        }).join('');
+      }
     }
 
     document.querySelectorAll('.filters button').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        render(btn.dataset.filter);
+        render(btn.dataset.filter, activeView, activeLanguage, activeFavorites);
       });
     });
 
-    render('all');
+    document.querySelectorAll('.view-toggle button').forEach(btn => {
+      if (btn.dataset.view === activeView) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        localStorage.setItem(STORAGE_KEY, btn.dataset.view);
+        render(activeFilter, btn.dataset.view, activeLanguage, activeFavorites);
+      });
+    });
+
+    document.querySelectorAll('.language-toggle button').forEach(btn => {
+      if (btn.dataset.language === activeLanguage) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.language-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, btn.dataset.language);
+        render(activeFilter, activeView, btn.dataset.language, activeFavorites);
+      });
+    });
+
+    document.querySelectorAll('.favorites-toggle button').forEach(btn => {
+      if (btn.dataset.favorites === activeFavorites) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.favorites-toggle button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        localStorage.setItem(FAVORITES_STORAGE_KEY, btn.dataset.favorites);
+        render(activeFilter, activeView, activeLanguage, btn.dataset.favorites);
+      });
+    });
+
+    renderHeaderStats();
+    render(activeFilter, activeView, activeLanguage, activeFavorites);
   </script>
 </body>
 </html>

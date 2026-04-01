@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yuta's Library</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #14181c;
+      color: #99aabb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 24px 32px;
+    }
+
+    header h1 {
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    header p {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: #678;
+    }
+
+    .filters {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 24px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .filters button {
+      background: transparent;
+      border: 1px solid #2c3440;
+      color: #99aabb;
+      padding: 6px 16px;
+      border-radius: 3px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .filters button:hover {
+      border-color: #678;
+      color: #fff;
+    }
+
+    .filters button.active {
+      background: #a67c52;
+      border-color: #a67c52;
+      color: #14181c;
+      font-weight: 600;
+    }
+
+    .grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 48px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+      gap: 8px;
+    }
+
+    .month-marker {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      color: #678;
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .month-marker:first-child {
+      margin-top: 0;
+    }
+
+    .month-marker::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(82, 99, 115, 0.7), rgba(82, 99, 115, 0));
+    }
+
+    .item {
+      position: relative;
+      aspect-ratio: 2/3;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #1f2830;
+      cursor: pointer;
+    }
+
+    .item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.2s;
+    }
+
+    .item:hover img {
+      opacity: 0.3;
+    }
+
+    .item .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+      padding: 10px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .item:hover .overlay {
+      opacity: 1;
+    }
+
+    .overlay .title {
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .overlay .author {
+      color: #99aabb;
+      font-size: 0.65rem;
+      margin-top: 2px;
+    }
+
+    .overlay .rating {
+      color: #a67c52;
+      font-size: 0.6rem;
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+
+    .overlay .date {
+      color: #678;
+      font-size: 0.58rem;
+      margin-top: 2px;
+    }
+
+    .no-cover {
+      display: flex;
+      align-items: end;
+      justify-content: start;
+      width: 100%;
+      height: 100%;
+      background: #2a2420;
+      padding: 12px;
+      text-align: left;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #d4c4b0;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      border: 1px solid #3d332a;
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+        gap: 6px;
+      }
+      header { padding: 32px 16px 24px; }
+      .filters { padding: 0 16px 16px; }
+      .grid { padding: 0 16px 32px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Books & Movies I consumed</h1>
+    <p id="count"></p>
+  </header>
+  <div class="filters">
+    <button class="active" data-filter="all">All</button>
+    <button data-filter="book">Books</button>
+    <button data-filter="movie">Movies</button>
+  </div>
+  <div class="grid" id="grid"></div>
+
+  <script src="items_data.js"></script>
+  <script>
+    const monthFormatter = new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+
+    function renderStars(rating) {
+      if (!rating) return '';
+      return '\u2605'.repeat(rating);
+    }
+
+    function renderMonth(dateString) {
+      if (!dateString) return 'Undated';
+      return monthFormatter.format(new Date(`${dateString}T00:00:00Z`));
+    }
+
+    function render(filter) {
+      const grid = document.getElementById('grid');
+      const filtered = filter === 'all' ? items : items.filter(i => i.type === filter);
+      const sorted = filtered
+        .map((item, index) => ({ item, index }))
+        .sort((left, right) => {
+          const leftDate = left.item.date_read || '';
+          const rightDate = right.item.date_read || '';
+
+          if (leftDate !== rightDate) {
+            return rightDate.localeCompare(leftDate);
+          }
+
+          if (left.item.ya !== right.item.ya) {
+            return Number(left.item.ya) - Number(right.item.ya);
+          }
+
+          return left.index - right.index;
+        })
+        .map(({ item }) => item);
+      document.getElementById('count').textContent = `${sorted.length} titles`;
+
+      let previousMonth = '';
+      const fragments = [];
+
+      sorted.forEach(item => {
+        const currentMonth = renderMonth(item.date_read);
+        if (currentMonth !== previousMonth) {
+          fragments.push(`<div class="month-marker">${currentMonth}</div>`);
+          previousMonth = currentMonth;
+        }
+
+        const img = item.cover
+          ? `<img src="${item.cover}" alt="${item.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">${item.title}</div>`
+          : `<div class="no-cover">${item.title}</div>`;
+        fragments.push(`
+        <div class="item" title="${item.title} — ${item.author}">
+          ${img}
+          <div class="overlay">
+            <span class="title">${item.title}</span>
+            <span class="author">${item.author}</span>
+            ${item.rating ? `<span class="rating">${renderStars(item.rating)}</span>` : ''}
+            ${item.date_read ? `<span class="date">${item.date_read}</span>` : ''}
+          </div>
+        </div>
+      `);
+      });
+
+      grid.innerHTML = fragments.join('');
+    }
+
+    document.querySelectorAll('.filters button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        render(btn.dataset.filter);
+      });
+    });
+
+    render('all');
+  </script>
+</body>
+</html>
