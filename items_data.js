@@ -1101,5 +1101,6 @@ const items = [
 {title:"41歳の東大生",author:"小川 和人",type:"book",date_read:"",rating:0,cover:"images/covers/bm-14736496.jpg",id:"bm-14736496",ya:false},
 {title:"「自分の木」の下で",author:"",type:"book",date_read:"",rating:0,cover:"images/covers/bm-457589.jpg",id:"bm-457589",ya:false},
 {title:"星の王子さま",author:"サン=テグジュペリ",type:"book",date_read:"",rating:0,cover:"images/covers/bm-555804.jpg",id:"bm-555804",ya:false},
-{title:"また、同じ夢を見ていた",author:"住野 よる",type:"book",date_read:"",rating:0,cover:"images/covers/bm-12924793.jpg",id:"bm-12924793",ya:false}
+{title:"また、同じ夢を見ていた",author:"住野 よる",type:"book",date_read:"",rating:0,cover:"images/covers/bm-12924793.jpg",id:"bm-12924793",ya:false},
+{title:"学歴狂の詩",author:"佐川 恭一",type:"book",date_read:"2026-04-02",rating:0,cover:"images/covers/bm-22523091.jpg",id:"bm-22523091",ya:false}
 ];

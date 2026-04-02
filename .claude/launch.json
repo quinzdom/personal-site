@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "site",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "-l", "8123", "/Users/yuta/Documents/Tracking site"],
+      "runtimeExecutable": "/opt/homebrew/bin/node",
+      "runtimeArgs": ["-e", "const h=require('http'),f=require('fs'),p=require('path'),d='/Users/yuta/Documents/Tracking site';h.createServer((q,r)=>{let u=decodeURIComponent(q.url.split('?')[0]);if(u==='/')u='/index.html';let fp=p.join(d,u);f.readFile(fp,(e,data)=>{if(e){r.writeHead(404);r.end('Not found');}else{const ext=p.extname(fp);const types={'.html':'text/html','.js':'application/javascript','.css':'text/css','.jpg':'image/jpeg','.png':'image/png','.mp3':'audio/mpeg','.json':'application/json'};r.writeHead(200,{'Content-Type':types[ext]||'application/octet-stream'});r.end(data);}});}).listen(8123)"],
       "port": 8123
     }
   ]

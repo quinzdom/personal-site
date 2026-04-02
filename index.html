@@ -1129,43 +1129,15 @@
     const chaconneAudio = document.getElementById('chaconne');
     const musicBtn = document.getElementById('music-btn');
     const CHACONNE_DURATION = 1077;
-    let autoStarted = false;
-    let fadeInterval = null;
-
-    chaconneAudio.currentTime = Math.random() * CHACONNE_DURATION * 0.85;
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const gainNode = audioCtx.createGain();
     const source = audioCtx.createMediaElementSource(chaconneAudio);
     source.connect(gainNode);
     gainNode.connect(audioCtx.destination);
-    gainNode.gain.value = 0;
-
-    function startFadeIn() {
-      if (autoStarted) return;
-      autoStarted = true;
-      gainNode.gain.value = 0;
-      chaconneAudio.volume = 1;
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      chaconneAudio.play().then(() => {
-        musicBtn.classList.add('playing');
-        const duration = 15000;
-        const steps = 150;
-        const interval = duration / steps;
-        let step = 0;
-        fadeInterval = setInterval(() => {
-          step++;
-          const t = step / steps;
-          gainNode.gain.value = t * t * t;
-          if (step >= steps) { gainNode.gain.value = 1; clearInterval(fadeInterval); }
-        }, interval);
-      }).catch(() => { autoStarted = false; });
-    }
-
-    document.getElementById('fullscreen-exit').addEventListener('click', startFadeIn, { once: true });
+    gainNode.gain.value = 1;
 
     musicBtn.addEventListener('click', () => {
-      clearInterval(fadeInterval);
       if (!chaconneAudio.paused) {
         chaconneAudio.pause();
         chaconneAudio.currentTime = 0;
