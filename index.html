@@ -65,6 +65,14 @@
       padding: 24px 24px 48px;
     }
 
+    .footer-credit {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 0.6rem;
+      color: #667787;
+      letter-spacing: 0.08em;
+    }
+
     body.full-width .site-footer {
       display: none;
     }
@@ -558,11 +566,11 @@
         </div>
       </div>
       <div class="toolbar-section">
-        <button class="search-trigger" id="search-trigger" type="button" aria-label="Search">&#x2315;</button>
-        <input class="search-input" id="search-input" type="text" placeholder="Search..." aria-label="Search titles" />
+        <button class="music-btn" id="music-btn" type="button">♩ noise</button>
       </div>
       <div class="toolbar-section">
-        <button class="music-btn" id="music-btn" type="button">♩ noise</button>
+        <button class="search-trigger" id="search-trigger" type="button" aria-label="Search">&#x2315;</button>
+        <input class="search-input" id="search-input" type="text" placeholder="Search..." aria-label="Search titles" />
       </div>
     </div>
     <div class="header-copy">
@@ -601,6 +609,7 @@
         <span class="header-stat-meta" id="average-wage-rate">--</span>
       </div>
     </div>
+    <p class="footer-credit">Music: Bach's Chaconne arranged for the left hand by Brahms, played by Leon Fleisher.</p>
   </footer>
 
   <script src="items_data.js"></script>
@@ -1120,18 +1129,54 @@
     const chaconneAudio = document.getElementById('chaconne');
     const musicBtn = document.getElementById('music-btn');
     const CHACONNE_DURATION = 1077;
+    let autoStarted = false;
+    let fadeInterval = null;
+
+    chaconneAudio.currentTime = Math.random() * CHACONNE_DURATION * 0.85;
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const gainNode = audioCtx.createGain();
+    const source = audioCtx.createMediaElementSource(chaconneAudio);
+    source.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    gainNode.gain.value = 0;
+
+    function startFadeIn() {
+      if (autoStarted) return;
+      autoStarted = true;
+      gainNode.gain.value = 0;
+      chaconneAudio.volume = 1;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      chaconneAudio.play().then(() => {
+        musicBtn.classList.add('playing');
+        const duration = 15000;
+        const steps = 150;
+        const interval = duration / steps;
+        let step = 0;
+        fadeInterval = setInterval(() => {
+          step++;
+          const t = step / steps;
+          gainNode.gain.value = t * t * t;
+          if (step >= steps) { gainNode.gain.value = 1; clearInterval(fadeInterval); }
+        }, interval);
+      }).catch(() => { autoStarted = false; });
+    }
+
+    document.getElementById('fullscreen-exit').addEventListener('click', startFadeIn, { once: true });
 
     musicBtn.addEventListener('click', () => {
-      if (chaconneAudio.paused) {
-        if (chaconneAudio.currentTime === 0) {
-          chaconneAudio.currentTime = Math.random() * CHACONNE_DURATION * 0.85;
-        }
+      clearInterval(fadeInterval);
+      if (!chaconneAudio.paused) {
+        chaconneAudio.pause();
+        chaconneAudio.currentTime = 0;
+        musicBtn.classList.remove('playing');
+      } else {
+        chaconneAudio.currentTime = Math.random() * CHACONNE_DURATION * 0.85;
+        gainNode.gain.value = 1;
+        chaconneAudio.volume = 1;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         chaconneAudio.play();
         musicBtn.classList.add('playing');
-        musicBtn.textContent = '♩ noise';
-      } else {
-        chaconneAudio.pause();
-        musicBtn.classList.remove('playing');
       }
     });
 
