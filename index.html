@@ -531,7 +531,7 @@
       timeZone: 'UTC',
     });
     const STORAGE_KEY = 'tracking-site-view-v2';
-    const LAYOUT_STORAGE_KEY = 'tracking-site-layout';
+    const LAYOUT_STORAGE_KEY = 'tracking-site-layout-v2';
     const LANGUAGE_STORAGE_KEY = 'tracking-site-language';
     const FAVORITES_STORAGE_KEY = 'tracking-site-favorites';
     const JAPANESE_MOVIE_IDS = new Set([
@@ -642,7 +642,7 @@
     ]);
     let activeFilter = 'all';
     let activeView = localStorage.getItem(STORAGE_KEY) || 'timeline';
-    let activeLayout = localStorage.getItem(LAYOUT_STORAGE_KEY) || 'default';
+    let activeLayout = localStorage.getItem(LAYOUT_STORAGE_KEY) || 'full';
     let activeLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'all';
     let activeFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY) || 'all';
     let fullscreenIdleTimer = null;
@@ -910,7 +910,7 @@
       applyLayout(activeLayout);
     });
 
-    ['mousemove', 'mousedown', 'touchstart', 'keydown'].forEach(eventName => {
+    ['mousemove', 'mousedown', 'touchstart', 'touchmove', 'wheel', 'scroll', 'keydown'].forEach(eventName => {
       document.addEventListener(eventName, bumpFullscreenExitVisibility, { passive: true });
     });
 
