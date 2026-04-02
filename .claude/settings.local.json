@@ -6,7 +6,8 @@
       "Bash(python3 -c \":*)",
       "WebFetch(domain:letterboxd.com)",
       "Bash(curl -sL -A \"Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36\" \"https://letterboxd.com/quinzdom/rss/\")",
-      "Bash(curl -sL -A \"Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36\" \"https://letterboxd.com/quinzdom/films/\")"
+      "Bash(curl -sL -A \"Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36\" \"https://letterboxd.com/quinzdom/films/\")",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }

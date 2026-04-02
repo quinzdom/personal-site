@@ -34,13 +34,6 @@
       order: 1;
     }
 
-    .header-main {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
     header h1 {
       color: #fff;
       font-size: 1.3rem;
@@ -58,24 +51,32 @@
       text-transform: uppercase;
     }
 
+    .site-footer {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 24px 48px;
+    }
+
+    body.full-width .site-footer {
+      display: none;
+    }
+
     .header-stats {
-      display: inline-flex;
-      align-items: baseline;
-      gap: 12px;
+      display: flex;
       flex-wrap: wrap;
-      justify-content: flex-end;
-      padding-top: 0;
-      flex: 0 0 auto;
-      max-width: 720px;
+      gap: 4px 18px;
+      justify-content: center;
+      align-items: baseline;
     }
 
     .header-stat {
       display: flex;
       flex-direction: row;
-      align-items: flex-end;
+      align-items: baseline;
       gap: 5px;
       min-width: 0;
       white-space: nowrap;
+      padding: 2px 0;
     }
 
     .header-stat-value {
@@ -92,16 +93,14 @@
       letter-spacing: 0.16em;
       text-transform: uppercase;
       white-space: nowrap;
-      order: 2;
     }
 
     .header-stat-meta {
       color: #8fa0af;
-      font-size: 0.66rem;
+      font-size: 0.62rem;
       line-height: 1;
       letter-spacing: 0.01em;
       white-space: nowrap;
-      order: 3;
     }
 
     .toolbar {
@@ -161,9 +160,9 @@
     }
 
     .filters button.active {
-      background: linear-gradient(180deg, #b58a5f, #a67c52);
-      color: #12171b;
-      box-shadow: inset 0 0 0 1px rgba(255, 236, 216, 0.2);
+      background: rgba(237, 242, 247, 0.08);
+      color: #f1f4f7;
+      box-shadow: inset 0 0 0 1px rgba(160, 177, 193, 0.16);
       font-weight: 600;
     }
 
@@ -220,7 +219,7 @@
     .grid {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 24px 48px;
+      padding: 0 24px 16px;
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
       gap: 8px;
@@ -280,6 +279,16 @@
 
     body.full-width.idle-ui .fullscreen-exit {
       opacity: 0.14;
+    }
+
+    @keyframes nudge {
+      0%   { opacity: 0.14; transform: scale(1); }
+      35%  { opacity: 0.85; transform: scale(1.08); }
+      100% { opacity: 0.14; transform: scale(1); }
+    }
+
+    body.full-width.idle-ui .fullscreen-exit.nudge {
+      animation: nudge 2s ease;
     }
 
     .entry {
@@ -409,19 +418,8 @@
         font-size: 1.15rem;
         white-space: normal;
       }
-      .header-main {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-      }
-      .header-stats {
-        gap: 8px 10px;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        max-width: none;
-      }
-      .header-stat {
-        align-items: baseline;
+      .site-footer {
+        padding: 20px 16px 32px;
       }
       .toolbar-section {
         flex-wrap: wrap;
@@ -485,41 +483,41 @@
       </div>
     </div>
     <div class="header-copy">
-      <div class="header-main">
-        <h1>Books & Movies I consumed</h1>
-        <div class="header-stats" aria-label="Consumption stats">
-          <div class="header-stat">
-            <span class="header-stat-value" id="reading-hours">--</span>
-            <span class="header-stat-label">Reading</span>
-            <span class="header-stat-meta" id="reading-days">--</span>
-          </div>
-          <div class="header-stat">
-            <span class="header-stat-value" id="watching-hours">--</span>
-            <span class="header-stat-label">Watching</span>
-            <span class="header-stat-meta" id="watching-days">--</span>
-          </div>
-          <div class="header-stat">
-            <span class="header-stat-value" id="total-hours">--</span>
-            <span class="header-stat-label">Total</span>
-            <span class="header-stat-meta" id="total-days">--</span>
-          </div>
-          <div class="header-stat">
-            <span class="header-stat-value" id="minimum-wage-value">--</span>
-            <span class="header-stat-label">Min Wage</span>
-            <span class="header-stat-meta" id="minimum-wage-rate">--</span>
-          </div>
-          <div class="header-stat">
-            <span class="header-stat-value" id="average-wage-value">--</span>
-            <span class="header-stat-label">Avg Wage</span>
-            <span class="header-stat-meta" id="average-wage-rate">--</span>
-          </div>
-        </div>
-      </div>
+      <h1>Books & Movies I consumed</h1>
       <p id="count"></p>
     </div>
   </header>
   <button class="fullscreen-exit" id="fullscreen-exit" type="button">Back To UI</button>
   <div class="grid" id="grid"></div>
+  <footer class="site-footer">
+    <div class="header-stats" aria-label="Consumption stats">
+      <div class="header-stat">
+        <span class="header-stat-label">Reading</span>
+        <span class="header-stat-value" id="reading-hours">--</span>
+        <span class="header-stat-meta" id="reading-days">--</span>
+      </div>
+      <div class="header-stat">
+        <span class="header-stat-label">Watching</span>
+        <span class="header-stat-value" id="watching-hours">--</span>
+        <span class="header-stat-meta" id="watching-days">--</span>
+      </div>
+      <div class="header-stat">
+        <span class="header-stat-label">Total</span>
+        <span class="header-stat-value" id="total-hours">--</span>
+        <span class="header-stat-meta" id="total-days">--</span>
+      </div>
+      <div class="header-stat">
+        <span class="header-stat-label">Min Wage</span>
+        <span class="header-stat-value" id="minimum-wage-value">--</span>
+        <span class="header-stat-meta" id="minimum-wage-rate">--</span>
+      </div>
+      <div class="header-stat">
+        <span class="header-stat-label">Avg Wage</span>
+        <span class="header-stat-value" id="average-wage-value">--</span>
+        <span class="header-stat-meta" id="average-wage-rate">--</span>
+      </div>
+    </div>
+  </footer>
 
   <script src="items_data.js"></script>
   <script src="likes_data.js"></script>
@@ -787,6 +785,7 @@
       activeView = view;
       activeLanguage = language;
       activeFavorites = favorites;
+      const effectiveView = activeLayout === 'full' ? 'timeline' : view;
 
       const grid = document.getElementById('grid');
       const filtered = items.filter((item) => {
@@ -808,7 +807,7 @@
 
       document.getElementById('count').textContent = `${sorted.length} titles`;
 
-      if (view === 'month') {
+      if (effectiveView === 'month') {
         let previousMonth = '';
         const fragments = [];
 
@@ -897,6 +896,7 @@
         btn.classList.toggle('active', nextActive);
         btn.setAttribute('aria-pressed', String(nextActive));
         applyLayout(nextLayout);
+        render(activeFilter, activeView, activeLanguage, activeFavorites);
       });
     });
 
@@ -908,11 +908,21 @@
         button.setAttribute('aria-pressed', 'false');
       });
       applyLayout(activeLayout);
+      render(activeFilter, activeView, activeLanguage, activeFavorites);
     });
 
     ['mousemove', 'mousedown', 'touchstart', 'touchmove', 'wheel', 'scroll', 'keydown'].forEach(eventName => {
       document.addEventListener(eventName, bumpFullscreenExitVisibility, { passive: true });
     });
+
+    const exitBtn = document.getElementById('fullscreen-exit');
+    setInterval(() => {
+      if (activeLayout === 'full' && document.body.classList.contains('idle-ui')) {
+        exitBtn.classList.remove('nudge');
+        void exitBtn.offsetWidth;
+        exitBtn.classList.add('nudge');
+      }
+    }, 10000);
 
     document.querySelectorAll('.language-toggle button').forEach(btn => {
       if (btn.dataset.language === activeLanguage) {
