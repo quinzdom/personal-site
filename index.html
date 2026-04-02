@@ -16,12 +16,12 @@
 
     header {
       max-width: 1200px;
-      margin: 24px auto 22px;
-      padding: 22px 24px;
-      display: grid;
-      grid-template-columns: auto 1fr;
-      align-items: center;
-      gap: 22px;
+      margin: 10px auto 8px;
+      padding: 8px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
       position: relative;
     }
 
@@ -31,54 +31,56 @@
       min-width: 0;
       position: relative;
       z-index: 1;
+      order: 1;
     }
 
     .header-main {
       display: flex;
-      align-items: flex-start;
+      align-items: baseline;
       justify-content: space-between;
-      gap: 18px;
+      gap: 16px;
     }
 
     header h1 {
       color: #fff;
-      font-size: 1.9rem;
+      font-size: 1.3rem;
       font-weight: 600;
       letter-spacing: 0.01em;
-      line-height: 1.05;
+      line-height: 1;
       white-space: nowrap;
     }
 
     header p {
-      margin-top: 10px;
-      font-size: 0.74rem;
+      margin-top: 3px;
+      font-size: 0.6rem;
       color: #718191;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
     }
 
     .header-stats {
       display: inline-flex;
-      align-items: flex-start;
-      gap: 14px;
+      align-items: baseline;
+      gap: 12px;
       flex-wrap: wrap;
       justify-content: flex-end;
-      padding-top: 4px;
+      padding-top: 0;
       flex: 0 0 auto;
-      max-width: 520px;
+      max-width: 720px;
     }
 
     .header-stat {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: flex-end;
-      gap: 3px;
-      min-width: 70px;
+      gap: 5px;
+      min-width: 0;
+      white-space: nowrap;
     }
 
     .header-stat-value {
       color: #e4ebf2;
-      font-size: 0.84rem;
+      font-size: 0.72rem;
       line-height: 1;
       letter-spacing: 0.01em;
       white-space: nowrap;
@@ -86,48 +88,50 @@
 
     .header-stat-label {
       color: #667787;
-      font-size: 0.54rem;
+      font-size: 0.46rem;
       letter-spacing: 0.16em;
       text-transform: uppercase;
       white-space: nowrap;
+      order: 2;
     }
 
     .header-stat-meta {
-      color: #e4ebf2;
-      font-size: 0.84rem;
+      color: #8fa0af;
+      font-size: 0.66rem;
       line-height: 1;
       letter-spacing: 0.01em;
       white-space: nowrap;
+      order: 3;
     }
 
     .toolbar {
-      width: fit-content;
-      max-width: 100%;
+      width: 100%;
+      max-width: none;
       margin: 0;
-      padding-right: 20px;
-      display: inline-flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
-      flex: 0 0 auto;
-      border-right: 1px solid rgba(64, 76, 89, 0.7);
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      row-gap: 6px;
       position: relative;
       z-index: 1;
+      order: 2;
     }
 
     .toolbar-section {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 6px;
+      flex-direction: row;
+      align-items: center;
+      gap: 7px;
     }
 
     .toolbar-label {
-      padding-left: 4px;
       color: #667787;
-      font-size: 0.5rem;
+      font-size: 0.46rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
+      white-space: nowrap;
     }
 
     .filters {
@@ -164,6 +168,7 @@
     }
 
     .view-toggle,
+    .layout-toggle,
     .language-toggle,
     .favorites-toggle {
       display: inline-flex;
@@ -176,6 +181,7 @@
     }
 
     .view-toggle button,
+    .layout-toggle button,
     .language-toggle button,
     .favorites-toggle button {
       border: 0;
@@ -190,17 +196,25 @@
     }
 
     .view-toggle button:hover,
+    .layout-toggle button:hover,
     .language-toggle button:hover,
     .favorites-toggle button:hover {
       color: #d6dee7;
     }
 
     .view-toggle button.active,
+    .layout-toggle button.active,
     .language-toggle button.active,
     .favorites-toggle button.active {
       background: rgba(237, 242, 247, 0.08);
       color: #f1f4f7;
       box-shadow: inset 0 0 0 1px rgba(160, 177, 193, 0.16);
+    }
+
+    .language-toggle button[data-language="japanese"].active {
+      background: linear-gradient(180deg, #d24a66, #bc002d);
+      color: #fff7f8;
+      box-shadow: inset 0 0 0 1px rgba(255, 226, 232, 0.18);
     }
 
     .grid {
@@ -211,6 +225,61 @@
       grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
       gap: 8px;
       align-items: start;
+    }
+
+    body.full-width {
+      overflow-x: hidden;
+    }
+
+    body.full-width header {
+      display: none;
+    }
+
+    body.full-width .grid {
+      max-width: none;
+      width: 100vw;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
+    .fullscreen-exit {
+      display: none;
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 20;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(20, 24, 28, 0.82);
+      color: #d9e2ea;
+      padding: 8px 12px;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: inset 0 0 0 1px rgba(119, 136, 153, 0.24);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 1.1s ease, background 0.18s ease, color 0.18s ease;
+    }
+
+    .fullscreen-exit:hover {
+      background: rgba(26, 31, 36, 0.92);
+      color: #fff;
+    }
+
+    body.full-width .fullscreen-exit {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    body.full-width.idle-ui .fullscreen-exit {
+      opacity: 0.14;
     }
 
     .entry {
@@ -325,52 +394,50 @@
 
     @media (max-width: 600px) {
       header {
-        margin: 14px 16px 18px;
-        padding: 18px 16px;
-        grid-template-columns: 1fr;
-        gap: 16px;
+        margin: 10px 16px 14px;
+        padding: 8px 0;
+        gap: 12px;
       }
       .grid {
         grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
         gap: 6px;
       }
       .toolbar {
-        padding-right: 0;
-        padding-bottom: 12px;
-        border-right: 0;
-        border-bottom: 1px solid rgba(64, 76, 89, 0.7);
+        align-items: flex-start;
       }
       header h1 {
-        font-size: 1.55rem;
+        font-size: 1.15rem;
         white-space: normal;
       }
       .header-main {
         flex-direction: column;
-        gap: 12px;
+        align-items: flex-start;
+        gap: 8px;
       }
       .header-stats {
-        gap: 12px;
+        gap: 8px 10px;
         flex-wrap: wrap;
         justify-content: flex-start;
         max-width: none;
       }
       .header-stat {
-        align-items: flex-start;
-        min-width: 0;
+        align-items: baseline;
       }
-      .toolbar {
-        display: inline-flex;
-        margin: 0;
+      .toolbar-section {
+        flex-wrap: wrap;
+        gap: 5px 7px;
       }
       .grid { padding: 0 16px 32px; }
       .filters,
       .view-toggle,
+      .layout-toggle,
       .language-toggle,
       .favorites-toggle {
         flex-wrap: wrap;
       }
       .filters button,
       .view-toggle button,
+      .layout-toggle button,
       .language-toggle button,
       .favorites-toggle button {
         padding: 5px 9px;
@@ -392,8 +459,15 @@
       <div class="toolbar-section">
         <div class="toolbar-label">View</div>
         <div class="view-toggle" aria-label="Sort view">
-          <button class="active" data-view="month">By Month</button>
-          <button data-view="timeline">Timeline</button>
+          <button class="active" data-view="timeline">Timeline</button>
+          <button data-view="month">By Month</button>
+        </div>
+      </div>
+      <div class="toolbar-section">
+        <div class="toolbar-label">Focus</div>
+        <div class="favorites-toggle" aria-label="Favorites filter">
+          <button class="active" data-favorites="all">All</button>
+          <button data-favorites="favorites">Favorites</button>
         </div>
       </div>
       <div class="toolbar-section">
@@ -404,10 +478,9 @@
         </div>
       </div>
       <div class="toolbar-section">
-        <div class="toolbar-label">Focus</div>
-        <div class="favorites-toggle" aria-label="Favorites filter">
-          <button class="active" data-favorites="all">All</button>
-          <button data-favorites="favorites">Favorites</button>
+        <div class="toolbar-label">Mode</div>
+        <div class="layout-toggle" aria-label="Presentation mode">
+          <button data-layout="full">Aesthetic</button>
         </div>
       </div>
     </div>
@@ -445,6 +518,7 @@
       <p id="count"></p>
     </div>
   </header>
+  <button class="fullscreen-exit" id="fullscreen-exit" type="button">Back To UI</button>
   <div class="grid" id="grid"></div>
 
   <script src="items_data.js"></script>
@@ -456,7 +530,8 @@
       year: 'numeric',
       timeZone: 'UTC',
     });
-    const STORAGE_KEY = 'tracking-site-view';
+    const STORAGE_KEY = 'tracking-site-view-v2';
+    const LAYOUT_STORAGE_KEY = 'tracking-site-layout';
     const LANGUAGE_STORAGE_KEY = 'tracking-site-language';
     const FAVORITES_STORAGE_KEY = 'tracking-site-favorites';
     const JAPANESE_MOVIE_IDS = new Set([
@@ -566,9 +641,42 @@
       'lb-https://boxd.it/yZYe',
     ]);
     let activeFilter = 'all';
-    let activeView = localStorage.getItem(STORAGE_KEY) || 'month';
+    let activeView = localStorage.getItem(STORAGE_KEY) || 'timeline';
+    let activeLayout = localStorage.getItem(LAYOUT_STORAGE_KEY) || 'default';
     let activeLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'all';
     let activeFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY) || 'all';
+    let fullscreenIdleTimer = null;
+
+    function clearFullscreenIdleTimer() {
+      if (fullscreenIdleTimer) {
+        window.clearTimeout(fullscreenIdleTimer);
+        fullscreenIdleTimer = null;
+      }
+    }
+
+    function scheduleFullscreenIdleFade() {
+      clearFullscreenIdleTimer();
+      if (activeLayout !== 'full') return;
+      fullscreenIdleTimer = window.setTimeout(() => {
+        document.body.classList.add('idle-ui');
+      }, 3200);
+    }
+
+    function bumpFullscreenExitVisibility() {
+      if (activeLayout !== 'full') return;
+      document.body.classList.remove('idle-ui');
+      scheduleFullscreenIdleFade();
+    }
+
+    function applyLayout(layout = activeLayout) {
+      activeLayout = layout;
+      document.body.classList.toggle('full-width', layout === 'full');
+      document.body.classList.remove('idle-ui');
+      clearFullscreenIdleTimer();
+      if (layout === 'full') {
+        scheduleFullscreenIdleFade();
+      }
+    }
 
     function formatCurrency(value) {
       return new Intl.NumberFormat('en-US', {
@@ -731,7 +839,6 @@
         grid.innerHTML = fragments.join('');
       } else {
         grid.innerHTML = sorted.map(item => {
-          const period = renderMonth(item.date_read);
           const img = item.cover
             ? `<img src="${item.cover}" alt="${item.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">${item.title}</div>`
             : `<div class="no-cover">${item.title}</div>`;
@@ -745,7 +852,6 @@
                 ${item.date_read ? `<span class="date">${item.date_read}</span>` : ''}
               </div>
             </div>
-            <div class="item-period">${period}</div>
           </div>
         `;
         }).join('');
@@ -773,6 +879,39 @@
         localStorage.setItem(STORAGE_KEY, btn.dataset.view);
         render(activeFilter, btn.dataset.view, activeLanguage, activeFavorites);
       });
+    });
+
+    document.querySelectorAll('.layout-toggle button').forEach(btn => {
+      const isActive = btn.dataset.layout === activeLayout;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-pressed', String(isActive));
+
+      btn.addEventListener('click', () => {
+        const nextLayout = activeLayout === btn.dataset.layout ? 'default' : btn.dataset.layout;
+        localStorage.setItem(LAYOUT_STORAGE_KEY, nextLayout);
+        document.querySelectorAll('.layout-toggle button').forEach(button => {
+          button.classList.remove('active');
+          button.setAttribute('aria-pressed', 'false');
+        });
+        const nextActive = nextLayout === btn.dataset.layout;
+        btn.classList.toggle('active', nextActive);
+        btn.setAttribute('aria-pressed', String(nextActive));
+        applyLayout(nextLayout);
+      });
+    });
+
+    document.getElementById('fullscreen-exit').addEventListener('click', () => {
+      activeLayout = 'default';
+      localStorage.setItem(LAYOUT_STORAGE_KEY, activeLayout);
+      document.querySelectorAll('.layout-toggle button').forEach(button => {
+        button.classList.remove('active');
+        button.setAttribute('aria-pressed', 'false');
+      });
+      applyLayout(activeLayout);
+    });
+
+    ['mousemove', 'mousedown', 'touchstart', 'keydown'].forEach(eventName => {
+      document.addEventListener(eventName, bumpFullscreenExitVisibility, { passive: true });
     });
 
     document.querySelectorAll('.language-toggle button').forEach(btn => {
@@ -806,6 +945,7 @@
     });
 
     renderHeaderStats();
+    applyLayout(activeLayout);
     render(activeFilter, activeView, activeLanguage, activeFavorites);
   </script>
 </body>
