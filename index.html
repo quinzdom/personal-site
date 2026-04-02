@@ -4,6 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>consume</title>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8XQHBWBCK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-G8XQHBWBCK');
+  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -384,6 +392,19 @@
       margin-top: 2px;
     }
 
+    .liked-heart {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      color: #ff4466;
+      font-size: 1rem;
+      line-height: 1;
+      opacity: 1;
+      pointer-events: none;
+      text-shadow: 0 0 6px rgba(0, 0, 0, 0.7), 0 0 2px rgba(0, 0, 0, 0.5);
+      z-index: 1;
+    }
+
     .no-cover {
       display: flex;
       align-items: end;
@@ -472,6 +493,7 @@
         <div class="toolbar-label">Language</div>
         <div class="language-toggle" aria-label="Language filter">
           <button class="active" data-language="all">All</button>
+          <button data-language="english">English</button>
           <button data-language="japanese">Japanese</button>
         </div>
       </div>
@@ -768,13 +790,25 @@
       return false;
     }
 
+    const FAVORITE_BOOK_IDS = new Set([
+      'bm-578733',     // 仮面の告白 (Confessions of a Mask)
+      'gr-12079',      // Ludwig Wittgenstein: The Duty of Genius
+      'gr-145660',     // The Captive Mind
+      'gr-12749',      // Swann's Way
+      'gr-16158559',   // Undisputed Truth (Mike Tyson)
+      'gr-17571564',   // Hyperbole and a Half
+      'gr-1260022',    // The Ancient City
+      'gr-4671',       // The Great Gatsby
+      'gr-49455',      // Notes from Underground
+    ]);
+
     function isFavoriteItem(item) {
       if (item.type === 'movie') {
-        return typeof likedMovieIds !== 'undefined' && likedMovieIds.has(item.id);
+        return Number(item.rating) === 5;
       }
 
       if (item.type === 'book') {
-        return item.id.startsWith('gr-') && Number(item.rating) === 5;
+        return FAVORITE_BOOK_IDS.has(item.id);
       }
 
       return false;
@@ -794,6 +828,10 @@
         }
 
         if (language === 'japanese' && !isJapaneseLanguageItem(item)) {
+          return false;
+        }
+
+        if (language === 'english' && isJapaneseLanguageItem(item)) {
           return false;
         }
 
@@ -821,9 +859,11 @@
           const img = item.cover
             ? `<img src="${item.cover}" alt="${item.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">${item.title}</div>`
             : `<div class="no-cover">${item.title}</div>`;
+          const liked = isFavoriteItem(item);
           fragments.push(`
           <div class="entry">
             <div class="item" title="${item.title} — ${item.author}">
+              ${liked ? '<span class="liked-heart">\u2665</span>' : ''}
               ${img}
               <div class="overlay">
                 <span class="title">${item.title}</span>
@@ -841,9 +881,11 @@
           const img = item.cover
             ? `<img src="${item.cover}" alt="${item.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">${item.title}</div>`
             : `<div class="no-cover">${item.title}</div>`;
+          const liked = isFavoriteItem(item);
           return `
           <div class="entry">
             <div class="item" title="${item.title} — ${item.author}">
+              ${liked ? '<span class="liked-heart">\u2665</span>' : ''}
               ${img}
               <div class="overlay">
                 <span class="title">${item.title}</span>
