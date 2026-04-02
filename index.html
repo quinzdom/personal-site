@@ -141,6 +141,60 @@
       white-space: nowrap;
     }
 
+    .search-input {
+      border: 1px solid rgba(56, 67, 79, 0.9);
+      border-radius: 999px;
+      background: rgba(18, 24, 30, 0.62);
+      color: #d6dee7;
+      padding: 5px 12px;
+      font-size: 0.66rem;
+      letter-spacing: 0.03em;
+      font-family: inherit;
+      outline: none;
+      width: 110px;
+      max-width: 180px;
+      transition: width 0.25s ease, border-color 0.15s;
+    }
+
+    .search-input:focus,
+    .search-input.has-value {
+      width: 160px;
+      border-color: rgba(99, 115, 129, 0.6);
+    }
+
+    .search-input::placeholder {
+      color: #556677;
+      letter-spacing: 0.08em;
+    }
+
+    .search-trigger {
+      display: none;
+    }
+
+    .music-btn {
+      border: 1px solid rgba(56, 67, 79, 0.9);
+      border-radius: 999px;
+      background: rgba(18, 24, 30, 0.62);
+      color: #667787;
+      padding: 5px 11px;
+      font-size: 0.66rem;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      font-family: inherit;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+
+    .music-btn:hover {
+      color: #d6dee7;
+      border-color: rgba(99, 115, 129, 0.6);
+    }
+
+    .music-btn.playing {
+      color: #d6dee7;
+      border-color: rgba(99, 115, 129, 0.5);
+    }
+
     .filters {
       display: inline-flex;
       align-items: center;
@@ -503,12 +557,20 @@
           <button data-layout="full">Aesthetic</button>
         </div>
       </div>
+      <div class="toolbar-section">
+        <button class="search-trigger" id="search-trigger" type="button" aria-label="Search">&#x2315;</button>
+        <input class="search-input" id="search-input" type="text" placeholder="Search..." aria-label="Search titles" />
+      </div>
+      <div class="toolbar-section">
+        <button class="music-btn" id="music-btn" type="button">♩ noise</button>
+      </div>
     </div>
     <div class="header-copy">
       <h1>Books & Movies I consumed</h1>
       <p id="count"></p>
     </div>
   </header>
+  <audio id="chaconne" src="chaconne.mp3" preload="none"></audio>
   <button class="fullscreen-exit" id="fullscreen-exit" type="button">Back To UI</button>
   <div class="grid" id="grid"></div>
   <footer class="site-footer">
@@ -665,6 +727,7 @@
     let activeLayout = localStorage.getItem(LAYOUT_STORAGE_KEY) || 'full';
     let activeLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'all';
     let activeFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY) || 'all';
+    let activeSearch = '';
     let fullscreenIdleTimer = null;
 
     function clearFullscreenIdleTimer() {
@@ -839,6 +902,13 @@
           return false;
         }
 
+        if (activeSearch) {
+          const q = activeSearch.toLowerCase();
+          if (!item.title.toLowerCase().includes(q) && !item.author.toLowerCase().includes(q)) {
+            return false;
+          }
+        }
+
         return true;
       });
       const sorted = sortItems(filtered);
@@ -903,6 +973,7 @@
       btn.addEventListener('click', () => {
         document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+        gtag('event', 'filter_change', { filter_type: 'show', filter_value: btn.dataset.filter });
         render(btn.dataset.filter, activeView, activeLanguage, activeFavorites);
       });
     });
@@ -918,6 +989,7 @@
         document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         localStorage.setItem(STORAGE_KEY, btn.dataset.view);
+        gtag('event', 'filter_change', { filter_type: 'view', filter_value: btn.dataset.view });
         render(activeFilter, btn.dataset.view, activeLanguage, activeFavorites);
       });
     });
@@ -937,6 +1009,7 @@
         const nextActive = nextLayout === btn.dataset.layout;
         btn.classList.toggle('active', nextActive);
         btn.setAttribute('aria-pressed', String(nextActive));
+        gtag('event', 'filter_change', { filter_type: 'mode', filter_value: nextLayout });
         applyLayout(nextLayout);
         render(activeFilter, activeView, activeLanguage, activeFavorites);
       });
@@ -977,6 +1050,7 @@
         document.querySelectorAll('.language-toggle button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         localStorage.setItem(LANGUAGE_STORAGE_KEY, btn.dataset.language);
+        gtag('event', 'filter_change', { filter_type: 'language', filter_value: btn.dataset.language });
         render(activeFilter, activeView, btn.dataset.language, activeFavorites);
       });
     });
@@ -992,8 +1066,77 @@
         document.querySelectorAll('.favorites-toggle button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         localStorage.setItem(FAVORITES_STORAGE_KEY, btn.dataset.favorites);
+        gtag('event', 'filter_change', { filter_type: 'focus', filter_value: btn.dataset.favorites });
         render(activeFilter, activeView, activeLanguage, btn.dataset.favorites);
       });
+    });
+
+    // Scroll depth tracking
+    const scrollMilestones = new Set();
+    window.addEventListener('scroll', () => {
+      const scrollPct = Math.round(
+        (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100
+      );
+      [25, 50, 75, 100].forEach(milestone => {
+        if (scrollPct >= milestone && !scrollMilestones.has(milestone)) {
+          scrollMilestones.add(milestone);
+          gtag('event', 'scroll_depth', { depth_percent: milestone });
+        }
+      });
+    }, { passive: true });
+
+    const searchInput = document.getElementById('search-input');
+    const searchTrigger = document.getElementById('search-trigger');
+
+    searchTrigger.addEventListener('click', () => {
+      searchInput.style.width = '140px';
+      searchInput.style.opacity = '1';
+      searchInput.focus();
+    });
+
+    searchInput.addEventListener('input', () => {
+      activeSearch = searchInput.value.trim();
+      searchInput.classList.toggle('has-value', activeSearch.length > 0);
+      render();
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        activeSearch = '';
+        searchInput.value = '';
+        searchInput.classList.remove('has-value');
+        searchInput.blur();
+        render();
+      }
+    });
+
+    searchInput.addEventListener('blur', () => {
+      if (!activeSearch) {
+        searchInput.style.width = '';
+        searchInput.style.opacity = '';
+      }
+    });
+
+    const chaconneAudio = document.getElementById('chaconne');
+    const musicBtn = document.getElementById('music-btn');
+    const CHACONNE_DURATION = 1077;
+
+    musicBtn.addEventListener('click', () => {
+      if (chaconneAudio.paused) {
+        if (chaconneAudio.currentTime === 0) {
+          chaconneAudio.currentTime = Math.random() * CHACONNE_DURATION * 0.85;
+        }
+        chaconneAudio.play();
+        musicBtn.classList.add('playing');
+        musicBtn.textContent = '♩ noise';
+      } else {
+        chaconneAudio.pause();
+        musicBtn.classList.remove('playing');
+      }
+    });
+
+    chaconneAudio.addEventListener('ended', () => {
+      musicBtn.classList.remove('playing');
     });
 
     renderHeaderStats();

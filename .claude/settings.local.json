@@ -7,7 +7,8 @@
       "WebFetch(domain:letterboxd.com)",
       "Bash(curl -sL -A \"Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36\" \"https://letterboxd.com/quinzdom/rss/\")",
       "Bash(curl -sL -A \"Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36\" \"https://letterboxd.com/quinzdom/films/\")",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(ffprobe -v quiet -show_entries format=duration -of csv=p=0 \"/Users/yuta/Documents/Tracking site/chaconne.mp3\")"
     ]
   }
 }
