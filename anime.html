@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>anime</title>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8XQHBWBCK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-G8XQHBWBCK');
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #14181c;
+      color: #99aabb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      max-width: 1200px;
+      margin: 10px auto 8px;
+      padding: 8px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .header-copy {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .header-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    header h1 {
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    header p {
+      margin-top: 3px;
+      font-size: 0.6rem;
+      color: #718191;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .header-links {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(70, 84, 98, 0.76);
+      border-radius: 999px;
+      background: rgba(237, 242, 247, 0.04);
+      color: #728292;
+      text-decoration: none;
+      padding: 4px 9px;
+      font-size: 0.56rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transform: translateY(1px);
+      transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
+    }
+
+    .nav-link:hover {
+      color: #f1f4f7;
+      border-color: rgba(99, 115, 129, 0.6);
+      background: rgba(237, 242, 247, 0.08);
+      transform: translateY(0);
+    }
+
+    .toolbar {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      row-gap: 6px;
+    }
+
+    .toolbar-section {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .toolbar-label {
+      color: #667787;
+      font-size: 0.46rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .filters,
+    .sort-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px;
+      border: 1px solid rgba(56, 67, 79, 0.9);
+      border-radius: 999px;
+      background: rgba(18, 24, 30, 0.62);
+    }
+
+    .filters button,
+    .sort-toggle button {
+      border: 0;
+      background: transparent;
+      color: #93a4b3;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 0.66rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      font-family: inherit;
+    }
+
+    .filters button:hover,
+    .sort-toggle button:hover {
+      color: #d6dee7;
+    }
+
+    .filters button.active,
+    .sort-toggle button.active {
+      background: rgba(237, 242, 247, 0.08);
+      color: #f1f4f7;
+      box-shadow: inset 0 0 0 1px rgba(160, 177, 193, 0.16);
+      font-weight: 600;
+    }
+
+    .search-input {
+      border: 1px solid rgba(56, 67, 79, 0.9);
+      border-radius: 999px;
+      background: rgba(18, 24, 30, 0.62);
+      color: #d6dee7;
+      padding: 5px 12px;
+      font-size: 0.66rem;
+      letter-spacing: 0.03em;
+      font-family: inherit;
+      outline: none;
+      width: 150px;
+      transition: width 0.25s ease, border-color 0.15s;
+    }
+
+    .search-input:focus,
+    .search-input.has-value {
+      width: 190px;
+      border-color: rgba(99, 115, 129, 0.6);
+    }
+
+    .search-input::placeholder {
+      color: #556677;
+      letter-spacing: 0.08em;
+    }
+
+    .grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+      gap: 8px;
+      align-items: start;
+    }
+
+    .entry {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .item {
+      position: relative;
+      aspect-ratio: 2/3;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #1f2830;
+    }
+
+    .item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.2s;
+    }
+
+    .item:hover img {
+      opacity: 0.3;
+    }
+
+    .item .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+      padding: 10px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .item:hover .overlay {
+      opacity: 1;
+    }
+
+    .overlay .title {
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .overlay .author {
+      color: #99aabb;
+      font-size: 0.65rem;
+      margin-top: 2px;
+    }
+
+    .overlay .date {
+      color: #678;
+      font-size: 0.58rem;
+      margin-top: 2px;
+    }
+
+    .no-cover {
+      display: flex;
+      align-items: end;
+      justify-content: start;
+      width: 100%;
+      height: 100%;
+      background: #2a2420;
+      padding: 12px;
+      text-align: left;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #d4c4b0;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      border: 1px solid #3d332a;
+    }
+
+    .empty-state {
+      max-width: 1200px;
+      margin: 40px auto 0;
+      padding: 0 24px 24px;
+      color: #667787;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        margin: 10px 16px 14px;
+        padding: 8px 0;
+        gap: 12px;
+      }
+
+      .header-main {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .header-links {
+        justify-content: flex-start;
+      }
+
+      header h1 {
+        font-size: 1.15rem;
+        white-space: normal;
+      }
+
+      .toolbar {
+        align-items: flex-start;
+      }
+
+      .toolbar-section {
+        flex-wrap: wrap;
+        gap: 5px 7px;
+      }
+
+      .filters,
+      .sort-toggle {
+        flex-wrap: wrap;
+      }
+
+      .filters button,
+      .sort-toggle button {
+        padding: 5px 9px;
+      }
+
+      .search-input {
+        width: 140px;
+      }
+
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+        gap: 6px;
+        padding: 0 16px 32px;
+      }
+
+      .empty-state {
+        padding: 0 16px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-copy">
+      <div class="header-main">
+        <h1>Anime I've Seen</h1>
+        <div class="header-links">
+          <a href="index.html" class="nav-link">Consume</a>
+          <a href="stats.html" class="nav-link">Stats</a>
+          <a href="https://myanimelist.net/animelist/gitcom?status=2" class="nav-link" target="_blank" rel="noreferrer noopener">MyAnimeList</a>
+        </div>
+      </div>
+      <p id="count"></p>
+    </div>
+    <div class="toolbar">
+      <div class="toolbar-section">
+        <div class="toolbar-label">Show</div>
+        <div class="filters" aria-label="Anime type filter">
+          <button class="active" data-filter="all">All</button>
+          <button data-filter="shows">Shows</button>
+          <button data-filter="other">Other</button>
+        </div>
+      </div>
+      <div class="toolbar-section">
+        <div class="toolbar-label">Sort</div>
+        <div class="sort-toggle" aria-label="Anime sort mode">
+          <button class="active" data-sort="mal">MAL</button>
+          <button data-sort="recent">Newest</button>
+        </div>
+      </div>
+      <div class="toolbar-section">
+        <div class="toolbar-label">Search</div>
+        <input class="search-input" id="search-input" type="text" placeholder="Search..." aria-label="Search anime titles" />
+      </div>
+    </div>
+  </header>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty-state" id="empty-state" hidden>No anime matched that filter.</div>
+
+  <script src="anime_data.js"></script>
+  <script>
+    const FILTER_STORAGE_KEY = 'anime-page-filter';
+    const SORT_STORAGE_KEY = 'anime-page-sort';
+    let activeFilter = localStorage.getItem(FILTER_STORAGE_KEY) || 'all';
+    let activeSort = localStorage.getItem(SORT_STORAGE_KEY) || 'mal';
+    let activeSearch = '';
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function filterMatches(item) {
+      if (activeFilter === 'shows') {
+        return item.type === 'TV' || item.type === 'Series';
+      }
+
+      if (activeFilter === 'other') {
+        return item.type !== 'TV' && item.type !== 'Series';
+      }
+
+      return true;
+    }
+
+    function compareRecent(left, right) {
+      const leftHasDate = Boolean(left.date_completed);
+      const rightHasDate = Boolean(right.date_completed);
+
+      if (leftHasDate !== rightHasDate) {
+        return Number(rightHasDate) - Number(leftHasDate);
+      }
+
+      if (left.date_completed !== right.date_completed) {
+        return right.date_completed.localeCompare(left.date_completed);
+      }
+
+      if (left.updated_date !== right.updated_date) {
+        return right.updated_date.localeCompare(left.updated_date);
+      }
+
+      return left.source_index - right.source_index;
+    }
+
+    function sortItems(collection) {
+      const items = [...collection];
+
+      if (activeSort === 'recent') {
+        return items.sort(compareRecent);
+      }
+
+      return items.sort((left, right) => left.source_index - right.source_index);
+    }
+
+    function renderSubtitle(visibleItems) {
+      const datedCount = visibleItems.filter(item => item.date_completed).length;
+      const parts = [`${visibleItems.length} completed shows`];
+
+      if (activeSort === 'recent' && datedCount > 0) {
+        parts.push(`${datedCount} with finish dates`);
+      } else {
+        parts.push('imported from MyAnimeList');
+      }
+
+      document.getElementById('count').textContent = parts.join(' · ');
+    }
+
+    function render() {
+      const grid = document.getElementById('grid');
+      const emptyState = document.getElementById('empty-state');
+      const filtered = animeItems.filter(item => {
+        if (!filterMatches(item)) return false;
+
+        if (activeSearch) {
+          const query = activeSearch.toLowerCase();
+          const haystack = [
+            item.title,
+            item.english_title,
+            item.studio,
+            item.type,
+          ].join(' ').toLowerCase();
+          return haystack.includes(query);
+        }
+
+        return true;
+      });
+      const sorted = sortItems(filtered);
+
+      renderSubtitle(sorted);
+
+      if (sorted.length === 0) {
+        grid.innerHTML = '';
+        emptyState.hidden = false;
+        return;
+      }
+
+      emptyState.hidden = true;
+      grid.innerHTML = sorted.map(item => {
+        const subtitleBits = [];
+        if (item.entry_count > 1) {
+          subtitleBits.push(`${item.entry_count} entries`);
+        }
+        if (item.type) {
+          subtitleBits.push(item.type);
+        }
+        if (subtitleBits.length < 2 && item.studio) {
+          subtitleBits.push(item.studio);
+        }
+        const subtitle = subtitleBits.join(' · ') || item.english_title || item.studio || item.premiered || item.type;
+        const metaBits = [];
+
+        if (item.episodes) metaBits.push(`${item.episodes} ep${item.episodes === 1 ? '' : 's'}`);
+        if (item.entry_count > 1 && item.member_types?.length) {
+          metaBits.push(item.member_types.join(' / '));
+        } else if (item.type) {
+          metaBits.push(item.type);
+        }
+        if (item.date_completed) metaBits.push(item.date_completed);
+
+        const img = item.cover
+          ? `<img src="${escapeHtml(item.cover)}" alt="${escapeHtml(item.title)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">${escapeHtml(item.title)}</div>`
+          : `<div class="no-cover">${escapeHtml(item.title)}</div>`;
+
+        return `
+          <div class="entry">
+            <div class="item" title="${escapeHtml(item.title)}">
+              ${img}
+              <div class="overlay">
+                <span class="title">${escapeHtml(item.title)}</span>
+                ${subtitle ? `<span class="author">${escapeHtml(subtitle)}</span>` : ''}
+                ${metaBits.length ? `<span class="date">${escapeHtml(metaBits.join(' · '))}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.querySelectorAll('.filters button').forEach(button => {
+      button.classList.toggle('active', button.dataset.filter === activeFilter);
+      button.addEventListener('click', () => {
+        activeFilter = button.dataset.filter;
+        localStorage.setItem(FILTER_STORAGE_KEY, activeFilter);
+        document.querySelectorAll('.filters button').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        render();
+      });
+    });
+
+    document.querySelectorAll('.sort-toggle button').forEach(button => {
+      button.classList.toggle('active', button.dataset.sort === activeSort);
+      button.addEventListener('click', () => {
+        activeSort = button.dataset.sort;
+        localStorage.setItem(SORT_STORAGE_KEY, activeSort);
+        document.querySelectorAll('.sort-toggle button').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        render();
+      });
+    });
+
+    document.getElementById('search-input').addEventListener('input', event => {
+      activeSearch = event.target.value.trim();
+      event.target.classList.toggle('has-value', activeSearch.length > 0);
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

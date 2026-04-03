@@ -15,7 +15,8 @@
       "Bash(ls /opt/homebrew/bin/python* /opt/homebrew/bin/node* /opt/homebrew/bin/npx*)",
       "Bash(/opt/homebrew/bin/node scripts/import-bookmeter-read-list.mjs)",
       "Skill(schedule)",
-      "Skill(schedule:*)"
+      "Skill(schedule:*)",
+      "Bash(/opt/homebrew/bin/node scripts/generate-recommendations.mjs)"
     ]
   }
 }

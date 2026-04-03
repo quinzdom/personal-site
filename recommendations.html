@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>recommendations</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #14181c;
+      color: #99aabb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+    }
+    header {
+      max-width: 1200px;
+      margin: 10px auto 8px;
+      padding: 8px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .header-copy {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      align-items: center;
+      text-align: center;
+    }
+    .header-main {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      align-self: center;
+      flex-wrap: wrap;
+    }
+    header h1 {
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    header p {
+      margin-top: 3px;
+      font-size: 0.6rem;
+      color: #718191;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      max-width: 60ch;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(70, 84, 98, 0.76);
+      border-radius: 999px;
+      background: rgba(237, 242, 247, 0.04);
+      color: #728292;
+      text-decoration: none;
+      padding: 4px 9px;
+      font-size: 0.56rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transform: translateY(1px);
+      transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
+    }
+    .back-link:hover {
+      color: #f1f4f7;
+      border-color: rgba(99, 115, 129, 0.6);
+      background: rgba(237, 242, 247, 0.08);
+      transform: translateY(0);
+    }
+    .section-label {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 24px 10px;
+      color: #667787;
+      font-size: 0.5rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(82, 99, 115, 0.7), rgba(82, 99, 115, 0));
+    }
+    .recommendation-list {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 10px;
+      display: flex;
+      flex-direction: column;
+    }
+    .rec-card {
+      display: grid;
+      grid-template-columns: 105px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+      padding: 10px 0;
+    }
+    .rec-card + .rec-card {
+      margin-top: 10px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(64, 76, 89, 0.58);
+    }
+    .item {
+      position: relative;
+      width: 105px;
+      aspect-ratio: 2/3;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #1f2830;
+      cursor: default;
+    }
+    .item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.2s ease;
+    }
+    .rec-card:hover .item img {
+      opacity: 0.9;
+    }
+    .rec-copy {
+      min-width: 0;
+      padding-top: 2px;
+    }
+    .rec-kicker {
+      color: #667787;
+      font-size: 0.48rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .rec-title {
+      margin-top: 5px;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.15;
+    }
+    .rec-author {
+      color: #99aabb;
+      font-size: 0.66rem;
+      margin-top: 5px;
+      letter-spacing: 0.01em;
+    }
+    .rec-why-label {
+      margin-top: 11px;
+      color: #667787;
+      font-size: 0.48rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .rec-why {
+      margin-top: 6px;
+      color: #c6d0da;
+      font-size: 0.72rem;
+      line-height: 1.65;
+      max-width: 64ch;
+    }
+    .no-cover {
+      display: flex;
+      align-items: end;
+      justify-content: start;
+      width: 100%;
+      height: 100%;
+      background: #2a2420;
+      padding: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #d4c4b0;
+      line-height: 1.25;
+      text-align: left;
+      border: 1px solid #3d332a;
+    }
+    .archive-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px 10px;
+    }
+    .archive-week {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 0;
+    }
+    .archive-week + .archive-week {
+      border-top: 1px solid rgba(64, 76, 89, 0.3);
+    }
+    .archive-date {
+      color: #556677;
+      font-size: 0.52rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      min-width: 72px;
+    }
+    .archive-covers {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .archive-item {
+      position: relative;
+      width: 48px;
+      aspect-ratio: 2/3;
+      border-radius: 3px;
+      overflow: hidden;
+      background: #1f2830;
+    }
+    .archive-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .archive-item .no-cover {
+      font-size: 0.4rem;
+      padding: 4px;
+    }
+    .footer-note {
+      max-width: 1200px;
+      margin: 22px auto 0;
+      padding: 0 24px 48px;
+      font-size: 0.55rem;
+      color: #445566;
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
+    @media (max-width: 600px) {
+      .header-main {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+        align-self: flex-start;
+      }
+      .recommendation-list {
+        padding: 0 16px 8px;
+      }
+      .rec-card {
+        grid-template-columns: 85px minmax(0, 1fr);
+        gap: 12px;
+      }
+      .item {
+        width: 85px;
+      }
+      header { margin: 10px 16px 14px; padding: 8px 0; }
+      .section-label { padding: 16px 16px 8px; }
+      header h1 { white-space: normal; }
+      .rec-card + .rec-card {
+        margin-top: 14px;
+        padding-top: 14px;
+      }
+      .rec-title {
+        font-size: 0.84rem;
+      }
+      .rec-author,
+      .rec-why {
+        font-size: 0.66rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-copy">
+      <div class="header-main">
+        <h1>Recommendations</h1>
+        <a href="index.html" class="back-link">Back To Consume</a>
+      </div>
+      <p>AI-generated picks based on your reading and viewing history. Updated 2026-04-02.</p>
+    </div>
+  </header>
+
+  <div class="section-label">Books</div>
+  <div class="recommendation-list">
+
+    <article class="rec-card">
+      <div class="item" title="The Man Without Qualities — Robert Musil">
+        <img src="images/covers/rec-man-without-qualities.jpg" alt="The Man Without Qualities" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">The Man Without Qualities</div>
+      </div>
+      <div class="rec-copy">
+        <div class="rec-kicker">AI Recommendation</div>
+        <h2 class="rec-title">The Man Without Qualities</h2>
+        <div class="rec-author">Robert Musil</div>
+        <div class="rec-why-label">Why It Fits</div>
+        <p class="rec-why">If Proust and Dostoevsky had a third sibling. Set in the twilight of the Austro-Hungarian Empire, endlessly digressive and ironic.</p>
+      </div>
+    </article>
+
+    <article class="rec-card">
+      <div class="item" title="Native Realm — Czesław Miłosz">
+        <img src="images/covers/rec-native-realm.jpg" alt="Native Realm" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Native Realm</div>
+      </div>
+      <div class="rec-copy">
+        <div class="rec-kicker">AI Recommendation</div>
+        <h2 class="rec-title">Native Realm</h2>
+        <div class="rec-author">Czesław Miłosz</div>
+        <div class="rec-why-label">Why It Fits</div>
+        <p class="rec-why">Miłosz's memoir — the natural follow-up to The Captive Mind. A life lived across pre-war Vilnius, Nazi occupation, and Communist Poland.</p>
+      </div>
+    </article>
+
+    <article class="rec-card">
+      <div class="item" title="Demons — Fyodor Dostoevsky">
+        <img src="images/covers/rec-demons.jpg" alt="Demons" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Demons</div>
+      </div>
+      <div class="rec-copy">
+        <div class="rec-kicker">AI Recommendation</div>
+        <h2 class="rec-title">Demons</h2>
+        <div class="rec-author">Fyodor Dostoevsky</div>
+        <div class="rec-why-label">Why It Fits</div>
+        <p class="rec-why">Dostoevsky's most politically prophetic novel — revolutionary nihilism in a provincial town. Pairs naturally with The Captive Mind, another favourite.</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="section-label">Movies</div>
+  <div class="recommendation-list">
+
+    <article class="rec-card">
+      <div class="item" title="Sansho the Bailiff — Kenji Mizoguchi, 1954">
+        <img src="images/covers/rec-sansho.jpg" alt="Sansho the Bailiff" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Sansho the Bailiff</div>
+      </div>
+      <div class="rec-copy">
+        <div class="rec-kicker">AI Recommendation</div>
+        <h2 class="rec-title">Sansho the Bailiff</h2>
+        <div class="rec-author">Kenji Mizoguchi, 1954</div>
+        <div class="rec-why-label">Why It Fits</div>
+        <p class="rec-why">You've watched Ugetsu and Woman in the Dunes. Sansho is Mizoguchi's peak — a medieval family torn apart by feudal cruelty. One of the most devastating films ever made.</p>
+      </div>
+    </article>
+
+    <article class="rec-card">
+      <div class="item" title="Yi Yi — Edward Yang, 2000">
+        <img src="images/covers/rec-yi-yi.jpg" alt="Yi Yi" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Yi Yi</div>
+      </div>
+      <div class="rec-copy">
+        <div class="rec-kicker">AI Recommendation</div>
+        <h2 class="rec-title">Yi Yi</h2>
+        <div class="rec-author">Edward Yang, 2000</div>
+        <div class="rec-why-label">Why It Fits</div>
+        <p class="rec-why">The Taiwanese equivalent of Kore-eda's family films you love. A three-hour portrait of a Taipei family. Often called one of the greatest films ever made.</p>
+      </div>
+    </article>
+
+    <article class="rec-card">
+      <div class="item" title="Taste of Cherry — Abbas Kiarostami, 1997">
+        <img src="images/covers/rec-taste-of-cherry.jpg" alt="Taste of Cherry" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Taste of Cherry</div>
+      </div>
+      <div class="rec-copy">
+        <div class="rec-kicker">AI Recommendation</div>
+        <h2 class="rec-title">Taste of Cherry</h2>
+        <div class="rec-author">Abbas Kiarostami, 1997</div>
+        <div class="rec-why-label">Why It Fits</div>
+        <p class="rec-why">You watched Close-Up. This is Kiarostami's Palme d'Or winner — a man drives through the hills outside Tehran looking for someone to bury him.</p>
+      </div>
+    </article>
+  </div>
+
+  <div class="section-label" style="margin-top:16px">Past Weeks</div>
+  <div class="archive-section">
+    
+    <div class="archive-week">
+      <div class="archive-date">2026-04-02</div>
+      <div class="archive-covers">
+      <div class="archive-item" title="The Man Without Qualities — Robert Musil">
+        <img src="images/covers/rec-man-without-qualities.jpg" alt="The Man Without Qualities" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">The Man Without Qualities</div>
+      </div>
+
+      <div class="archive-item" title="Native Realm — Czesław Miłosz">
+        <img src="images/covers/rec-native-realm.jpg" alt="Native Realm" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Native Realm</div>
+      </div>
+
+      <div class="archive-item" title="Demons — Fyodor Dostoevsky">
+        <img src="images/covers/rec-demons.jpg" alt="Demons" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Demons</div>
+      </div>
+
+      <div class="archive-item" title="Sansho the Bailiff — Kenji Mizoguchi, 1954">
+        <img src="images/covers/rec-sansho.jpg" alt="Sansho the Bailiff" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Sansho the Bailiff</div>
+      </div>
+
+      <div class="archive-item" title="Yi Yi — Edward Yang, 2000">
+        <img src="images/covers/rec-yi-yi.jpg" alt="Yi Yi" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Yi Yi</div>
+      </div>
+
+      <div class="archive-item" title="Taste of Cherry — Abbas Kiarostami, 1997">
+        <img src="images/covers/rec-taste-of-cherry.jpg" alt="Taste of Cherry" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Taste of Cherry</div>
+      </div></div>
+    </div>
+  </div>
+
+  <p class="footer-note">Recommendations generated by AI from your library and watch history.</p>
+</body>
+</html>

@@ -1,0 +1,51 @@
+{
+  "usedBooks": [
+    "rec-man-without-qualities",
+    "rec-native-realm",
+    "rec-demons"
+  ],
+  "usedMovies": [
+    "rec-sansho",
+    "rec-yi-yi",
+    "rec-taste-of-cherry"
+  ],
+  "archive": [
+    {
+      "date": "2026-04-02",
+      "books": [
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        },
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        },
+        {
+          "title": "Against Nature",
+          "author": "Joris-Karl Huysmans",
+          "coverPath": "images/covers/rec-against-nature.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Satantango",
+          "author": "Béla Tarr, 1994",
+          "coverPath": "images/covers/rec-satantango.jpg"
+        },
+        {
+          "title": "Cleo from 5 to 7",
+          "author": "Agnès Varda, 1962",
+          "coverPath": "images/covers/rec-cleo.jpg"
+        },
+        {
+          "title": "Céline and Julie Go Boating",
+          "author": "Jacques Rivette, 1974",
+          "coverPath": "images/covers/rec-celine-julie.jpg"
+        }
+      ]
+    }
+  ]
+}

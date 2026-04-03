@@ -42,6 +42,13 @@
       order: 1;
     }
 
+    .header-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
     header h1 {
       color: #fff;
       font-size: 1.3rem;
@@ -57,6 +64,39 @@
       color: #718191;
       letter-spacing: 0.12em;
       text-transform: uppercase;
+    }
+
+    .recommendations-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(70, 84, 98, 0.76);
+      border-radius: 999px;
+      background: rgba(237, 242, 247, 0.04);
+      color: #728292;
+      text-decoration: none;
+      padding: 4px 9px;
+      font-size: 0.56rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transform: translateY(1px);
+      transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
+    }
+
+    .recommendations-link:hover {
+      color: #f1f4f7;
+      border-color: rgba(99, 115, 129, 0.6);
+      background: rgba(237, 242, 247, 0.08);
+      transform: translateY(0);
+    }
+
+    .header-links {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .site-footer {
@@ -497,6 +537,15 @@
       .toolbar {
         align-items: flex-start;
       }
+      .header-main {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+        align-self: flex-start;
+      }
+      .header-links {
+        justify-content: flex-start;
+      }
       header h1 {
         font-size: 1.15rem;
         white-space: normal;
@@ -535,6 +584,7 @@
           <button class="active" data-filter="all">All</button>
           <button data-filter="book">Books</button>
           <button data-filter="movie">Movies</button>
+          <button data-filter="anime">Anime</button>
         </div>
       </div>
       <div class="toolbar-section">
@@ -574,7 +624,13 @@
       </div>
     </div>
     <div class="header-copy">
-      <h1>Books & Movies I consumed</h1>
+      <div class="header-main">
+        <h1>Books & Movies I consumed</h1>
+        <div class="header-links">
+          <a href="stats.html" class="recommendations-link">Stats</a>
+          <a href="recommendations.html" class="recommendations-link">Recommendations</a>
+        </div>
+      </div>
       <p id="count"></p>
     </div>
   </header>
@@ -614,6 +670,7 @@
 
   <script src="items_data.js"></script>
   <script src="likes_data.js"></script>
+  <script src="anime_data.js"></script>
   <script src="stats_data.js"></script>
   <script>
     const monthFormatter = new Intl.DateTimeFormat('en-US', {
@@ -739,6 +796,39 @@
     let activeSearch = '';
     let fullscreenIdleTimer = null;
 
+    function normalizeAnimeItem(item) {
+      const subtitleBits = [];
+
+      if (item.entry_count > 1) {
+        subtitleBits.push(`${item.entry_count} entries`);
+      }
+
+      if (item.type) {
+        subtitleBits.push(item.type);
+      }
+
+      if (subtitleBits.length < 2 && item.studio) {
+        subtitleBits.push(item.studio);
+      } else if (subtitleBits.length === 0 && item.english_title) {
+        subtitleBits.push(item.english_title);
+      }
+
+      return {
+        id: item.id,
+        title: item.title,
+        author: subtitleBits.join(' · ') || item.english_title || item.studio || 'Anime',
+        cover: item.cover,
+        type: 'anime',
+        date_read: item.date_completed || '',
+        rating: 0,
+        ya: false,
+      };
+    }
+
+    const siteItems = items.concat(
+      typeof animeItems === 'undefined' ? [] : animeItems.map(normalizeAnimeItem)
+    );
+
     function clearFullscreenIdleTimer() {
       if (fullscreenIdleTimer) {
         window.clearTimeout(fullscreenIdleTimer);
@@ -859,6 +949,10 @@
         return JAPANESE_MOVIE_IDS.has(item.id);
       }
 
+      if (item.type === 'anime') {
+        return true;
+      }
+
       return false;
     }
 
@@ -894,7 +988,7 @@
       const effectiveView = activeLayout === 'full' ? 'timeline' : view;
 
       const grid = document.getElementById('grid');
-      const filtered = items.filter((item) => {
+      const filtered = siteItems.filter((item) => {
         if (filter !== 'all' && item.type !== filter) {
           return false;
         }

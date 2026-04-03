@@ -4,6 +4,7 @@ import vm from 'node:vm';
 
 const workspaceDir = process.cwd();
 const dataFile = path.join(workspaceDir, 'items_data.js');
+const animeDataFile = path.join(workspaceDir, 'anime_data.js');
 const statsFile = path.join(workspaceDir, 'stats_data.js');
 const DEFAULT_GOODREADS_CSV = path.join(workspaceDir, 'data-source', 'goodreads', 'goodreads_library_export.csv');
 const DEFAULT_BOOKMETER_URL = 'https://bookmeter.com/users/1465681/books/read?display_type=list';
@@ -17,6 +18,13 @@ function loadItems(source) {
   vm.createContext(context);
   vm.runInContext(`${source}\nthis.__items__ = items;`, context);
   return context.__items__;
+}
+
+function loadAnimeItems(source) {
+  const context = {};
+  vm.createContext(context);
+  vm.runInContext(`${source}\nthis.__anime_items__ = animeItems;`, context);
+  return context.__anime_items__;
 }
 
 function parseCsvLine(line) {
@@ -107,6 +115,25 @@ function extractMovieRuntimeMinutes(html) {
   return null;
 }
 
+function extractAnimeDuration(html) {
+  const match = html.match(/<span class="dark_text">Duration:<\/span>\s*([^<]+)/i);
+  if (!match) return null;
+
+  const raw = match[1].replace(/\s+/g, ' ').trim();
+  if (!raw || /Unknown/i.test(raw)) return null;
+
+  const hourMatch = raw.match(/(\d+)\s*hr\./i);
+  const minuteMatch = raw.match(/(\d+)\s*min\./i);
+  const totalMinutes = (hourMatch ? Number(hourMatch[1]) * 60 : 0) + (minuteMatch ? Number(minuteMatch[1]) : 0);
+
+  if (!totalMinutes) return null;
+
+  return {
+    minutes: totalMinutes,
+    perEpisode: /per ep\./i.test(raw),
+  };
+}
+
 async function mapWithConcurrency(values, concurrency, worker) {
   const results = new Array(values.length);
   let nextIndex = 0;
@@ -160,6 +187,52 @@ async function buildMovieRuntimeMap(movieItems) {
   return new Map(results.filter((entry) => entry.minutes).map((entry) => [entry.id, entry.minutes]));
 }
 
+function flattenAnimeMembers(animeItems) {
+  const members = [];
+
+  for (const item of animeItems) {
+    const ids = item.member_ids || [item.mal_id];
+    const urls = item.member_urls || [item.mal_url];
+    const episodeCounts = item.member_episodes || [item.episodes || 0];
+    const types = item.member_types || [item.type || ''];
+    const titles = item.member_titles || [item.english_title || item.title];
+
+    ids.forEach((memberId, index) => {
+      members.push({
+        memberId,
+        memberUrl: urls[index] || item.mal_url,
+        episodes: episodeCounts[index] || 0,
+        type: types[index] || item.type || '',
+        title: titles[index] || item.title,
+        parentId: item.id,
+        parentTitle: item.title,
+      });
+    });
+  }
+
+  return members;
+}
+
+async function buildAnimeRuntimeMap(animeItems) {
+  const members = flattenAnimeMembers(animeItems);
+  const uniqueMembers = Array.from(new Map(members.map((member) => [member.memberId, member])).values());
+  const results = await mapWithConcurrency(uniqueMembers, MOVIE_CONCURRENCY, async (member) => {
+    const html = await fetchText(member.memberUrl);
+    const duration = extractAnimeDuration(html);
+    if (!duration) {
+      return { id: member.memberId, minutes: null };
+    }
+
+    const minutes = duration.perEpisode
+      ? duration.minutes * Math.max(member.episodes || 1, 1)
+      : duration.minutes;
+
+    return { id: member.memberId, minutes };
+  });
+
+  return new Map(results.filter((entry) => entry.minutes).map((entry) => [entry.id, entry.minutes]));
+}
+
 function serializeStats(stats) {
   return `const stats = ${JSON.stringify(stats, null, 2)};\n`;
 }
@@ -170,13 +243,16 @@ function roundToOneDecimal(value) {
 
 async function main() {
   const dataSource = await fs.readFile(dataFile, 'utf8');
+  const animeSource = await fs.readFile(animeDataFile, 'utf8');
   const items = loadItems(dataSource);
+  const animeItems = loadAnimeItems(animeSource);
   const bookItems = items.filter((item) => item.type === 'book');
   const movieItems = items.filter((item) => item.type === 'movie');
 
-  const [{ goodreadsPages, bookmeterPages }, movieRuntimeMap] = await Promise.all([
+  const [{ goodreadsPages, bookmeterPages }, movieRuntimeMap, animeRuntimeMap] = await Promise.all([
     buildBookPageMaps(),
     buildMovieRuntimeMap(movieItems),
+    buildAnimeRuntimeMap(animeItems),
   ]);
 
   let totalBookPages = 0;
@@ -195,27 +271,103 @@ async function main() {
     totalMovieMinutes += movieRuntimeMap.get(item.id) || 0;
   }
 
+  const animeMemberCount = animeItems.reduce((sum, item) => sum + (item.member_ids?.length || 1), 0);
+  let animeRuntimeMatches = 0;
+  let totalAnimeMinutes = 0;
+  const animeMinutesById = new Map();
+
+  for (const item of animeItems) {
+    const memberIds = item.member_ids || [item.mal_id];
+    let itemMinutes = 0;
+
+    for (const memberId of memberIds) {
+      const minutes = animeRuntimeMap.get(memberId) || 0;
+      if (minutes > 0) {
+        animeRuntimeMatches += 1;
+      }
+      itemMinutes += minutes;
+    }
+
+    animeMinutesById.set(item.id, itemMinutes);
+    totalAnimeMinutes += itemMinutes;
+  }
+
   const readingHours = Math.round(totalBookPages / READING_PAGES_PER_HOUR);
   const watchingHours = Math.round(totalMovieMinutes / 60);
+  const animeHours = Math.round(totalAnimeMinutes / 60);
   const totalHours = readingHours + watchingHours;
+  const screenHours = watchingHours + animeHours;
+  const allMediaHours = readingHours + screenHours;
   const readingDays = roundToOneDecimal(readingHours / 24);
   const watchingDays = roundToOneDecimal(watchingHours / 24);
+  const animeDays = roundToOneDecimal(animeHours / 24);
   const totalDays = roundToOneDecimal(totalHours / 24);
+  const screenDays = roundToOneDecimal(screenHours / 24);
+  const allMediaDays = roundToOneDecimal(allMediaHours / 24);
   const minimumWageValue = Math.round(totalHours * CALIFORNIA_MINIMUM_WAGE);
   const averageWageValue = Math.round(totalHours * AVERAGE_HOURLY_WAGE);
+  const allMediaMinimumWageValue = Math.round(allMediaHours * CALIFORNIA_MINIMUM_WAGE);
+  const allMediaAverageWageValue = Math.round(allMediaHours * AVERAGE_HOURLY_WAGE);
+
+  const animeTypeCounts = animeItems.reduce((counts, item) => {
+    counts[item.type] = (counts[item.type] || 0) + 1;
+    return counts;
+  }, {});
+
+  const animeCompletionYears = animeItems.reduce((counts, item) => {
+    if (!item.date_completed) return counts;
+    const year = item.date_completed.slice(0, 4);
+    counts[year] = (counts[year] || 0) + 1;
+    return counts;
+  }, {});
+
+  const animeStudioCounts = animeItems.reduce((counts, item) => {
+    const studio = item.studio || 'Unknown';
+    counts[studio] = (counts[studio] || 0) + 1;
+    return counts;
+  }, {});
+
+  const animeScoreItems = animeItems.filter((item) => Number(item.score) > 0);
+  const animeAverageScore = animeScoreItems.length
+    ? roundToOneDecimal(animeScoreItems.reduce((sum, item) => sum + Number(item.score), 0) / animeScoreItems.length)
+    : 0;
+
+  const topAnimeByHours = [...animeItems]
+    .map((item) => ({
+      title: item.title,
+      hours: roundToOneDecimal((animeMinutesById.get(item.id) || 0) / 60),
+      minutes: animeMinutesById.get(item.id) || 0,
+      episodes: item.episodes || 0,
+      type: item.type,
+      entryCount: item.entry_count || 1,
+    }))
+    .filter((item) => item.minutes > 0)
+    .sort((left, right) => right.minutes - left.minutes)
+    .slice(0, 8);
 
   const stats = {
     readingHours,
+    movieHours: watchingHours,
     watchingHours,
+    animeHours,
     totalHours,
+    screenHours,
+    allMediaHours,
     readingDays,
+    movieDays: watchingDays,
     watchingDays,
+    animeDays,
     totalDays,
+    screenDays,
+    allMediaDays,
     minimumWageHourly: CALIFORNIA_MINIMUM_WAGE,
     averageWageHourly: AVERAGE_HOURLY_WAGE,
     minimumWageValue,
     averageWageValue,
+    allMediaMinimumWageValue,
+    allMediaAverageWageValue,
     readingHoursEstimated: true,
+    animeHoursEstimated: false,
     readingPagesPerHour: READING_PAGES_PER_HOUR,
     wageSources: {
       minimumWage: 'California statewide minimum wage, effective 2026-01-01 (DIR)',
@@ -227,6 +379,30 @@ async function main() {
       booksTotal: bookItems.length,
       moviesMatched: movieRuntimeMap.size,
       moviesTotal: movieItems.length,
+      animeMatched: animeRuntimeMatches,
+      animeTotal: animeMemberCount,
+    },
+    libraryCounts: {
+      books: bookItems.length,
+      movies: movieItems.length,
+      anime: animeItems.length,
+      total: bookItems.length + movieItems.length + animeItems.length,
+    },
+    anime: {
+      shows: animeItems.length,
+      entries: animeMemberCount,
+      episodes: animeItems.reduce((sum, item) => sum + (item.episodes || 0), 0),
+      hours: animeHours,
+      days: animeDays,
+      averageScore: animeAverageScore,
+      datedTitles: animeItems.filter((item) => item.date_completed).length,
+      countsByType: animeTypeCounts,
+      completionYears: animeCompletionYears,
+      topStudios: Object.entries(animeStudioCounts)
+        .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+        .slice(0, 8)
+        .map(([studio, count]) => ({ studio, count })),
+      topByHours: topAnimeByHours,
     },
   };
 

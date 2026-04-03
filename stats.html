@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>stats</title>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8XQHBWBCK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-G8XQHBWBCK');
+  </script>
+  <style>
+    :root {
+      --bg: #14181c;
+      --panel: rgba(20, 25, 31, 0.88);
+      --panel-border: rgba(74, 89, 104, 0.42);
+      --muted: #768797;
+      --text: #d9e2ea;
+      --white: #f5f8fb;
+      --book: #98b7d6;
+      --movie: #8ad0a5;
+      --anime: #f0a9c2;
+      --all: #f2d18a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background:
+        radial-gradient(circle at top left, rgba(72, 87, 104, 0.16), transparent 28%),
+        radial-gradient(circle at top right, rgba(100, 118, 137, 0.1), transparent 32%),
+        var(--bg);
+      color: #99aabb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+    }
+
+    header {
+      max-width: 1200px;
+      margin: 10px auto 8px;
+      padding: 8px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .header-copy {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .header-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    header h1 {
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    header p {
+      margin-top: 3px;
+      font-size: 0.6rem;
+      color: #718191;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      max-width: 72ch;
+    }
+
+    .header-links {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(70, 84, 98, 0.76);
+      border-radius: 999px;
+      background: rgba(237, 242, 247, 0.04);
+      color: #728292;
+      text-decoration: none;
+      padding: 4px 9px;
+      font-size: 0.56rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transform: translateY(1px);
+      transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
+    }
+
+    .nav-link:hover {
+      color: #f1f4f7;
+      border-color: rgba(99, 115, 129, 0.6);
+      background: rgba(237, 242, 247, 0.08);
+      transform: translateY(0);
+    }
+
+    .dashboard {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 8px 24px 40px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .panel,
+    .metric-card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(23, 29, 36, 0.96), rgba(17, 22, 28, 0.96));
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.16);
+    }
+
+    .metric-card {
+      min-height: 186px;
+      padding: 18px 18px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .metric-card::before,
+    .panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.08), transparent 40%);
+      pointer-events: none;
+    }
+
+    .metric-card.book { background: linear-gradient(180deg, rgba(28, 39, 50, 0.98), rgba(18, 24, 30, 0.98)); }
+    .metric-card.movie { background: linear-gradient(180deg, rgba(23, 40, 35, 0.98), rgba(17, 24, 21, 0.98)); }
+    .metric-card.anime { background: linear-gradient(180deg, rgba(45, 28, 36, 0.98), rgba(24, 18, 22, 0.98)); }
+    .metric-card.all { background: linear-gradient(180deg, rgba(48, 38, 24, 0.98), rgba(24, 19, 14, 0.98)); }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 0.52rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      margin-top: 10px;
+      color: var(--white);
+      font-size: clamp(1.9rem, 4vw, 2.65rem);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+    }
+
+    .metric-days {
+      margin-top: 8px;
+      color: #b8c6d3;
+      font-size: 0.86rem;
+      letter-spacing: 0.01em;
+    }
+
+    .metric-note {
+      margin-top: 14px;
+      color: #6f8090;
+      font-size: 0.66rem;
+      line-height: 1.45;
+      max-width: 24ch;
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .panel-title {
+      color: #eff4f8;
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .panel-meta {
+      color: #6d7e8e;
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .big-value {
+      color: var(--white);
+      font-size: clamp(1.55rem, 3vw, 2.2rem);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .muted-copy {
+      margin-top: 8px;
+      color: #7f90a0;
+      font-size: 0.72rem;
+      line-height: 1.55;
+      max-width: 60ch;
+    }
+
+    .pair-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .mini-stat {
+      padding: 12px 12px 11px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      box-shadow: inset 0 0 0 1px rgba(114, 130, 146, 0.12);
+    }
+
+    .mini-stat-label {
+      color: #728292;
+      font-size: 0.5rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .mini-stat-value {
+      margin-top: 8px;
+      color: var(--white);
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .mini-stat-note {
+      margin-top: 4px;
+      color: #8191a0;
+      font-size: 0.68rem;
+      line-height: 1.45;
+    }
+
+    .bar-stack {
+      display: flex;
+      width: 100%;
+      height: 16px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.04);
+      box-shadow: inset 0 0 0 1px rgba(114, 130, 146, 0.12);
+      margin-top: 12px;
+    }
+
+    .bar-segment { height: 100%; }
+    .bar-book { background: linear-gradient(90deg, rgba(152, 183, 214, 0.95), rgba(120, 163, 200, 0.95)); }
+    .bar-movie { background: linear-gradient(90deg, rgba(138, 208, 165, 0.95), rgba(95, 182, 131, 0.95)); }
+    .bar-anime { background: linear-gradient(90deg, rgba(240, 169, 194, 0.95), rgba(229, 133, 171, 0.95)); }
+
+    .legend {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .legend-row,
+    .rank-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .legend-key {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #d3dde7;
+      font-size: 0.74rem;
+    }
+
+    .swatch {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+
+    .legend-bar {
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(114, 130, 146, 0.1);
+    }
+
+    .legend-fill {
+      height: 100%;
+      border-radius: inherit;
+    }
+
+    .legend-value,
+    .rank-value {
+      color: #91a1b0;
+      font-size: 0.68rem;
+      white-space: nowrap;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .kpi {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03);
+      box-shadow: inset 0 0 0 1px rgba(114, 130, 146, 0.12);
+    }
+
+    .kpi-label {
+      color: #728292;
+      font-size: 0.48rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .kpi-value {
+      margin-top: 8px;
+      color: var(--white);
+      font-size: 1.15rem;
+      letter-spacing: -0.03em;
+    }
+
+    .rank-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .rank-row {
+      grid-template-columns: minmax(0, 1fr) 160px auto;
+    }
+
+    .rank-name {
+      color: #d9e2ea;
+      font-size: 0.75rem;
+      line-height: 1.35;
+    }
+
+    .rank-meta {
+      color: #718191;
+      font-size: 0.64rem;
+      margin-top: 2px;
+      letter-spacing: 0.02em;
+    }
+
+    .rank-bar {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(114, 130, 146, 0.1);
+      align-self: center;
+    }
+
+    .rank-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(240, 169, 194, 0.94), rgba(172, 205, 255, 0.94));
+    }
+
+    .footnote {
+      padding: 16px 18px 20px;
+      border-radius: 18px;
+      border: 1px solid rgba(74, 89, 104, 0.34);
+      background: rgba(13, 17, 22, 0.72);
+      color: #708190;
+      font-size: 0.68rem;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 960px) {
+      .hero-grid,
+      .section-grid,
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      header {
+        margin: 10px 16px 12px;
+        padding: 8px 0;
+      }
+
+      .header-main {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .header-links {
+        justify-content: flex-start;
+      }
+
+      header h1 {
+        white-space: normal;
+        font-size: 1.15rem;
+      }
+
+      .dashboard {
+        padding: 8px 16px 28px;
+      }
+
+      .hero-grid,
+      .section-grid,
+      .pair-grid,
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .rank-row,
+      .legend-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-copy">
+      <div class="header-main">
+        <h1>Stats</h1>
+        <div class="header-links">
+          <a href="index.html" class="nav-link">Consume</a>
+          <a href="anime.html" class="nav-link">Anime</a>
+          <a href="recommendations.html" class="nav-link">Recommendations</a>
+        </div>
+      </div>
+      <p id="subtitle">A fuller view of the time, titles, and anime buried inside the tracking page.</p>
+    </div>
+  </header>
+
+  <main class="dashboard">
+    <section class="hero-grid" id="hero-grid"></section>
+
+    <section class="section-grid">
+      <article class="panel" id="worth-panel"></article>
+      <article class="panel" id="library-panel"></article>
+    </section>
+
+    <section class="section-grid">
+      <article class="panel" id="time-panel"></article>
+      <article class="panel" id="coverage-panel"></article>
+    </section>
+
+    <section class="section-grid">
+      <article class="panel" id="anime-panel"></article>
+      <article class="panel" id="format-panel"></article>
+    </section>
+
+    <section class="section-grid">
+      <article class="panel" id="studio-panel"></article>
+      <article class="panel" id="year-panel"></article>
+    </section>
+
+    <section class="panel" id="top-anime-panel"></section>
+
+    <div class="footnote" id="footnote"></div>
+  </main>
+
+  <script src="stats_data.js"></script>
+  <script>
+    function formatCurrency(value) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0,
+      }).format(value);
+    }
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat('en-US').format(value);
+    }
+
+    function ratio(value, total) {
+      if (!total) return 0;
+      return (value / total) * 100;
+    }
+
+    function barRows(entries, valueFormatter, colorClass) {
+      const maxValue = Math.max(...entries.map((entry) => entry.value), 1);
+      return `
+        <div class="legend">
+          ${entries.map((entry) => `
+            <div class="legend-row">
+              <div class="legend-key">
+                ${entry.swatch ? `<span class="swatch ${entry.swatch}"></span>` : ''}
+                <span>${entry.label}</span>
+              </div>
+              <div class="legend-bar">
+                <div class="legend-fill ${entry.fill || colorClass || ''}" style="width:${(entry.value / maxValue) * 100}%"></div>
+              </div>
+              <div class="legend-value">${valueFormatter(entry.value)}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderHero() {
+      const cards = [
+        {
+          key: 'book',
+          label: 'Reading',
+          value: `~${stats.readingHours}h`,
+          days: `~${stats.readingDays} days`,
+          note: `Estimated from ${stats.readingPagesPerHour} pages per hour.`,
+        },
+        {
+          key: 'movie',
+          label: 'Movies',
+          value: `${stats.movieHours}h`,
+          days: `${stats.movieDays} days`,
+          note: `${formatNumber(stats.libraryCounts.movies)} titles in the film section.`,
+        },
+        {
+          key: 'anime',
+          label: 'Anime',
+          value: `${stats.animeHours}h`,
+          days: `${stats.animeDays} days`,
+          note: `${formatNumber(stats.anime.episodes)} episodes across ${stats.anime.shows} grouped shows.`,
+        },
+        {
+          key: 'all',
+          label: 'All Media',
+          value: `${stats.allMediaHours}h`,
+          days: `${stats.allMediaDays} days`,
+          note: `Books, movies, and anime together.`,
+        },
+      ];
+
+      document.getElementById('hero-grid').innerHTML = cards.map((card) => `
+        <article class="metric-card ${card.key}">
+          <div>
+            <div class="metric-label">${card.label}</div>
+            <div class="metric-value">${card.value}</div>
+            <div class="metric-days">${card.days}</div>
+          </div>
+          <div class="metric-note">${card.note}</div>
+        </article>
+      `).join('');
+    }
+
+    function renderWorth() {
+      document.getElementById('worth-panel').innerHTML = `
+        <div class="panel-header">
+          <div class="panel-title">Time Value</div>
+          <div class="panel-meta">All Media</div>
+        </div>
+        <div class="big-value">${formatCurrency(stats.allMediaMinimumWageValue)} to ${formatCurrency(stats.allMediaAverageWageValue)}</div>
+        <div class="muted-copy">
+          Pricing your total time at California minimum wage and average hourly wage.
+        </div>
+        <div class="pair-grid">
+          <div class="mini-stat">
+            <div class="mini-stat-label">Minimum Wage</div>
+            <div class="mini-stat-value">${formatCurrency(stats.allMediaMinimumWageValue)}</div>
+            <div class="mini-stat-note">$${stats.minimumWageHourly}/hr</div>
+          </div>
+          <div class="mini-stat">
+            <div class="mini-stat-label">Average Wage</div>
+            <div class="mini-stat-value">${formatCurrency(stats.allMediaAverageWageValue)}</div>
+            <div class="mini-stat-note">$${stats.averageWageHourly}/hr</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLibrary() {
+      const total = stats.libraryCounts.total;
+      document.getElementById('library-panel').innerHTML = `
+        <div class="panel-header">
+          <div class="panel-title">Library Size</div>
+          <div class="panel-meta">${formatNumber(total)} titles</div>
+        </div>
+        <div class="bar-stack">
+          <div class="bar-segment bar-book" style="width:${ratio(stats.libraryCounts.books, total)}%"></div>
+          <div class="bar-segment bar-movie" style="width:${ratio(stats.libraryCounts.movies, total)}%"></div>
+          <div class="bar-segment bar-anime" style="width:${ratio(stats.libraryCounts.anime, total)}%"></div>
+        </div>
+        ${barRows([
+          { label: 'Books', value: stats.libraryCounts.books, swatch: 'bar-book', fill: 'bar-book' },
+          { label: 'Movies', value: stats.libraryCounts.movies, swatch: 'bar-movie', fill: 'bar-movie' },
+          { label: 'Anime', value: stats.libraryCounts.anime, swatch: 'bar-anime', fill: 'bar-anime' },
+        ], (value) => `${formatNumber(value)} titles`)}
+      `;
+    }
+
+    function renderTimeBreakdown() {
+      const total = stats.allMediaHours;
+      document.getElementById('time-panel').innerHTML = `
+        <div class="panel-header">
+          <div class="panel-title">Time Breakdown</div>
+          <div class="panel-meta">${stats.allMediaHours}h total</div>
+        </div>
+        <div class="big-value">${stats.screenHours}h on screens</div>
+        <div class="muted-copy">
+          Screen time combines films and anime. Reading remains its own chunk of time.
+        </div>
+        <div class="bar-stack">
+          <div class="bar-segment bar-book" style="width:${ratio(stats.readingHours, total)}%"></div>
+          <div class="bar-segment bar-movie" style="width:${ratio(stats.movieHours, total)}%"></div>
+          <div class="bar-segment bar-anime" style="width:${ratio(stats.animeHours, total)}%"></div>
+        </div>
+        ${barRows([
+          { label: 'Reading', value: stats.readingHours, swatch: 'bar-book', fill: 'bar-book' },
+          { label: 'Movies', value: stats.movieHours, swatch: 'bar-movie', fill: 'bar-movie' },
+          { label: 'Anime', value: stats.animeHours, swatch: 'bar-anime', fill: 'bar-anime' },
+        ], (value) => `${value}h · ${Math.round(ratio(value, total))}%`)}
+      `;
+    }
+
+    function renderCoverage() {
+      document.getElementById('coverage-panel').innerHTML = `
+        <div class="panel-header">
+          <div class="panel-title">Coverage</div>
+          <div class="panel-meta">Source Match</div>
+        </div>
+        ${barRows([
+          { label: 'Books', value: ratio(stats.sourceCoverage.booksMatched, stats.sourceCoverage.booksTotal), fill: 'bar-book' },
+          { label: 'Movies', value: ratio(stats.sourceCoverage.moviesMatched, stats.sourceCoverage.moviesTotal), fill: 'bar-movie' },
+          { label: 'Anime', value: ratio(stats.sourceCoverage.animeMatched, stats.sourceCoverage.animeTotal), fill: 'bar-anime' },
+        ], (value) => `${Math.round(value)}%`)}
+        <div class="muted-copy">
+          Books use page counts when available. Movie and anime time come from scraped runtime data.
+        </div>
+      `;
+    }
+
+    function renderAnimeOverview() {
+      document.getElementById('anime-panel').innerHTML = `
+        <div class="panel-header">
+          <div class="panel-title">Anime</div>
+          <div class="panel-meta">${stats.anime.hours}h</div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-label">Grouped Shows</div>
+            <div class="kpi-value">${stats.anime.shows}</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">MAL Entries</div>
+            <div class="kpi-value">${stats.anime.entries}</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Episodes</div>
+            <div class="kpi-value">${formatNumber(stats.anime.episodes)}</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Avg Score</div>
+            <div class="kpi-value">${stats.anime.averageScore}</div>
+          </div>
+        </div>
+        <div class="muted-copy">
+          ${stats.anime.datedTitles} anime titles have explicit completion dates on MyAnimeList.
+        </div>
+      `;
+    }
+
+    function renderAnimeFormats() {
+      const entries = Object.entries(stats.anime.countsByType)
+        .map(([label, value]) => ({ label, value, fill: 'bar-anime' }))
+        .sort((left, right) => right.value - left.value);
+
+      document.getElementById('format-panel').innerHTML = `
+        <div class="panel-header">
+          <div class="panel-title">Anime Formats</div>
+          <div class="panel-meta">${entries.length} types</div>
+        </div>
+        ${barRows(entries, (value) => `${value} shows`)}
+      `;
+    }
+
+    function renderStudios() {
+      const entries = stats.anime.topStudios.map((entry) => ({
+        label: entry.studio,
+        value: entry.count,
+        fill: 'bar-anime',
+      }));
+
+      document.getElementById('studio-panel').innerHTML = `
+        <div class="panel-header">
+          <div class="panel-title">Top Studios</div>
+          <div class="panel-meta">Anime</div>
+        </div>
+        ${barRows(entries, (value) => `${value} titles`)}
+      `;
+    }
+
+    function renderYears() {
+      const entries = Object.entries(stats.anime.completionYears)
+        .map(([label, value]) => ({ label, value, fill: 'bar-anime' }))
+        .sort((left, right) => left.label.localeCompare(right.label));
+
+      document.getElementById('year-panel').innerHTML = `
+        <div class="panel-header">
+          <div class="panel-title">Completion Years</div>
+          <div class="panel-meta">${stats.anime.datedTitles} dated</div>
+        </div>
+        ${barRows(entries, (value) => `${value} titles`)}
+      `;
+    }
+
+    function renderTopAnime() {
+      const maxMinutes = Math.max(...stats.anime.topByHours.map((entry) => entry.minutes), 1);
+      document.getElementById('top-anime-panel').innerHTML = `
+        <div class="panel-header">
+          <div class="panel-title">Longest Anime Commitments</div>
+          <div class="panel-meta">By Hours Watched</div>
+        </div>
+        <div class="rank-list">
+          ${stats.anime.topByHours.map((entry) => `
+            <div class="rank-row">
+              <div>
+                <div class="rank-name">${entry.title}</div>
+                <div class="rank-meta">${entry.episodes} eps · ${entry.type}${entry.entryCount > 1 ? ` · ${entry.entryCount} grouped entries` : ''}</div>
+              </div>
+              <div class="rank-bar">
+                <div class="rank-fill" style="width:${(entry.minutes / maxMinutes) * 100}%"></div>
+              </div>
+              <div class="rank-value">${entry.hours}h</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderFootnote() {
+      document.getElementById('footnote').innerHTML = `
+        Books are estimated from page counts at ${stats.readingPagesPerHour} pages per hour. Movie runtimes come from Letterboxd film pages, and anime runtimes come from MyAnimeList duration fields multiplied by episode counts when MAL marks them as per-episode. Wage comparisons use California minimum wage and the U.S. average hourly wage figures already used elsewhere on the site.
+      `;
+    }
+
+    renderHero();
+    renderWorth();
+    renderLibrary();
+    renderTimeBreakdown();
+    renderCoverage();
+    renderAnimeOverview();
+    renderAnimeFormats();
+    renderStudios();
+    renderYears();
+    renderTopAnime();
+    renderFootnote();
+  </script>
+</body>
+</html>
