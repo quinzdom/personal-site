@@ -979,7 +979,7 @@
 
     function getOverlaySubtitle(item) {
       if (item.type === 'movie') {
-        return displayMetadataState.movieDirectors[item.id] || '';
+        return item.author || '';
       }
 
       if (item.type === 'book') {
@@ -990,6 +990,10 @@
     }
 
     function getOverlayMeta(item) {
+      if (item.type === 'movie') {
+        return displayMetadataState.movieDirectors[item.id] || '';
+      }
+
       if (item.type === 'book') {
         return displayMetadataState.bookPublicationYears[item.id] || '';
       }
@@ -1115,7 +1119,7 @@
     function resetAllControls() {
       activeFilter = 'all';
       activeView = 'timeline';
-      activeLayout = 'full';
+      activeLayout = 'default';
       activeLanguage = 'all';
       activeFavorites = 'all';
       activeSearch = '';

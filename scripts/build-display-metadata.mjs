@@ -8,12 +8,45 @@ const goodreadsCsvFile = path.join(workspaceDir, 'data-source', 'goodreads', 'go
 const outputFile = path.join(workspaceDir, 'display_metadata.js');
 const LETTERBOXD_CONCURRENCY = 3;
 const GOOGLE_BOOKS_CONCURRENCY = 3;
+const BOOKMETER_CONCURRENCY = 4;
+const MANUAL_BOOK_PUBLICATION_YEARS = {
+  // Prefer the original publication year for works where the Bookmeter ISBN points to a bunko, reprint, or "complete" edition.
+  'bm-12282073': '2014',
+  'bm-12282211': '2014',
+  'bm-366448': '1985',
+  'bm-502251': '1968',
+  'bm-547694': '2002',
+  'bm-552620': '2004',
+  'bm-555804': '1943',
+  'bm-569528': '1947',
+  'bm-572234': '2000',
+  'bm-573780': '2003',
+  'bm-576878': '1948',
+  'bm-577586': '1991',
+  // openBD returns null for this older edition, so keep a stable fallback year.
+  'bm-562729': '2005',
+  'bm-578337': '1914',
+  'bm-578733': '1949',
+  'bm-579144': '1988',
+  'bm-10124617': '2013',
+  'bm-12922494': '2015',
+  'bm-12924793': '2016',
+  'bm-4749596': '2011',
+  'bm-4786193': '2009',
+};
 
 function loadItems(source) {
   const context = {};
   vm.createContext(context);
   vm.runInContext(`${source}\nthis.__items__ = items;`, context);
   return context.__items__;
+}
+
+function loadDisplayMetadata(source) {
+  const context = {};
+  vm.createContext(context);
+  vm.runInContext(`${source}\nthis.__display_metadata__ = displayMetadata;`, context);
+  return context.__display_metadata__;
 }
 
 function parseCsvLine(line) {
@@ -63,7 +96,7 @@ function serializeMetadata(metadata) {
 }
 
 function extractYear(value) {
-  const match = String(value || '').match(/\b(1[0-9]{3}|20[0-9]{2}|2100)\b/);
+  const match = String(value || '').match(/(1[0-9]{3}|20[0-9]{2}|2100)/);
   return match ? match[1] : '';
 }
 
@@ -139,6 +172,29 @@ function extractLetterboxdDirector(html) {
   return names.join(', ');
 }
 
+function extractAmazonBookCode(html) {
+  const match = html.match(/amazon\.co\.jp\/dp\/([A-Z0-9]{10,13})/i);
+  return match ? match[1] : '';
+}
+
+function extractOpenBdYear(payload) {
+  const record = Array.isArray(payload) ? payload[0] : payload;
+  if (!record) return '';
+
+  const candidates = [
+    record.hanmoto?.dateshuppan,
+    record.summary?.pubdate,
+    ...(record.onix?.PublishingDetail?.PublishingDate || []).map((entry) => entry.Date),
+  ];
+
+  for (const value of candidates) {
+    const year = extractYear(value);
+    if (year) return year;
+  }
+
+  return '';
+}
+
 function buildGoodreadsYearMap(rows) {
   return new Map(rows.map((row) => {
     const preferredYear = extractYear(row['Original Publication Year']) || extractYear(row['Year Published']);
@@ -173,13 +229,30 @@ async function lookupGoogleBooksYear(item) {
   return extractYear(volumes[0]?.volumeInfo?.publishedDate);
 }
 
+async function lookupBookmeterYear(item) {
+  const html = await fetchText(`https://bookmeter.com/books/${item.id.slice(3)}`, {
+    timeoutMs: 15000,
+    accept: 'text/html,application/xhtml+xml',
+  });
+
+  const amazonCode = extractAmazonBookCode(html);
+  if (!amazonCode) return '';
+
+  const openBdPayload = await fetchJson(`https://api.openbd.jp/v1/get?isbn=${amazonCode}`);
+  return extractOpenBdYear(openBdPayload);
+}
+
 async function main() {
-  const [itemsSource, goodreadsCsvSource] = await Promise.all([
+  const [itemsSource, goodreadsCsvSource, existingMetadataSource] = await Promise.all([
     fs.readFile(itemsFile, 'utf8'),
     fs.readFile(goodreadsCsvFile, 'utf8'),
+    fs.readFile(outputFile, 'utf8').catch(() => ''),
   ]);
 
   const items = loadItems(itemsSource);
+  const existingMetadata = existingMetadataSource
+    ? loadDisplayMetadata(existingMetadataSource)
+    : { movieDirectors: {}, bookPublicationYears: {} };
   const books = items.filter((item) => item.type === 'book');
   const movies = items.filter((item) => item.type === 'movie');
   const goodreadsRows = parseCsv(goodreadsCsvSource);
@@ -190,6 +263,26 @@ async function main() {
     if (item.id.startsWith('gr-')) {
       const year = goodreadsYearMap.get(item.id) || '';
       if (year) bookPublicationYears[item.id] = year;
+      continue;
+    }
+
+    const year = MANUAL_BOOK_PUBLICATION_YEARS[item.id] || '';
+    if (year) bookPublicationYears[item.id] = year;
+  }
+
+  const unresolvedBookmeterBooks = books.filter((item) => item.id.startsWith('bm-') && !bookPublicationYears[item.id]);
+  const bookmeterYearLookups = await mapLimit(unresolvedBookmeterBooks, BOOKMETER_CONCURRENCY, async (item) => {
+    try {
+      const year = await lookupBookmeterYear(item);
+      return { id: item.id, year };
+    } catch {
+      return { id: item.id, year: '' };
+    }
+  });
+
+  for (const result of bookmeterYearLookups) {
+    if (result.year) {
+      bookPublicationYears[result.id] = result.year;
     }
   }
 
@@ -209,7 +302,8 @@ async function main() {
     }
   }
 
-  const movieDirectorResults = await mapLimit(movies, LETTERBOXD_CONCURRENCY, async (item) => {
+  const missingDirectorMovies = movies.filter((item) => !existingMetadata.movieDirectors?.[item.id]);
+  const movieDirectorResults = await mapLimit(missingDirectorMovies, LETTERBOXD_CONCURRENCY, async (item) => {
     try {
       const html = await fetchText(extractMovieUrl(item), {
         timeoutMs: 15000,
@@ -222,10 +316,14 @@ async function main() {
   });
 
   const movieDirectors = Object.fromEntries(
-    movieDirectorResults
-      .filter((result) => result.director)
-      .map((result) => [result.id, result.director])
-      .sort((left, right) => left[0].localeCompare(right[0]))
+    Object.entries({
+      ...(existingMetadata.movieDirectors || {}),
+      ...Object.fromEntries(
+        movieDirectorResults
+          .filter((result) => result.director)
+          .map((result) => [result.id, result.director])
+      ),
+    }).sort((left, right) => left[0].localeCompare(right[0]))
   );
 
   const metadata = {

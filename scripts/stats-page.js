@@ -14,7 +14,7 @@ const animeHours = stats.animeHours ?? stats.anime?.hours ?? 0;
 const animeDays = stats.animeDays ?? stats.anime?.days ?? 0;
 const tvHours = stats.tvHours ?? stats.tv?.hours ?? 0;
 const tvDays = stats.tvDays ?? stats.tv?.days ?? 0;
-const yearlyComparison = stats.yearlyComparison || [];
+const yearlyComparison = (stats.yearlyComparison || []).slice(-5);
 const hourRows = [
   { label: 'Reading', hours: stats.readingHours, className: 'book' },
   { label: 'Movies', hours: stats.movieHours ?? stats.watchingHours, className: 'movie' },
