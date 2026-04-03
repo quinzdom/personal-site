@@ -10,6 +10,8 @@ const totalHours = stats.allMediaHours ?? stats.totalHours;
 const totalDays = stats.allMediaDays ?? stats.totalDays;
 const totalMinimumWageValue = stats.allMediaMinimumWageValue ?? stats.minimumWageValue;
 const totalAverageWageValue = stats.allMediaAverageWageValue ?? stats.averageWageValue;
+const mangaHours = stats.mangaHours ?? stats.manga?.hours ?? 0;
+const mangaDays = stats.mangaDays ?? stats.manga?.days ?? 0;
 const animeHours = stats.animeHours ?? stats.anime?.hours ?? 0;
 const animeDays = stats.animeDays ?? stats.anime?.days ?? 0;
 const tvHours = stats.tvHours ?? stats.tv?.hours ?? 0;
@@ -17,6 +19,7 @@ const tvDays = stats.tvDays ?? stats.tv?.days ?? 0;
 const yearlyComparison = (stats.yearlyComparison || []).slice(-5);
 const hourRows = [
   { label: 'Reading', hours: stats.readingHours, className: 'book' },
+  { label: 'Manga', hours: mangaHours, className: 'manga' },
   { label: 'Movies', hours: stats.movieHours ?? stats.watchingHours, className: 'movie' },
   { label: 'TV', hours: tvHours, className: 'tv' },
   { label: 'Anime', hours: animeHours, className: 'anime' },
@@ -32,6 +35,11 @@ const timeStats = [
     label: 'Movies',
     value: `${stats.movieHours ?? stats.watchingHours}h`,
     meta: `${stats.movieDays ?? stats.watchingDays} days`,
+  },
+  {
+    label: 'Manga',
+    value: `~${mangaHours}h`,
+    meta: `~${mangaDays} days`,
   },
   {
     label: 'TV',

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>reading list</title>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8XQHBWBCK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-G8XQHBWBCK');
+  </script>
+  <link rel="stylesheet" href="styles/page-chrome.css">
+  <style>
+    main {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 8px 24px 48px;
+    }
+
+    .reading-list {
+      margin-top: 14px;
+      padding-left: 1.8rem;
+      color: #dbe4ed;
+    }
+
+    .reading-list li {
+      padding-left: 0.5rem;
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .reading-list li + li {
+      margin-top: 10px;
+    }
+
+    .reading-list ::marker {
+      color: #6f8090;
+      font-size: 0.82rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding: 8px 16px 40px;
+      }
+
+      .reading-list {
+        padding-left: 1.4rem;
+      }
+
+      .reading-list li {
+        font-size: 0.94rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-copy">
+      <div class="header-main">
+        <h1>Reading List</h1>
+      </div>
+      <div class="header-subline">
+        <p>Just the books I want to get to next.</p>
+        <div class="header-links">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="stats.html" class="nav-link">Stats</a>
+          <a href="recommendations.html" class="nav-link">Recommendations</a>
+          <span class="nav-link-current" aria-current="page">Reading List</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <ol class="reading-list">
+      <li>Odyssey</li>
+      <li>Iliad</li>
+      <li>Dante</li>
+      <li>New Testament</li>
+      <li>The Idiot</li>
+    </ol>
+  </main>
+</body>
+</html>

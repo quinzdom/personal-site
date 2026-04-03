@@ -5,11 +5,14 @@ import vm from 'node:vm';
 const workspaceDir = process.cwd();
 const dataFile = path.join(workspaceDir, 'items_data.js');
 const animeDataFile = path.join(workspaceDir, 'anime_data.js');
+const mangaDataFile = path.join(workspaceDir, 'manga_data.js');
 const tvDataFile = path.join(workspaceDir, 'tv_data.js');
 const statsFile = path.join(workspaceDir, 'stats_data.js');
 const DEFAULT_GOODREADS_CSV = path.join(workspaceDir, 'data-source', 'goodreads', 'goodreads_library_export.csv');
 const DEFAULT_BOOKMETER_URL = 'https://bookmeter.com/users/1465681/books/read?display_type=list';
 const READING_PAGES_PER_HOUR = 50;
+const MANGA_MINUTES_PER_VOLUME = 20;
+const DEFAULT_MANGA_CHAPTERS_PER_VOLUME = 10;
 const MOVIE_CONCURRENCY = 2;
 const CALIFORNIA_MINIMUM_WAGE = 16.9;
 const AVERAGE_HOURLY_WAGE = 37.32;
@@ -26,6 +29,13 @@ function loadAnimeItems(source) {
   vm.createContext(context);
   vm.runInContext(`${source}\nthis.__anime_items__ = animeItems;`, context);
   return context.__anime_items__;
+}
+
+function loadMangaItems(source) {
+  const context = {};
+  vm.createContext(context);
+  vm.runInContext(`${source}\nthis.__manga_items__ = mangaItems;`, context);
+  return context.__manga_items__;
 }
 
 function loadTvItems(source) {
@@ -258,6 +268,41 @@ function roundToOneDecimal(value) {
   return Math.round(value * 10) / 10;
 }
 
+function estimateMangaChaptersPerVolume(mangaItems) {
+  let chapterTotal = 0;
+  let volumeTotal = 0;
+
+  for (const item of mangaItems) {
+    const volumes = Number(item.volumes_read || 0);
+    const chapters = Number(item.chapters_read || 0);
+    if (volumes > 0 && chapters > 0) {
+      chapterTotal += chapters;
+      volumeTotal += volumes;
+    }
+  }
+
+  if (volumeTotal > 0) {
+    return chapterTotal / volumeTotal;
+  }
+
+  return DEFAULT_MANGA_CHAPTERS_PER_VOLUME;
+}
+
+function estimateMangaMinutes(item, chaptersPerVolumeEstimate) {
+  const volumes = Number(item.volumes_read || 0);
+  const chapters = Number(item.chapters_read || 0);
+
+  if (volumes > 0) {
+    return volumes * MANGA_MINUTES_PER_VOLUME;
+  }
+
+  if (chapters > 0) {
+    return (chapters / chaptersPerVolumeEstimate) * MANGA_MINUTES_PER_VOLUME;
+  }
+
+  return 0;
+}
+
 function buildYearlyComparison(bookItems, movieItems, goodreadsPages, bookmeterPages, movieRuntimeMap) {
   const years = new Set();
   const readingByYear = new Map();
@@ -291,9 +336,11 @@ function buildYearlyComparison(bookItems, movieItems, goodreadsPages, bookmeterP
 async function main() {
   const dataSource = await fs.readFile(dataFile, 'utf8');
   const animeSource = await fs.readFile(animeDataFile, 'utf8');
+  const mangaSource = await fs.readFile(mangaDataFile, 'utf8').catch(() => 'const mangaItems = [];\n');
   const tvSource = await fs.readFile(tvDataFile, 'utf8').catch(() => 'const tvItems = [];\n');
   const items = loadItems(dataSource);
   const animeItems = loadAnimeItems(animeSource);
+  const mangaItems = loadMangaItems(mangaSource);
   const tvItems = loadTvItems(tvSource);
   const bookItems = items.filter((item) => item.type === 'book');
   const movieItems = items.filter((item) => item.type === 'movie');
@@ -318,6 +365,17 @@ async function main() {
   let totalMovieMinutes = 0;
   for (const item of movieItems) {
     totalMovieMinutes += movieRuntimeMap.get(item.id) || 0;
+  }
+
+  const mangaChaptersPerVolumeEstimate = estimateMangaChaptersPerVolume(mangaItems);
+  let totalMangaMinutes = 0;
+  let mangaEstimateMatches = 0;
+  for (const item of mangaItems) {
+    const minutes = estimateMangaMinutes(item, mangaChaptersPerVolumeEstimate);
+    if (minutes > 0) {
+      totalMangaMinutes += minutes;
+      mangaEstimateMatches += 1;
+    }
   }
 
   const yearlyComparison = buildYearlyComparison(bookItems, movieItems, goodreadsPages, bookmeterPages, movieRuntimeMap);
@@ -354,13 +412,15 @@ async function main() {
   }
 
   const readingHours = Math.round(totalBookPages / READING_PAGES_PER_HOUR);
+  const mangaHours = Math.round(totalMangaMinutes / 60);
   const watchingHours = Math.round(totalMovieMinutes / 60);
   const animeHours = Math.round(totalAnimeMinutes / 60);
   const tvHours = Math.round(totalTvMinutes / 60);
-  const totalHours = readingHours + watchingHours;
+  const totalHours = readingHours + mangaHours + watchingHours;
   const screenHours = watchingHours + animeHours + tvHours;
-  const allMediaHours = readingHours + screenHours;
+  const allMediaHours = readingHours + mangaHours + screenHours;
   const readingDays = roundToOneDecimal(readingHours / 24);
+  const mangaDays = roundToOneDecimal(mangaHours / 24);
   const watchingDays = roundToOneDecimal(watchingHours / 24);
   const animeDays = roundToOneDecimal(animeHours / 24);
   const tvDays = roundToOneDecimal(tvHours / 24);
@@ -410,6 +470,7 @@ async function main() {
 
   const stats = {
     readingHours,
+    mangaHours,
     movieHours: watchingHours,
     watchingHours,
     animeHours,
@@ -417,6 +478,7 @@ async function main() {
     screenHours,
     allMediaHours,
     readingDays,
+    mangaDays,
     movieDays: watchingDays,
     watchingDays,
     animeDays,
@@ -433,8 +495,11 @@ async function main() {
     allMediaAverageWageValue,
     yearlyComparison,
     readingHoursEstimated: true,
+    mangaHoursEstimated: true,
     animeHoursEstimated: false,
     readingPagesPerHour: READING_PAGES_PER_HOUR,
+    mangaMinutesPerVolume: MANGA_MINUTES_PER_VOLUME,
+    mangaChaptersPerVolumeEstimate: roundToOneDecimal(mangaChaptersPerVolumeEstimate),
     wageSources: {
       minimumWage: 'California statewide minimum wage, effective 2026-01-01 (DIR)',
       averageWage: 'U.S. average hourly earnings, total private, Feb. 2026 (BLS)',
@@ -443,6 +508,8 @@ async function main() {
     sourceCoverage: {
       booksMatched: bookPageMatches,
       booksTotal: bookItems.length,
+      mangaMatched: mangaEstimateMatches,
+      mangaTotal: mangaItems.length,
       moviesMatched: movieRuntimeMap.size,
       moviesTotal: movieItems.length,
       animeMatched: animeRuntimeMatches,
@@ -452,10 +519,18 @@ async function main() {
     },
     libraryCounts: {
       books: bookItems.length,
+      manga: mangaItems.length,
       movies: movieItems.length,
       anime: animeItems.length,
       tv: tvItems.length,
-      total: bookItems.length + movieItems.length + animeItems.length + tvItems.length,
+      total: bookItems.length + mangaItems.length + movieItems.length + animeItems.length + tvItems.length,
+    },
+    manga: {
+      titles: mangaItems.length,
+      chapters: mangaItems.reduce((sum, item) => sum + Number(item.chapters_read || 0), 0),
+      volumes: mangaItems.reduce((sum, item) => sum + Number(item.volumes_read || 0), 0),
+      hours: mangaHours,
+      days: mangaDays,
     },
     anime: {
       shows: animeItems.length,

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>tv</title>
+  <title>manga</title>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8XQHBWBCK"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -18,7 +18,7 @@
   <header>
     <div class="header-copy">
       <div class="header-main">
-        <h1>TV I've Seen</h1>
+        <h1>Manga I've Read</h1>
       </div>
       <div class="header-subline">
         <p id="count"></p>
@@ -30,23 +30,23 @@
     <div class="toolbar">
       <div class="toolbar-section">
         <div class="toolbar-label">Sort</div>
-        <div class="sort-toggle" aria-label="TV sort mode">
+        <div class="sort-toggle" aria-label="Manga sort mode">
           <button class="active" data-sort="source">Source</button>
-          <button data-sort="recent">Newest</button>
+          <button data-sort="score">Score</button>
         </div>
       </div>
       <div class="toolbar-section">
         <div class="toolbar-label">Search</div>
-        <input class="search-input" id="search-input" type="text" placeholder="Search..." aria-label="Search TV titles">
+        <input class="search-input" id="search-input" type="text" placeholder="Search..." aria-label="Search manga titles">
       </div>
     </div>
   </header>
 
   <div class="grid" id="grid"></div>
-  <div class="empty-state" id="empty-state" hidden>No TV shows matched that search.</div>
+  <div class="empty-state" id="empty-state" hidden>No manga matched that search.</div>
 
-  <script src="tv_data.js"></script>
+  <script src="manga_data.js"></script>
   <script src="scripts/page-utils.js"></script>
-  <script src="scripts/tv-page.js"></script>
+  <script src="scripts/manga-page.js"></script>
 </body>
 </html>

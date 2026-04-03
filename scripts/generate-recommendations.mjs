@@ -370,66 +370,56 @@ async function generateHtml(books, movies, bookCovers, movieCovers, archive) {
     }
     header {
       max-width: 1200px;
-      margin: 10px auto 8px;
-      padding: 8px 24px;
+      margin: 0 auto;
+      padding: 32px 24px 24px;
       display: flex;
       flex-direction: column;
-      align-items: stretch;
-      gap: 8px;
-    }
-    .header-copy {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
       align-items: center;
       text-align: center;
-    }
-    .header-main {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      align-self: center;
-      flex-wrap: wrap;
-    }
-    header h1 {
-      color: #fff;
-      font-size: 1.3rem;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-      line-height: 1;
-      white-space: nowrap;
-    }
-    header p {
-      margin-top: 3px;
-      font-size: 0.6rem;
-      color: #718191;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      max-width: 60ch;
+      gap: 14px;
     }
     .back-link {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(70, 84, 98, 0.76);
-      border-radius: 999px;
-      background: rgba(237, 242, 247, 0.04);
-      color: #728292;
+      gap: 5px;
+      color: #556677;
       text-decoration: none;
-      padding: 4px 9px;
-      font-size: 0.56rem;
-      letter-spacing: 0.12em;
+      font-size: 0.52rem;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      white-space: nowrap;
-      transform: translateY(1px);
-      transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
+      transition: color 0.2s;
     }
     .back-link:hover {
-      color: #f1f4f7;
-      border-color: rgba(99, 115, 129, 0.6);
-      background: rgba(237, 242, 247, 0.08);
-      transform: translateY(0);
+      color: #99aabb;
+    }
+    .back-link svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      transition: transform 0.2s;
+    }
+    .back-link:hover svg {
+      transform: translateX(-2px);
+    }
+    header h1 {
+      color: #fff;
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .header-rule {
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #465462, transparent);
+    }
+    header p {
+      font-size: 0.55rem;
+      color: #5a6a7a;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      max-width: 50ch;
+      line-height: 1.6;
     }
     .section-label {
       max-width: 1200px;
@@ -594,11 +584,11 @@ async function generateHtml(books, movies, bookCovers, movieCovers, archive) {
       text-align: center;
     }
     @media (max-width: 600px) {
-      .header-main {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 8px;
-        align-self: flex-start;
+      header {
+        padding: 24px 16px 18px;
+      }
+      header h1 {
+        font-size: 1.35rem;
       }
       .recommendation-list {
         padding: 0 16px 8px;
@@ -610,9 +600,7 @@ async function generateHtml(books, movies, bookCovers, movieCovers, archive) {
       .item {
         width: 85px;
       }
-      header { margin: 10px 16px 14px; padding: 8px 0; }
       .section-label { padding: 16px 16px 8px; }
-      header h1 { white-space: normal; }
       .rec-card + .rec-card {
         margin-top: 14px;
         padding-top: 14px;
@@ -629,13 +617,13 @@ async function generateHtml(books, movies, bookCovers, movieCovers, archive) {
 </head>
 <body>
   <header>
-    <div class="header-copy">
-      <div class="header-main">
-        <h1>Recommendations</h1>
-        <a href="index.html" class="back-link">Back To Consume</a>
-      </div>
-      <p>AI-generated picks based on your reading and viewing history. Updated ${today}.</p>
-    </div>
+    <a href="index.html" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      Back to Consume
+    </a>
+    <h1>Recommendations</h1>
+    <div class="header-rule"></div>
+    <p>AI-generated picks from your reading and viewing history</p>
   </header>
 
   <div class="section-label">Books</div>

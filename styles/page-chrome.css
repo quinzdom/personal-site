@@ -1,3 +1,8 @@
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -21,13 +26,23 @@ header {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  gap: 3px;
 }
 
 .header-main {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 14px;
+  min-width: 0;
+}
+
+.header-subline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+  min-width: 0;
 }
 
 header h1 {
@@ -40,45 +55,60 @@ header h1 {
 }
 
 header p {
-  margin-top: 3px;
   font-size: 0.6rem;
   color: #718191;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  margin: 0;
   max-width: 56ch;
+  min-width: 0;
 }
 
 .header-links {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
+  flex-shrink: 0;
+  justify-self: end;
 }
 
-.nav-link {
+.nav-link,
+.nav-link-current {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(70, 84, 98, 0.76);
-  border-radius: 999px;
-  background: rgba(237, 242, 247, 0.04);
-  color: #728292;
+  color: #687888;
   text-decoration: none;
-  padding: 4px 9px;
-  font-size: 0.56rem;
+  padding: 0;
+  font-size: 0.58rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   white-space: nowrap;
-  transform: translateY(1px);
-  transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
+  transition: color 0.15s ease;
+}
+
+.nav-link::before,
+.nav-link-current::before {
+  content: '/';
+  color: #42505d;
+  margin-right: 8px;
+}
+
+.nav-link:first-child::before,
+.nav-link-current:first-child::before {
+  content: '';
+  margin-right: 0;
 }
 
 .nav-link:hover {
   color: #f1f4f7;
-  border-color: rgba(99, 115, 129, 0.6);
-  background: rgba(237, 242, 247, 0.08);
-  transform: translateY(0);
+}
+
+.nav-link-current {
+  color: #a6b5c3;
+  pointer-events: none;
 }
 
 @media (max-width: 640px) {
@@ -90,6 +120,14 @@ header p {
   .header-main {
     flex-direction: column;
     align-items: flex-start;
+    gap: 4px;
+  }
+
+  .header-subline {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
   }
 
   .header-links {
