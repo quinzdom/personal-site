@@ -1,0 +1,250 @@
+.toolbar {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  row-gap: 6px;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.toolbar-label {
+  color: #667787;
+  font-size: 0.46rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.filters,
+.sort-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px;
+  border: 1px solid rgba(56, 67, 79, 0.9);
+  border-radius: 999px;
+  background: rgba(18, 24, 30, 0.62);
+}
+
+.filters button,
+.sort-toggle button {
+  border: 0;
+  background: transparent;
+  color: #93a4b3;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  font-family: inherit;
+}
+
+.filters button:hover,
+.sort-toggle button:hover {
+  color: #d6dee7;
+}
+
+.filters button.active,
+.sort-toggle button.active {
+  background: rgba(237, 242, 247, 0.08);
+  color: #f1f4f7;
+  box-shadow: inset 0 0 0 1px rgba(160, 177, 193, 0.16);
+  font-weight: 600;
+}
+
+.search-input {
+  border: 1px solid rgba(56, 67, 79, 0.9);
+  border-radius: 999px;
+  background: rgba(18, 24, 30, 0.62);
+  color: #d6dee7;
+  padding: 5px 12px;
+  font-size: 0.66rem;
+  letter-spacing: 0.03em;
+  font-family: inherit;
+  outline: none;
+  width: 150px;
+  transition: width 0.25s ease, border-color 0.15s;
+}
+
+.search-input:focus,
+.search-input.has-value {
+  width: 190px;
+  border-color: rgba(99, 115, 129, 0.6);
+}
+
+.search-input::placeholder {
+  color: #556677;
+  letter-spacing: 0.08em;
+}
+
+.item-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.item-link:focus-visible {
+  outline: 2px solid rgba(172, 205, 255, 0.8);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+  gap: 8px;
+  align-items: start;
+}
+
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.item {
+  position: relative;
+  aspect-ratio: 2/3;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #1f2830;
+}
+
+.item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.2s;
+}
+
+.item:hover img {
+  opacity: 0.3;
+}
+
+.item .overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  padding: 10px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.item:hover .overlay {
+  opacity: 1;
+}
+
+.overlay .title {
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.overlay .author {
+  color: #99aabb;
+  font-size: 0.65rem;
+  margin-top: 2px;
+}
+
+.overlay .date {
+  color: #678;
+  font-size: 0.58rem;
+  margin-top: 2px;
+}
+
+.no-cover {
+  display: flex;
+  align-items: end;
+  justify-content: start;
+  width: 100%;
+  height: 100%;
+  background: #2a2420;
+  padding: 12px;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #d4c4b0;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  border: 1px solid #3d332a;
+}
+
+.empty-state {
+  max-width: 1200px;
+  margin: 40px auto 0;
+  padding: 0 24px 24px;
+  color: #667787;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 600px) {
+  header {
+    margin: 10px 16px 14px;
+    padding: 8px 0;
+    gap: 12px;
+  }
+
+  .header-main {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .header-links {
+    justify-content: flex-start;
+  }
+
+  header h1 {
+    font-size: 1.15rem;
+    white-space: normal;
+  }
+
+  .toolbar {
+    align-items: flex-start;
+  }
+
+  .toolbar-section {
+    flex-wrap: wrap;
+    gap: 5px 7px;
+  }
+
+  .filters,
+  .sort-toggle {
+    flex-wrap: wrap;
+  }
+
+  .filters button,
+  .sort-toggle button {
+    padding: 5px 9px;
+  }
+
+  .search-input {
+    width: 140px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 6px;
+    padding: 0 16px 32px;
+  }
+
+  .empty-state {
+    padding: 0 16px 24px;
+  }
+}

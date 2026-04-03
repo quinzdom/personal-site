@@ -4,21 +4,120 @@ const stats = {
   "watchingHours": 1517,
   "animeHours": 369,
   "totalHours": 3724,
-  "screenHours": 1886,
-  "allMediaHours": 4093,
+  "screenHours": 2082,
+  "allMediaHours": 4289,
   "readingDays": 92,
   "movieDays": 63.2,
   "watchingDays": 63.2,
   "animeDays": 15.4,
+  "tvHours": 196,
+  "tvDays": 8.2,
   "totalDays": 155.2,
-  "screenDays": 78.6,
-  "allMediaDays": 170.5,
+  "screenDays": 86.8,
+  "allMediaDays": 178.7,
   "minimumWageHourly": 16.9,
   "averageWageHourly": 37.32,
   "minimumWageValue": 62936,
   "averageWageValue": 138980,
-  "allMediaMinimumWageValue": 69172,
-  "allMediaAverageWageValue": 152751,
+  "allMediaMinimumWageValue": 72484,
+  "allMediaAverageWageValue": 160065,
+  "yearlyComparison": [
+    {
+      "year": 2006,
+      "readingHours": 61.6,
+      "movieHours": 0
+    },
+    {
+      "year": 2007,
+      "readingHours": 103.9,
+      "movieHours": 0
+    },
+    {
+      "year": 2008,
+      "readingHours": 62.3,
+      "movieHours": 0
+    },
+    {
+      "year": 2009,
+      "readingHours": 89.9,
+      "movieHours": 0
+    },
+    {
+      "year": 2010,
+      "readingHours": 64.8,
+      "movieHours": 0
+    },
+    {
+      "year": 2011,
+      "readingHours": 96.7,
+      "movieHours": 0
+    },
+    {
+      "year": 2012,
+      "readingHours": 88.1,
+      "movieHours": 0
+    },
+    {
+      "year": 2014,
+      "readingHours": 293.3,
+      "movieHours": 0
+    },
+    {
+      "year": 2015,
+      "readingHours": 4.3,
+      "movieHours": 0
+    },
+    {
+      "year": 2017,
+      "readingHours": 4.8,
+      "movieHours": 0
+    },
+    {
+      "year": 2018,
+      "readingHours": 4,
+      "movieHours": 44.3
+    },
+    {
+      "year": 2019,
+      "readingHours": 0,
+      "movieHours": 153.9
+    },
+    {
+      "year": 2020,
+      "readingHours": 775.6,
+      "movieHours": 97.5
+    },
+    {
+      "year": 2021,
+      "readingHours": 0,
+      "movieHours": 51.2
+    },
+    {
+      "year": 2022,
+      "readingHours": 232,
+      "movieHours": 52.2
+    },
+    {
+      "year": 2023,
+      "readingHours": 11.8,
+      "movieHours": 37.3
+    },
+    {
+      "year": 2024,
+      "readingHours": 143.4,
+      "movieHours": 34.5
+    },
+    {
+      "year": 2025,
+      "readingHours": 109.6,
+      "movieHours": 59.3
+    },
+    {
+      "year": 2026,
+      "readingHours": 45.8,
+      "movieHours": 22.5
+    }
+  ],
   "readingHoursEstimated": true,
   "animeHoursEstimated": false,
   "readingPagesPerHour": 50,
@@ -33,13 +132,16 @@ const stats = {
     "moviesMatched": 763,
     "moviesTotal": 763,
     "animeMatched": 40,
-    "animeTotal": 40
+    "animeTotal": 40,
+    "tvMatched": 5,
+    "tvTotal": 5
   },
   "libraryCounts": {
     "books": 341,
     "movies": 763,
     "anime": 31,
-    "total": 1135
+    "tv": 5,
+    "total": 1140
   },
   "anime": {
     "shows": 31,
@@ -159,5 +261,11 @@ const stats = {
         "entryCount": 1
       }
     ]
+  },
+  "tv": {
+    "shows": 5,
+    "episodes": 240,
+    "hours": 196,
+    "days": 8.2
   }
 };

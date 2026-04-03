@@ -1,6 +1,6 @@
 # Tracking Site
 
-Static site for browsing tracked books and movies.
+Static site for browsing tracked books, movies, anime, and TV.
 
 ## Run locally
 
@@ -15,12 +15,29 @@ Then open `http://localhost:8000`.
 ## Files
 
 - `index.html`: UI and client-side rendering
+- `anime.html`: dedicated anime page
+- `tv.html`: dedicated TV page
+- `stats.html`: compact stats page
 - `items_data.js`: tracked books and movies
+- `anime_data.js`: generated grouped anime data
+- `tv_data.js`: generated TV data
 - `likes_data.js`: generated Letterboxd liked-movie set used by the favorites filter
 - `stats_data.js`: generated reading, watching, and wage stats shown in the header
 - `images/covers/`: local cover images
 - `data-source/`: raw source exports kept in the repo for reproducible rebuilds
 - `scripts/`: maintenance scripts for imports, covers, and derived data
+
+## Structure
+
+The project is compacted around a few shared pieces now:
+
+- `styles/page-chrome.css`: shared page header and nav styling
+- `styles/media-grid-page.css`: shared poster-grid page styling used by anime and TV
+- `styles/stats-page.css`: stats page styling
+- `scripts/page-utils.js`: shared client-side helpers for page rendering
+- `scripts/anime-page.js`: anime page behavior
+- `scripts/tv-page.js`: TV page behavior
+- `scripts/stats-page.js`: stats page behavior
 
 ## Source data
 
@@ -33,6 +50,16 @@ This repo is set up to be self-contained. The checked-in raw exports live here:
 - `data-source/letterboxd/likes/films.csv`
 
 Bookmeter is the only exception: those books were imported from the live Bookmeter site, not from a local export file.
+
+TV is currently sourced from:
+
+- `data-source/tv/shows.json`
+
+Then generated into `tv_data.js` with:
+
+```bash
+node scripts/build-tv-data.mjs
+```
 
 ## Deploy to GitHub Pages
 
@@ -75,4 +102,5 @@ node scripts/update-movie-dates-from-letterboxd-diary.mjs
 ```bash
 node scripts/build-liked-movie-data.mjs
 node scripts/build-consumption-stats.mjs
+node scripts/build-tv-data.mjs
 ```

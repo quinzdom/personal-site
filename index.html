@@ -56,6 +56,7 @@
       letter-spacing: 0.01em;
       line-height: 1;
       white-space: nowrap;
+      cursor: pointer;
     }
 
     header p {
@@ -97,24 +98,6 @@
       gap: 6px;
       flex-wrap: wrap;
       justify-content: flex-end;
-    }
-
-    .site-footer {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 24px 24px 48px;
-    }
-
-    .footer-credit {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 0.6rem;
-      color: #667787;
-      letter-spacing: 0.08em;
-    }
-
-    body.full-width .site-footer {
-      display: none;
     }
 
     .header-stats {
@@ -439,6 +422,18 @@
       cursor: pointer;
     }
 
+    .item-link {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .item-link:focus-visible {
+      outline: 2px solid rgba(172, 205, 255, 0.8);
+      outline-offset: 3px;
+      border-radius: 6px;
+    }
+
     .item-period {
       min-height: 0.75rem;
       padding-left: 2px;
@@ -550,9 +545,6 @@
         font-size: 1.15rem;
         white-space: normal;
       }
-      .site-footer {
-        padding: 20px 16px 32px;
-      }
       .toolbar-section {
         flex-wrap: wrap;
         gap: 5px 7px;
@@ -584,6 +576,7 @@
           <button class="active" data-filter="all">All</button>
           <button data-filter="book">Books</button>
           <button data-filter="movie">Movies</button>
+          <button data-filter="tv">TV</button>
           <button data-filter="anime">Anime</button>
         </div>
       </div>
@@ -625,8 +618,9 @@
     </div>
     <div class="header-copy">
       <div class="header-main">
-        <h1>Books & Movies I consumed</h1>
+        <h1 id="site-title" role="button" tabindex="0">Books & Movies I consumed</h1>
         <div class="header-links">
+          <a href="tv.html" class="recommendations-link">TV</a>
           <a href="stats.html" class="recommendations-link">Stats</a>
           <a href="recommendations.html" class="recommendations-link">Recommendations</a>
         </div>
@@ -637,47 +631,24 @@
   <audio id="chaconne" src="chaconne.mp3" preload="none"></audio>
   <button class="fullscreen-exit" id="fullscreen-exit" type="button">Back To UI</button>
   <div class="grid" id="grid"></div>
-  <footer class="site-footer">
-    <div class="header-stats" aria-label="Consumption stats">
-      <div class="header-stat">
-        <span class="header-stat-label">Reading</span>
-        <span class="header-stat-value" id="reading-hours">--</span>
-        <span class="header-stat-meta" id="reading-days">--</span>
-      </div>
-      <div class="header-stat">
-        <span class="header-stat-label">Watching</span>
-        <span class="header-stat-value" id="watching-hours">--</span>
-        <span class="header-stat-meta" id="watching-days">--</span>
-      </div>
-      <div class="header-stat">
-        <span class="header-stat-label">Total</span>
-        <span class="header-stat-value" id="total-hours">--</span>
-        <span class="header-stat-meta" id="total-days">--</span>
-      </div>
-      <div class="header-stat">
-        <span class="header-stat-label">Min Wage</span>
-        <span class="header-stat-value" id="minimum-wage-value">--</span>
-        <span class="header-stat-meta" id="minimum-wage-rate">--</span>
-      </div>
-      <div class="header-stat">
-        <span class="header-stat-label">Avg Wage</span>
-        <span class="header-stat-value" id="average-wage-value">--</span>
-        <span class="header-stat-meta" id="average-wage-rate">--</span>
-      </div>
-    </div>
-    <p class="footer-credit">Music: Bach's Chaconne arranged for the left hand by Brahms, played by Leon Fleisher.</p>
-  </footer>
 
   <script src="items_data.js"></script>
   <script src="likes_data.js"></script>
   <script src="anime_data.js"></script>
+  <script src="tv_data.js"></script>
   <script src="stats_data.js"></script>
+  <script src="display_metadata.js"></script>
+  <script src="scripts/page-utils.js"></script>
   <script>
     const monthFormatter = new Intl.DateTimeFormat('en-US', {
       month: 'short',
       year: 'numeric',
       timeZone: 'UTC',
     });
+    const urlState = new URL(window.location.href);
+    const displayMetadataState = typeof displayMetadata === 'undefined'
+      ? { movieDirectors: {}, bookPublicationYears: {} }
+      : displayMetadata;
     const STORAGE_KEY = 'tracking-site-view-v2';
     const LAYOUT_STORAGE_KEY = 'tracking-site-layout-v2';
     const LANGUAGE_STORAGE_KEY = 'tracking-site-language';
@@ -788,12 +759,12 @@
       'lb-https://boxd.it/yzY8',
       'lb-https://boxd.it/yZYe',
     ]);
-    let activeFilter = 'all';
-    let activeView = localStorage.getItem(STORAGE_KEY) || 'timeline';
-    let activeLayout = localStorage.getItem(LAYOUT_STORAGE_KEY) || 'full';
-    let activeLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'all';
-    let activeFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY) || 'all';
-    let activeSearch = '';
+    let activeFilter = urlState.searchParams.get('filter') || 'all';
+    let activeView = urlState.searchParams.get('view') || localStorage.getItem(STORAGE_KEY) || 'timeline';
+    let activeLayout = urlState.searchParams.get('layout') || localStorage.getItem(LAYOUT_STORAGE_KEY) || 'full';
+    let activeLanguage = urlState.searchParams.get('language') || localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'all';
+    let activeFavorites = urlState.searchParams.get('favorites') || localStorage.getItem(FAVORITES_STORAGE_KEY) || 'all';
+    let activeSearch = urlState.searchParams.get('q') || '';
     let fullscreenIdleTimer = null;
 
     function normalizeAnimeItem(item) {
@@ -818,6 +789,7 @@
         title: item.title,
         author: subtitleBits.join(' · ') || item.english_title || item.studio || 'Anime',
         cover: item.cover,
+        source_url: item.mal_url,
         type: 'anime',
         date_read: item.date_completed || '',
         rating: 0,
@@ -825,9 +797,36 @@
       };
     }
 
-    const siteItems = items.concat(
-      typeof animeItems === 'undefined' ? [] : animeItems.map(normalizeAnimeItem)
-    );
+    function normalizeTvItem(item) {
+      const subtitleBits = [];
+
+      if (item.episodes) {
+        subtitleBits.push(`${item.episodes} eps`);
+      }
+
+      if (item.network) {
+        subtitleBits.push(item.network);
+      } else if (item.format) {
+        subtitleBits.push(item.format);
+      }
+
+      return {
+        id: item.id,
+        title: item.title,
+        author: subtitleBits.join(' · ') || 'TV',
+        cover: item.cover,
+        source_url: item.tvmaze_url,
+        type: 'tv',
+        date_read: item.date_completed || '',
+        rating: 0,
+        ya: false,
+        language: item.language || '',
+      };
+    }
+
+    const siteItems = items
+      .concat(typeof tvItems === 'undefined' ? [] : tvItems.map(normalizeTvItem))
+      .concat(typeof animeItems === 'undefined' ? [] : animeItems.map(normalizeAnimeItem));
 
     function clearFullscreenIdleTimer() {
       if (fullscreenIdleTimer) {
@@ -866,47 +865,6 @@
         currency: 'USD',
         maximumFractionDigits: 0,
       }).format(value);
-    }
-
-    function renderHeaderStats() {
-      const readingValue = document.getElementById('reading-hours');
-      const watchingValue = document.getElementById('watching-hours');
-      const totalValue = document.getElementById('total-hours');
-      const readingDays = document.getElementById('reading-days');
-      const watchingDays = document.getElementById('watching-days');
-      const totalDays = document.getElementById('total-days');
-      const minimumWageValue = document.getElementById('minimum-wage-value');
-      const minimumWageRate = document.getElementById('minimum-wage-rate');
-      const averageWageValue = document.getElementById('average-wage-value');
-      const averageWageRate = document.getElementById('average-wage-rate');
-
-      if (typeof stats === 'undefined') {
-        readingValue.textContent = '--';
-        watchingValue.textContent = '--';
-        totalValue.textContent = '--';
-        readingDays.textContent = '--';
-        watchingDays.textContent = '--';
-        totalDays.textContent = '--';
-        minimumWageValue.textContent = '--';
-        minimumWageRate.textContent = '--';
-        averageWageValue.textContent = '--';
-        averageWageRate.textContent = '--';
-        return;
-      }
-
-      readingValue.textContent = `~${stats.readingHours}h`;
-      watchingValue.textContent = `${stats.watchingHours}h`;
-      totalValue.textContent = `~${stats.totalHours}h`;
-      readingDays.textContent = `~${stats.readingDays} days`;
-      watchingDays.textContent = `~${stats.watchingDays} days`;
-      totalDays.textContent = `~${stats.totalDays} days`;
-      minimumWageValue.textContent = `~${formatCurrency(stats.minimumWageValue)}`;
-      minimumWageRate.textContent = `$${stats.minimumWageHourly}/hr`;
-      averageWageValue.textContent = `~${formatCurrency(stats.averageWageValue)}`;
-      averageWageRate.textContent = `$${stats.averageWageHourly}/hr`;
-      readingValue.title = `Estimated from page counts at ${stats.readingPagesPerHour} pages/hour`;
-      minimumWageValue.title = stats.wageSources.minimumWage;
-      averageWageValue.title = `${stats.wageSources.averageWage}; published ${stats.wageSources.averageWagePublished}`;
     }
 
     function renderMonth(dateString) {
@@ -953,6 +911,10 @@
         return true;
       }
 
+      if (item.type === 'tv') {
+        return /japanese/i.test(item.language || '');
+      }
+
       return false;
     }
 
@@ -978,6 +940,61 @@
       }
 
       return false;
+    }
+
+    function syncControls() {
+      document.querySelectorAll('.filters button').forEach(button => {
+        button.classList.toggle('active', button.dataset.filter === activeFilter);
+      });
+      document.querySelectorAll('.view-toggle button').forEach(button => {
+        const isActive = button.dataset.view === activeView;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+      document.querySelectorAll('.layout-toggle button').forEach(button => {
+        const isActive = button.dataset.layout === activeLayout;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+      document.querySelectorAll('.language-toggle button').forEach(button => {
+        button.classList.toggle('active', button.dataset.language === activeLanguage);
+      });
+      document.querySelectorAll('.favorites-toggle button').forEach(button => {
+        button.classList.toggle('active', button.dataset.favorites === activeFavorites);
+      });
+      searchInput.value = activeSearch;
+      searchInput.classList.toggle('has-value', activeSearch.length > 0);
+    }
+
+    function syncUrlState(options = {}) {
+      PageUtils.updateUrlQuery({
+        filter: activeFilter !== 'all' ? activeFilter : '',
+        view: activeView !== 'timeline' ? activeView : '',
+        layout: activeLayout !== 'full' ? activeLayout : '',
+        language: activeLanguage !== 'all' ? activeLanguage : '',
+        favorites: activeFavorites !== 'all' ? activeFavorites : '',
+        q: activeSearch || '',
+      }, options);
+    }
+
+    function getOverlaySubtitle(item) {
+      if (item.type === 'movie') {
+        return displayMetadataState.movieDirectors[item.id] || '';
+      }
+
+      if (item.type === 'book') {
+        return item.author || '';
+      }
+
+      return item.author || '';
+    }
+
+    function getOverlayMeta(item) {
+      if (item.type === 'book') {
+        return displayMetadataState.bookPublicationYears[item.id] || '';
+      }
+
+      return '';
     }
 
     function render(filter = activeFilter, view = activeView, language = activeLanguage, favorites = activeFavorites) {
@@ -1030,20 +1047,26 @@
           }
 
           const img = item.cover
-            ? `<img src="${item.cover}" alt="${item.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">${item.title}</div>`
-            : `<div class="no-cover">${item.title}</div>`;
+            ? `<img src="${PageUtils.escapeHtml(item.cover)}" alt="${PageUtils.escapeHtml(item.title)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">${PageUtils.escapeHtml(item.title)}</div>`
+            : `<div class="no-cover">${PageUtils.escapeHtml(item.title)}</div>`;
           const liked = isFavoriteItem(item);
-          fragments.push(`
-          <div class="entry">
-            <div class="item" title="${item.title} — ${item.author}">
+          const href = PageUtils.getItemUrl(item);
+          const subtitle = getOverlaySubtitle(item);
+          const meta = getOverlayMeta(item);
+          const card = `
+            <div class="item" title="${PageUtils.escapeHtml(item.title)} — ${PageUtils.escapeHtml(item.author)}">
               ${liked ? '<span class="liked-heart">\u2665</span>' : ''}
               ${img}
               <div class="overlay">
-                <span class="title">${item.title}</span>
-                <span class="author">${item.author}</span>
-                ${item.date_read ? `<span class="date">${item.date_read}</span>` : ''}
+                <span class="title">${PageUtils.escapeHtml(item.title)}</span>
+                ${subtitle ? `<span class="author">${PageUtils.escapeHtml(subtitle)}</span>` : ''}
+                ${meta ? `<span class="date">${PageUtils.escapeHtml(meta)}</span>` : ''}
               </div>
             </div>
+          `;
+          fragments.push(`
+          <div class="entry">
+            ${href ? `<a class="item-link" href="${PageUtils.escapeHtml(href)}" target="_blank" rel="noreferrer noopener">${card}</a>` : card}
           </div>
         `);
         });
@@ -1052,20 +1075,26 @@
       } else {
         grid.innerHTML = sorted.map(item => {
           const img = item.cover
-            ? `<img src="${item.cover}" alt="${item.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">${item.title}</div>`
-            : `<div class="no-cover">${item.title}</div>`;
+            ? `<img src="${PageUtils.escapeHtml(item.cover)}" alt="${PageUtils.escapeHtml(item.title)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">${PageUtils.escapeHtml(item.title)}</div>`
+            : `<div class="no-cover">${PageUtils.escapeHtml(item.title)}</div>`;
           const liked = isFavoriteItem(item);
-          return `
-          <div class="entry">
-            <div class="item" title="${item.title} — ${item.author}">
+          const href = PageUtils.getItemUrl(item);
+          const subtitle = getOverlaySubtitle(item);
+          const meta = getOverlayMeta(item);
+          const card = `
+            <div class="item" title="${PageUtils.escapeHtml(item.title)} — ${PageUtils.escapeHtml(item.author)}">
               ${liked ? '<span class="liked-heart">\u2665</span>' : ''}
               ${img}
               <div class="overlay">
-                <span class="title">${item.title}</span>
-                <span class="author">${item.author}</span>
-                ${item.date_read ? `<span class="date">${item.date_read}</span>` : ''}
+                <span class="title">${PageUtils.escapeHtml(item.title)}</span>
+                ${subtitle ? `<span class="author">${PageUtils.escapeHtml(subtitle)}</span>` : ''}
+                ${meta ? `<span class="date">${PageUtils.escapeHtml(meta)}</span>` : ''}
               </div>
             </div>
+          `;
+          return `
+          <div class="entry">
+            ${href ? `<a class="item-link" href="${PageUtils.escapeHtml(href)}" target="_blank" rel="noreferrer noopener">${card}</a>` : card}
           </div>
         `;
         }).join('');
@@ -1074,11 +1103,40 @@
 
     document.querySelectorAll('.filters button').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        activeFilter = btn.dataset.filter;
         gtag('event', 'filter_change', { filter_type: 'show', filter_value: btn.dataset.filter });
-        render(btn.dataset.filter, activeView, activeLanguage, activeFavorites);
+        syncControls();
+        syncUrlState();
+        render(activeFilter, activeView, activeLanguage, activeFavorites);
       });
+    });
+
+    const siteTitle = document.getElementById('site-title');
+    function resetAllControls() {
+      activeFilter = 'all';
+      activeView = 'timeline';
+      activeLayout = 'full';
+      activeLanguage = 'all';
+      activeFavorites = 'all';
+      activeSearch = '';
+      localStorage.setItem(STORAGE_KEY, activeView);
+      localStorage.setItem(LAYOUT_STORAGE_KEY, activeLayout);
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, activeLanguage);
+      localStorage.setItem(FAVORITES_STORAGE_KEY, activeFavorites);
+      searchInput.value = '';
+      searchInput.classList.remove('has-value');
+      applyLayout(activeLayout);
+      syncControls();
+      syncUrlState({ replace: true });
+      render(activeFilter, activeView, activeLanguage, activeFavorites);
+    }
+
+    siteTitle.addEventListener('click', resetAllControls);
+    siteTitle.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        resetAllControls();
+      }
     });
 
     document.querySelectorAll('.view-toggle button').forEach(btn => {
@@ -1089,11 +1147,12 @@
       }
 
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        activeView = btn.dataset.view;
         localStorage.setItem(STORAGE_KEY, btn.dataset.view);
         gtag('event', 'filter_change', { filter_type: 'view', filter_value: btn.dataset.view });
-        render(activeFilter, btn.dataset.view, activeLanguage, activeFavorites);
+        syncControls();
+        syncUrlState();
+        render(activeFilter, activeView, activeLanguage, activeFavorites);
       });
     });
 
@@ -1104,16 +1163,12 @@
 
       btn.addEventListener('click', () => {
         const nextLayout = activeLayout === btn.dataset.layout ? 'default' : btn.dataset.layout;
+        activeLayout = nextLayout;
         localStorage.setItem(LAYOUT_STORAGE_KEY, nextLayout);
-        document.querySelectorAll('.layout-toggle button').forEach(button => {
-          button.classList.remove('active');
-          button.setAttribute('aria-pressed', 'false');
-        });
-        const nextActive = nextLayout === btn.dataset.layout;
-        btn.classList.toggle('active', nextActive);
-        btn.setAttribute('aria-pressed', String(nextActive));
         gtag('event', 'filter_change', { filter_type: 'mode', filter_value: nextLayout });
         applyLayout(nextLayout);
+        syncControls();
+        syncUrlState();
         render(activeFilter, activeView, activeLanguage, activeFavorites);
       });
     });
@@ -1121,10 +1176,21 @@
     document.getElementById('fullscreen-exit').addEventListener('click', () => {
       activeLayout = 'default';
       localStorage.setItem(LAYOUT_STORAGE_KEY, activeLayout);
-      document.querySelectorAll('.layout-toggle button').forEach(button => {
-        button.classList.remove('active');
-        button.setAttribute('aria-pressed', 'false');
-      });
+      applyLayout(activeLayout);
+      syncControls();
+      syncUrlState();
+      render(activeFilter, activeView, activeLanguage, activeFavorites);
+    });
+
+    window.addEventListener('popstate', () => {
+      const nextUrl = new URL(window.location.href);
+      activeFilter = nextUrl.searchParams.get('filter') || 'all';
+      activeView = nextUrl.searchParams.get('view') || localStorage.getItem(STORAGE_KEY) || 'timeline';
+      activeLayout = nextUrl.searchParams.get('layout') || localStorage.getItem(LAYOUT_STORAGE_KEY) || 'full';
+      activeLanguage = nextUrl.searchParams.get('language') || localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'all';
+      activeFavorites = nextUrl.searchParams.get('favorites') || localStorage.getItem(FAVORITES_STORAGE_KEY) || 'all';
+      activeSearch = nextUrl.searchParams.get('q') || '';
+      syncControls();
       applyLayout(activeLayout);
       render(activeFilter, activeView, activeLanguage, activeFavorites);
     });
@@ -1150,11 +1216,12 @@
       }
 
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.language-toggle button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        activeLanguage = btn.dataset.language;
         localStorage.setItem(LANGUAGE_STORAGE_KEY, btn.dataset.language);
         gtag('event', 'filter_change', { filter_type: 'language', filter_value: btn.dataset.language });
-        render(activeFilter, activeView, btn.dataset.language, activeFavorites);
+        syncControls();
+        syncUrlState();
+        render(activeFilter, activeView, activeLanguage, activeFavorites);
       });
     });
 
@@ -1166,11 +1233,12 @@
       }
 
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.favorites-toggle button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+        activeFavorites = btn.dataset.favorites;
         localStorage.setItem(FAVORITES_STORAGE_KEY, btn.dataset.favorites);
         gtag('event', 'filter_change', { filter_type: 'focus', filter_value: btn.dataset.favorites });
-        render(activeFilter, activeView, activeLanguage, btn.dataset.favorites);
+        syncControls();
+        syncUrlState();
+        render(activeFilter, activeView, activeLanguage, activeFavorites);
       });
     });
 
@@ -1200,6 +1268,7 @@
     searchInput.addEventListener('input', () => {
       activeSearch = searchInput.value.trim();
       searchInput.classList.toggle('has-value', activeSearch.length > 0);
+      syncUrlState({ replace: true });
       render();
     });
 
@@ -1209,6 +1278,7 @@
         searchInput.value = '';
         searchInput.classList.remove('has-value');
         searchInput.blur();
+        syncUrlState({ replace: true });
         render();
       }
     });
@@ -1250,7 +1320,7 @@
       musicBtn.classList.remove('playing');
     });
 
-    renderHeaderStats();
+    syncControls();
     applyLayout(activeLayout);
     render(activeFilter, activeView, activeLanguage, activeFavorites);
   </script>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>anime</title>
+  <title>tv</title>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8XQHBWBCK"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -18,44 +18,35 @@
   <header>
     <div class="header-copy">
       <div class="header-main">
-        <h1>Anime I've Seen</h1>
+        <h1>TV I've Seen</h1>
         <div class="header-links">
           <a href="index.html" class="nav-link">Consume</a>
-          <a href="tv.html" class="nav-link">TV</a>
+          <a href="anime.html" class="nav-link">Anime</a>
           <a href="stats.html" class="nav-link">Stats</a>
-          <a href="https://myanimelist.net/animelist/gitcom?status=2" class="nav-link" target="_blank" rel="noreferrer noopener">MyAnimeList</a>
         </div>
       </div>
       <p id="count"></p>
     </div>
     <div class="toolbar">
       <div class="toolbar-section">
-        <div class="toolbar-label">Show</div>
-        <div class="filters" aria-label="Anime type filter">
-          <button class="active" data-filter="all">All</button>
-          <button data-filter="shows">Shows</button>
-          <button data-filter="other">Other</button>
-        </div>
-      </div>
-      <div class="toolbar-section">
         <div class="toolbar-label">Sort</div>
-        <div class="sort-toggle" aria-label="Anime sort mode">
-          <button class="active" data-sort="mal">MAL</button>
+        <div class="sort-toggle" aria-label="TV sort mode">
+          <button class="active" data-sort="source">Source</button>
           <button data-sort="recent">Newest</button>
         </div>
       </div>
       <div class="toolbar-section">
         <div class="toolbar-label">Search</div>
-        <input class="search-input" id="search-input" type="text" placeholder="Search..." aria-label="Search anime titles">
+        <input class="search-input" id="search-input" type="text" placeholder="Search..." aria-label="Search TV titles">
       </div>
     </div>
   </header>
 
   <div class="grid" id="grid"></div>
-  <div class="empty-state" id="empty-state" hidden>No anime matched that filter.</div>
+  <div class="empty-state" id="empty-state" hidden>No TV shows matched that search.</div>
 
-  <script src="anime_data.js"></script>
+  <script src="tv_data.js"></script>
   <script src="scripts/page-utils.js"></script>
-  <script src="scripts/anime-page.js"></script>
+  <script src="scripts/tv-page.js"></script>
 </body>
 </html>
