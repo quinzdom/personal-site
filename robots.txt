@@ -1,0 +1,2 @@
+User-agent: *
+Disallow: /daylog-k7m2.html
