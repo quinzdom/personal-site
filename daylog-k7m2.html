@@ -13,12 +13,39 @@
       padding: 8px 24px 48px;
     }
 
+    .log-entry + .log-entry {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(64, 76, 89, 0.42);
+    }
+
     .entry-date {
       color: #7f92a4;
       font-size: 0.72rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       margin-bottom: 14px;
+    }
+
+    .auto-note {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 10px;
+      margin: 0 0 14px;
+      color: #b6c2ce;
+    }
+
+    .auto-note-label {
+      color: #6d8091;
+      font-size: 0.5rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .auto-note-copy {
+      color: #cad4de;
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
     }
 
     .day-notes {
@@ -60,12 +87,9 @@
     </div>
   </header>
 
-  <main>
-    <p class="entry-date">April 3, 2026</p>
-    <ul class="day-notes">
-      <li>Read <em>Chainsaw Man</em> volumes 13-20 (roughly).</li>
-      <li>Went out drinking with K.</li>
-    </ul>
-  </main>
+  <main id="day-log"></main>
+
+  <script src="daylog_data.js"></script>
+  <script src="scripts/daylog-page.js"></script>
 </body>
 </html>

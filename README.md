@@ -23,8 +23,11 @@ Then open `http://localhost:8000`.
 - `tv_data.js`: generated TV data
 - `likes_data.js`: generated Letterboxd liked-movie set used by the favorites filter
 - `stats_data.js`: generated reading, watching, and wage stats shown in the header
+- `daylog-k7m2.html`: private daily log page
+- `daylog_data.js`: generated daily log data used by the private log page
 - `images/covers/`: local cover images
 - `data-source/`: raw source exports kept in the repo for reproducible rebuilds
+- `anki-addon/`: template for the local Anki exporter add-on used by the daylog sync
 - `scripts/`: maintenance scripts for imports, covers, and derived data
 
 ## Structure
@@ -54,6 +57,10 @@ Bookmeter is the only exception: those books were imported from the live Bookmet
 TV is currently sourced from:
 
 - `data-source/tv/shows.json`
+
+Daily log entries are currently sourced from:
+
+- `data-source/daylog/entries.json`
 
 Then generated into `tv_data.js` with:
 
@@ -103,4 +110,31 @@ node scripts/update-movie-dates-from-letterboxd-diary.mjs
 node scripts/build-liked-movie-data.mjs
 node scripts/build-consumption-stats.mjs
 node scripts/build-tv-data.mjs
+node scripts/build-daylog-data.mjs
 ```
+
+## Sync Anki into the daily log
+
+The Anki sync is split into two small pieces:
+
+- a local Anki add-on that exports today's review totals to `~/Library/Application Support/Tracking Site/anki-latest.json`
+- an hourly launch agent that reads that snapshot, updates the daylog files, and auto-commits/pushes only when the saved totals changed
+
+Run a one-off sync:
+
+```bash
+node scripts/sync-anki-progress.mjs
+```
+
+Install the background refresh agent:
+
+```bash
+node scripts/install-anki-sync-launch-agent.mjs
+```
+
+That installs:
+
+- `~/Library/LaunchAgents/com.yuta.tracking-site.anki-sync.plist`
+- `~/Library/Application Support/Anki2/addons21/tracking_site_sync/__init__.py`
+
+The launch agent runs hourly and on login, and it auto-commits/pushes the updated daylog files to `origin/main` only when the saved review totals changed. If Anki is already open when you install it, restart Anki once so the exporter add-on can start writing fresh snapshots.

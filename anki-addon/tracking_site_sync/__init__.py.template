@@ -1,0 +1,68 @@
+from __future__ import annotations
+
+import json
+import traceback
+from datetime import datetime, timedelta
+from pathlib import Path
+
+from aqt import gui_hooks, mw
+
+SNAPSHOT_PATH = Path(__SNAPSHOT_PATH__)
+
+
+def export_snapshot(*_args) -> None:
+    try:
+        if not mw or not getattr(mw, "col", None):
+            return
+
+        now = datetime.now().astimezone()
+        start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        end = start + timedelta(days=1)
+        start_ms = int(start.timestamp() * 1000)
+        end_ms = int(end.timestamp() * 1000)
+
+        row = mw.col.db.first(
+            """
+            select
+              count(*) as review_count,
+              count(distinct cid) as distinct_card_count,
+              coalesce(sum(time), 0) as total_millis
+            from revlog
+            where id >= ? and id < ?;
+            """,
+            start_ms,
+            end_ms,
+        )
+
+        if not row:
+            return
+
+        review_count = int(row[0] or 0)
+        distinct_cards = int(row[1] or 0)
+        total_millis = int(row[2] or 0)
+        minutes = max(1, round(total_millis / 60000)) if review_count > 0 else 0
+
+        payload = {
+            "date": start.date().isoformat(),
+            "anki": {
+                "reviewCount": review_count,
+                "distinctCards": distinct_cards,
+                "minutes": minutes,
+            },
+            "source": "anki-add-on",
+            "updatedAt": now.isoformat(),
+        }
+
+        SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
+        SNAPSHOT_PATH.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf8",
+        )
+    except Exception:
+        traceback.print_exc()
+
+
+gui_hooks.profile_did_open.append(export_snapshot)
+gui_hooks.profile_will_close.append(export_snapshot)
+gui_hooks.reviewer_did_answer_card.append(export_snapshot)
+gui_hooks.sync_did_finish.append(export_snapshot)
