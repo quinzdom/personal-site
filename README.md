@@ -137,4 +137,4 @@ That installs:
 - `~/Library/LaunchAgents/com.yuta.tracking-site.anki-sync.plist`
 - `~/Library/Application Support/Anki2/addons21/tracking_site_sync/__init__.py`
 
-The launch agent runs hourly and on login, and it auto-commits/pushes the updated daylog files to `origin/main` only when the saved review totals changed. If Anki is already open when you install it, restart Anki once so the exporter add-on can start writing fresh snapshots.
+The launch agent runs hourly and on login, and it auto-commits/pushes the updated daylog files to `origin/main` only when the saved review totals changed. The sync uses a `4 AM` rollover, so reviews done before `4:00 AM` count toward the previous day. If Anki is already open when you install it, restart Anki once so the exporter add-on can start writing fresh snapshots.

@@ -22,6 +22,19 @@ const logPath = resolve(logsDir, `${label}.log`);
 const snapshotPath = process.env.TRACKING_SITE_ANKI_SNAPSHOT_PATH || resolve(appSupportDir, 'anki-latest.json');
 const userId = execFileSync('id', ['-u'], { encoding: 'utf8' }).trim();
 const nodePath = execFileSync('which', ['node'], { encoding: 'utf8' }).trim();
+const ankiDayStartHour = 4;
+
+function formatLocalDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getLogicalAnkiDate(date) {
+  const shiftedTime = new Date(date.getTime() - ankiDayStartHour * 60 * 60 * 1000);
+  return formatLocalDate(shiftedTime);
+}
 
 function installAnkiExporterAddon() {
   const template = readFileSync(addonTemplatePath, 'utf8');
@@ -52,13 +65,13 @@ function seedSnapshotFromLog() {
       continue;
     }
 
-    const [, date, reviewCount, distinctCards, minutes] = match;
+    const [, , reviewCount, distinctCards, minutes] = match;
     mkdirSync(dirname(snapshotPath), { recursive: true });
     writeFileSync(
       snapshotPath,
       `${JSON.stringify(
         {
-          date,
+          date: getLogicalAnkiDate(new Date()),
           anki: {
             reviewCount: Number(reviewCount),
             distinctCards: Number(distinctCards),

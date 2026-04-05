@@ -17,6 +17,7 @@ const defaultSnapshotPath = resolve(
 const collectionPath = process.env.ANKI_COLLECTION_PATH || defaultCollectionPath;
 const snapshotPath = process.env.TRACKING_SITE_ANKI_SNAPSHOT_PATH || defaultSnapshotPath;
 const trackedPublishPaths = ['data-source/daylog/entries.json', 'daylog_data.js'];
+const ankiDayStartHour = 4;
 
 function formatLocalDate(date) {
   const year = date.getFullYear();
@@ -25,15 +26,16 @@ function formatLocalDate(date) {
   return `${year}-${month}-${day}`;
 }
 
-function shiftLocalDate(date, offsetDays) {
-  const shifted = new Date(date.getFullYear(), date.getMonth(), date.getDate() + offsetDays);
-  return formatLocalDate(shifted);
+function getLogicalAnkiDateWithOffset(date, offsetDays) {
+  const shiftedTime = new Date(date.getTime() - ankiDayStartHour * 60 * 60 * 1000);
+  shiftedTime.setDate(shiftedTime.getDate() + offsetDays);
+  return formatLocalDate(shiftedTime);
 }
 
 function getDayRange(dateString) {
   const [year, month, day] = dateString.split('-').map(Number);
-  const startMs = new Date(year, month - 1, day).getTime();
-  const endMs = new Date(year, month - 1, day + 1).getTime();
+  const startMs = new Date(year, month - 1, day, ankiDayStartHour).getTime();
+  const endMs = new Date(year, month - 1, day + 1, ankiDayStartHour).getTime();
   return { startMs, endMs };
 }
 
@@ -297,7 +299,7 @@ function publishChanges(targetDate) {
 
 const { targetDate: rawTargetDate, offsetDays, publish } = parseArgs(process.argv.slice(2));
 const now = new Date();
-const targetDate = rawTargetDate || shiftLocalDate(now, offsetDays);
+const targetDate = rawTargetDate || getLogicalAnkiDateWithOffset(now, offsetDays);
 const { startMs, endMs } = getDayRange(targetDate);
 const result = queryDailyAnkiStats(targetDate, startMs, endMs);
 
