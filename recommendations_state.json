@@ -2,14 +2,57 @@
   "usedBooks": [
     "rec-man-without-qualities",
     "rec-native-realm",
-    "rec-demons"
+    "rec-demons",
+    "rec-spring-snow",
+    "rec-unnamable",
+    "rec-autobiography-corpse"
   ],
   "usedMovies": [
     "rec-sansho",
     "rec-yi-yi",
-    "rec-taste-of-cherry"
+    "rec-taste-of-cherry",
+    "rec-satantango",
+    "rec-vengeance",
+    "rec-cleo"
   ],
   "archive": [
+    {
+      "date": "2026-04-05",
+      "books": [
+        {
+          "title": "Spring Snow",
+          "author": "Yukio Mishima",
+          "coverPath": "images/covers/rec-spring-snow.jpg"
+        },
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        },
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Satantango",
+          "author": "Béla Tarr, 1994",
+          "coverPath": "images/covers/rec-satantango.jpg"
+        },
+        {
+          "title": "Vengeance Is Mine",
+          "author": "Shohei Imamura, 1979",
+          "coverPath": null
+        },
+        {
+          "title": "Cleo from 5 to 7",
+          "author": "Agnès Varda, 1962",
+          "coverPath": "images/covers/rec-cleo.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-04-02",
       "books": [

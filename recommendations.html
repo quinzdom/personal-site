@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>recommendations</title>
-  <link rel="stylesheet" href="styles/page-chrome.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -12,6 +11,59 @@
       color: #99aabb;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       min-height: 100vh;
+    }
+    header {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 14px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #556677;
+      text-decoration: none;
+      font-size: 0.52rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .back-link:hover {
+      color: #99aabb;
+    }
+    .back-link svg {
+      width: 12px;
+      height: 12px;
+      stroke: currentColor;
+      transition: transform 0.2s;
+    }
+    .back-link:hover svg {
+      transform: translateX(-2px);
+    }
+    header h1 {
+      color: #fff;
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1;
+    }
+    .header-rule {
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #465462, transparent);
+    }
+    header p {
+      font-size: 0.55rem;
+      color: #5a6a7a;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      max-width: 50ch;
+      line-height: 1.6;
     }
     .section-label {
       max-width: 1200px;
@@ -176,6 +228,12 @@
       text-align: center;
     }
     @media (max-width: 600px) {
+      header {
+        padding: 24px 16px 18px;
+      }
+      header h1 {
+        font-size: 1.35rem;
+      }
       .recommendation-list {
         padding: 0 16px 8px;
       }
@@ -203,104 +261,97 @@
 </head>
 <body>
   <header>
-    <div class="header-copy">
-      <div class="header-main">
-        <h1>Recommendations</h1>
-      </div>
-      <div class="header-subline">
-        <p>AI-generated picks from your reading and viewing history</p>
-        <div class="header-links">
-          <a href="index.html" class="nav-link">Home</a>
-          <a href="stats.html" class="nav-link">Stats</a>
-          <span class="nav-link-current" aria-current="page">Recommendations</span>
-          <a href="reading-list.html" class="nav-link">Reading List</a>
-        </div>
-      </div>
-    </div>
+    <a href="index.html" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      Back to Consume
+    </a>
+    <h1>Recommendations</h1>
+    <div class="header-rule"></div>
+    <p>AI-generated picks from your reading and viewing history</p>
   </header>
 
   <div class="section-label">Books</div>
   <div class="recommendation-list">
-
+    
     <article class="rec-card">
-      <div class="item" title="The Man Without Qualities — Robert Musil">
-        <img src="images/covers/rec-man-without-qualities.jpg" alt="The Man Without Qualities" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">The Man Without Qualities</div>
+      <div class="item" title="Spring Snow — Yukio Mishima">
+        <img src="images/covers/rec-spring-snow.jpg" alt="Spring Snow" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Spring Snow</div>
       </div>
       <div class="rec-copy">
         <div class="rec-kicker">AI Recommendation</div>
-        <h2 class="rec-title">The Man Without Qualities</h2>
-        <div class="rec-author">Robert Musil</div>
+        <h2 class="rec-title">Spring Snow</h2>
+        <div class="rec-author">Yukio Mishima</div>
         <div class="rec-why-label">Why It Fits</div>
-        <p class="rec-why">If Proust and Dostoevsky had a third sibling. Set in the twilight of the Austro-Hungarian Empire, endlessly digressive and ironic.</p>
+        <p class="rec-why">The first volume of The Sea of Fertility tetralogy — Mishima's magnum opus. You've read four of his novels and 仮面の告白 is an all-time favourite. An aristocratic love story set in Taisho-era Japan.</p>
       </div>
     </article>
 
     <article class="rec-card">
-      <div class="item" title="Native Realm — Czesław Miłosz">
-        <img src="images/covers/rec-native-realm.jpg" alt="Native Realm" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Native Realm</div>
+      <div class="item" title="The Unnamable — Samuel Beckett">
+        <img src="images/covers/rec-unnamable.jpg" alt="The Unnamable" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">The Unnamable</div>
       </div>
       <div class="rec-copy">
         <div class="rec-kicker">AI Recommendation</div>
-        <h2 class="rec-title">Native Realm</h2>
-        <div class="rec-author">Czesław Miłosz</div>
+        <h2 class="rec-title">The Unnamable</h2>
+        <div class="rec-author">Samuel Beckett</div>
         <div class="rec-why-label">Why It Fits</div>
-        <p class="rec-why">Miłosz's memoir — the natural follow-up to The Captive Mind. A life lived across pre-war Vilnius, Nazi occupation, and Communist Poland.</p>
+        <p class="rec-why">You read Waiting for Godot. This is Beckett's prose trilogy pushed to its limit — pure voice, no character, no plot. The endgame of European nihilism.</p>
       </div>
     </article>
 
     <article class="rec-card">
-      <div class="item" title="Demons — Fyodor Dostoevsky">
-        <img src="images/covers/rec-demons.jpg" alt="Demons" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Demons</div>
+      <div class="item" title="Autobiography of a Corpse — Sigizmund Krzhizhanovsky">
+        <img src="images/covers/rec-autobiography-corpse.jpg" alt="Autobiography of a Corpse" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Autobiography of a Corpse</div>
       </div>
       <div class="rec-copy">
         <div class="rec-kicker">AI Recommendation</div>
-        <h2 class="rec-title">Demons</h2>
-        <div class="rec-author">Fyodor Dostoevsky</div>
+        <h2 class="rec-title">Autobiography of a Corpse</h2>
+        <div class="rec-author">Sigizmund Krzhizhanovsky</div>
         <div class="rec-why-label">Why It Fits</div>
-        <p class="rec-why">Dostoevsky's most politically prophetic novel — revolutionary nihilism in a provincial town. Pairs naturally with The Captive Mind, another favourite.</p>
+        <p class="rec-why">Soviet-era stories with the underground intensity of Dostoevsky filtered through absurdism. Short and very strange.</p>
       </div>
     </article>
   </div>
 
   <div class="section-label">Movies</div>
   <div class="recommendation-list">
-
+    
     <article class="rec-card">
-      <div class="item" title="Sansho the Bailiff — Kenji Mizoguchi, 1954">
-        <img src="images/covers/rec-sansho.jpg" alt="Sansho the Bailiff" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Sansho the Bailiff</div>
+      <div class="item" title="Satantango — Béla Tarr, 1994">
+        <img src="images/covers/rec-satantango.jpg" alt="Satantango" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Satantango</div>
       </div>
       <div class="rec-copy">
         <div class="rec-kicker">AI Recommendation</div>
-        <h2 class="rec-title">Sansho the Bailiff</h2>
-        <div class="rec-author">Kenji Mizoguchi, 1954</div>
+        <h2 class="rec-title">Satantango</h2>
+        <div class="rec-author">Béla Tarr, 1994</div>
         <div class="rec-why-label">Why It Fits</div>
-        <p class="rec-why">You've watched Ugetsu and Woman in the Dunes. Sansho is Mizoguchi's peak — a medieval family torn apart by feudal cruelty. One of the most devastating films ever made.</p>
+        <p class="rec-why">An Elephant Sitting Still was made under Tarr's direct influence. This is the source — seven hours of Hungarian rural despair, rain, and long takes.</p>
       </div>
     </article>
 
     <article class="rec-card">
-      <div class="item" title="Yi Yi — Edward Yang, 2000">
-        <img src="images/covers/rec-yi-yi.jpg" alt="Yi Yi" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Yi Yi</div>
+      <div class="item" title="Vengeance Is Mine — Shohei Imamura, 1979">
+        <div class="no-cover">Vengeance Is Mine</div>
       </div>
       <div class="rec-copy">
         <div class="rec-kicker">AI Recommendation</div>
-        <h2 class="rec-title">Yi Yi</h2>
-        <div class="rec-author">Edward Yang, 2000</div>
+        <h2 class="rec-title">Vengeance Is Mine</h2>
+        <div class="rec-author">Shohei Imamura, 1979</div>
         <div class="rec-why-label">Why It Fits</div>
-        <p class="rec-why">The Taiwanese equivalent of Kore-eda's family films you love. A three-hour portrait of a Taipei family. Often called one of the greatest films ever made.</p>
+        <p class="rec-why">Given Love Exposure (5 stars) and your appetite for dark Japanese cinema that goes somewhere real. A serial killer case reconstructed coldly.</p>
       </div>
     </article>
 
     <article class="rec-card">
-      <div class="item" title="Taste of Cherry — Abbas Kiarostami, 1997">
-        <img src="images/covers/rec-taste-of-cherry.jpg" alt="Taste of Cherry" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Taste of Cherry</div>
+      <div class="item" title="Cleo from 5 to 7 — Agnès Varda, 1962">
+        <img src="images/covers/rec-cleo.jpg" alt="Cleo from 5 to 7" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Cleo from 5 to 7</div>
       </div>
       <div class="rec-copy">
         <div class="rec-kicker">AI Recommendation</div>
-        <h2 class="rec-title">Taste of Cherry</h2>
-        <div class="rec-author">Abbas Kiarostami, 1997</div>
+        <h2 class="rec-title">Cleo from 5 to 7</h2>
+        <div class="rec-author">Agnès Varda, 1962</div>
         <div class="rec-why-label">Why It Fits</div>
-        <p class="rec-why">You watched Close-Up. This is Kiarostami's Palme d'Or winner — a man drives through the hills outside Tehran looking for someone to bury him.</p>
+        <p class="rec-why">A French singer wanders Paris for two hours waiting for a cancer diagnosis. Real time, real streets. Varda at her most alive.</p>
       </div>
     </article>
   </div>
@@ -311,28 +362,28 @@
     <div class="archive-week">
       <div class="archive-date">2026-04-02</div>
       <div class="archive-covers">
-      <div class="archive-item" title="The Man Without Qualities — Robert Musil">
-        <img src="images/covers/rec-man-without-qualities.jpg" alt="The Man Without Qualities" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">The Man Without Qualities</div>
+      <div class="archive-item" title="Autobiography of a Corpse — Sigizmund Krzhizhanovsky">
+        <img src="images/covers/rec-autobiography-corpse.jpg" alt="Autobiography of a Corpse" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Autobiography of a Corpse</div>
       </div>
 
-      <div class="archive-item" title="Native Realm — Czesław Miłosz">
-        <img src="images/covers/rec-native-realm.jpg" alt="Native Realm" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Native Realm</div>
+      <div class="archive-item" title="The Unnamable — Samuel Beckett">
+        <img src="images/covers/rec-unnamable.jpg" alt="The Unnamable" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">The Unnamable</div>
       </div>
 
-      <div class="archive-item" title="Demons — Fyodor Dostoevsky">
-        <img src="images/covers/rec-demons.jpg" alt="Demons" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Demons</div>
+      <div class="archive-item" title="Against Nature — Joris-Karl Huysmans">
+        <img src="images/covers/rec-against-nature.jpg" alt="Against Nature" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Against Nature</div>
       </div>
 
-      <div class="archive-item" title="Sansho the Bailiff — Kenji Mizoguchi, 1954">
-        <img src="images/covers/rec-sansho.jpg" alt="Sansho the Bailiff" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Sansho the Bailiff</div>
+      <div class="archive-item" title="Satantango — Béla Tarr, 1994">
+        <img src="images/covers/rec-satantango.jpg" alt="Satantango" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Satantango</div>
       </div>
 
-      <div class="archive-item" title="Yi Yi — Edward Yang, 2000">
-        <img src="images/covers/rec-yi-yi.jpg" alt="Yi Yi" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Yi Yi</div>
+      <div class="archive-item" title="Cleo from 5 to 7 — Agnès Varda, 1962">
+        <img src="images/covers/rec-cleo.jpg" alt="Cleo from 5 to 7" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Cleo from 5 to 7</div>
       </div>
 
-      <div class="archive-item" title="Taste of Cherry — Abbas Kiarostami, 1997">
-        <img src="images/covers/rec-taste-of-cherry.jpg" alt="Taste of Cherry" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Taste of Cherry</div>
+      <div class="archive-item" title="Céline and Julie Go Boating — Jacques Rivette, 1974">
+        <img src="images/covers/rec-celine-julie.jpg" alt="Céline and Julie Go Boating" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="no-cover" style="display:none">Céline and Julie Go Boating</div>
       </div></div>
     </div>
   </div>
