@@ -13,8 +13,8 @@ const dayLogEntries = [
       {
         "text": "<em>火花</em>を少し読んだ。",
         "estimate": {
-          "pages": 30,
-          "minutes": 36
+          "pages": 77,
+          "minutes": 132
         }
       },
       {
