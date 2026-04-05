@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>day log</title>
+  <title>日次ログ</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
   <link rel="stylesheet" href="styles/page-chrome.css">
   <style>
@@ -22,8 +22,7 @@
     .entry-date {
       color: #7f92a4;
       font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+      letter-spacing: 0.08em;
       margin-bottom: 14px;
     }
 
@@ -37,13 +36,23 @@
 
     .auto-note-label {
       color: #6d8091;
-      font-size: 0.5rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
+      font-size: 0.58rem;
+      letter-spacing: 0.08em;
     }
 
     .auto-note-copy {
       color: #cad4de;
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
+    }
+
+    .note-text {
+      display: block;
+    }
+
+    .note-estimate {
+      margin-top: 6px;
+      color: #8ea0b1;
       font-size: 0.78rem;
       letter-spacing: 0.02em;
     }
@@ -72,6 +81,10 @@
       .day-notes li {
         font-size: 0.94rem;
       }
+
+      .note-estimate {
+        font-size: 0.74rem;
+      }
     }
   </style>
 </head>
@@ -79,17 +92,17 @@
   <header>
     <div class="header-copy">
       <div class="header-main">
-        <h1>day log</h1>
+        <h1>日次ログ</h1>
       </div>
       <div class="header-subline">
-        <p>private notes</p>
+        <p>個人メモ</p>
       </div>
     </div>
   </header>
 
   <main id="day-log"></main>
 
-  <script src="daylog_data.js"></script>
-  <script src="scripts/daylog-page.js"></script>
+  <script src="daylog_data.js?v=20260406e"></script>
+  <script src="scripts/daylog-page.js?v=20260406e"></script>
 </body>
 </html>

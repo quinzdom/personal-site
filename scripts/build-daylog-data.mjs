@@ -6,10 +6,47 @@ const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const sourcePath = resolve(rootDir, 'data-source/daylog/entries.json');
 const outputPath = resolve(rootDir, 'daylog_data.js');
 
+function normalizeEstimate(estimate) {
+  if (!estimate || typeof estimate !== 'object') {
+    return null;
+  }
+
+  const pages = Number(estimate.pages || 0);
+  const minutes = Number(estimate.minutes || 0);
+  if (pages <= 0 || minutes <= 0) {
+    return null;
+  }
+
+  return { pages, minutes };
+}
+
+function normalizeNote(note) {
+  if (typeof note === 'string') {
+    return {
+      text: note,
+      estimate: null,
+    };
+  }
+
+  if (!note || typeof note !== 'object') {
+    return null;
+  }
+
+  const text = String(note.text || '').trim();
+  if (!text) {
+    return null;
+  }
+
+  return {
+    text,
+    estimate: normalizeEstimate(note.estimate),
+  };
+}
+
 function normalizeEntry(entry) {
   return {
     date: String(entry.date || ''),
-    notes: Array.isArray(entry.notes) ? entry.notes.map((note) => String(note)) : [],
+    notes: Array.isArray(entry.notes) ? entry.notes.map(normalizeNote).filter(Boolean) : [],
     anki: entry.anki && typeof entry.anki === 'object'
       ? {
           reviewCount: Number(entry.anki.reviewCount || 0),

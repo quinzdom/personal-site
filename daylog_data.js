@@ -3,10 +3,32 @@ const dayLogEntries = [
   {
     "date": "2026-04-05",
     "notes": [
-      "Woke up around noon.",
-      "Finished reading <em>Chainsaw Man</em> in the yard.",
-      "Read some <em>Hibana</em>.",
-      "Had not done kanji for two days, so caught up on it."
+      {
+        "text": "庭で<em>チェンソーマン</em>を読み終えた。",
+        "estimate": {
+          "pages": 570,
+          "minutes": 90
+        }
+      },
+      {
+        "text": "<em>火花</em>を少し読んだ。",
+        "estimate": {
+          "pages": 30,
+          "minutes": 36
+        }
+      },
+      {
+        "text": "昼頃に起きた。",
+        "estimate": null
+      },
+      {
+        "text": "気分はかなり低く、スティムを使った。",
+        "estimate": null
+      },
+      {
+        "text": "2日間漢字をやっていなかったので、追いつくためにやった。",
+        "estimate": null
+      }
     ],
     "anki": {
       "reviewCount": 133,
@@ -17,8 +39,17 @@ const dayLogEntries = [
   {
     "date": "2026-04-04",
     "notes": [
-      "Read <em>Chainsaw Man</em> volumes 13-20 (roughly).",
-      "Went out drinking with K."
+      {
+        "text": "<em>チェンソーマン</em>の13巻から20巻くらいまで読んだ。",
+        "estimate": {
+          "pages": 1520,
+          "minutes": 240
+        }
+      },
+      {
+        "text": "Kと飲みに行った。",
+        "estimate": null
+      }
     ],
     "anki": null
   }
