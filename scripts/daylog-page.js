@@ -1,4 +1,9 @@
 const dayLogContainer = document.getElementById('day-log');
+const composerForm = document.getElementById('daylog-input-form');
+const composerInput = document.getElementById('daylog-input');
+const composerSubmit = document.getElementById('daylog-submit');
+const composerStatus = document.getElementById('daylog-input-status');
+const composerModel = document.getElementById('daylog-model');
 
 const dayLogDateFormatter = new Intl.DateTimeFormat('ja-JP', {
   month: 'numeric',
@@ -7,6 +12,8 @@ const dayLogDateFormatter = new Intl.DateTimeFormat('ja-JP', {
   timeZone: 'UTC',
 });
 const pageNumberFormatter = new Intl.NumberFormat('ja-JP');
+let currentEntries = Array.isArray(dayLogEntries) ? dayLogEntries : [];
+let composerEnabled = false;
 
 function formatDayLogDate(dateString) {
   return dayLogDateFormatter
@@ -82,6 +89,106 @@ function renderEntry(entry) {
   `;
 }
 
-dayLogContainer.innerHTML = (Array.isArray(dayLogEntries) ? dayLogEntries : [])
-  .map(renderEntry)
-  .join('');
+function renderDayLog(entries) {
+  dayLogContainer.innerHTML = (Array.isArray(entries) ? entries : [])
+    .map(renderEntry)
+    .join('');
+}
+
+function setComposerState(message, state = 'idle') {
+  composerStatus.textContent = message || '';
+  if (message) {
+    composerStatus.dataset.state = state;
+    return;
+  }
+
+  delete composerStatus.dataset.state;
+}
+
+function setComposerAvailability(enabled, statusText = '') {
+  composerEnabled = enabled;
+  composerInput.disabled = !enabled;
+  composerSubmit.disabled = !enabled;
+  if (statusText) {
+    setComposerState(statusText, enabled ? 'idle' : 'error');
+  }
+}
+
+async function loadComposerStatus() {
+  try {
+    const response = await fetch('/api/daylog/status', {
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) {
+      throw new Error('AI入力はこのサーバーでは使えません。');
+    }
+
+    const payload = await response.json();
+    if (payload.model) {
+      composerModel.textContent = payload.model.toUpperCase();
+    }
+
+    if (!payload.enabled) {
+      setComposerAvailability(false, 'OPENAI_API_KEY を設定したローカルサーバーで使えます。');
+      return;
+    }
+
+    setComposerAvailability(true, 'そのまま書けば反映されます。');
+  } catch (error) {
+    setComposerAvailability(false, 'AI入力はローカルの Node サーバーでのみ使えます。');
+  }
+}
+
+async function handleComposerSubmit(event) {
+  event.preventDefault();
+
+  if (!composerEnabled) {
+    return;
+  }
+
+  const inputText = composerInput.value.trim();
+  if (!inputText) {
+    setComposerState('何か書いてから送ってください。', 'error');
+    return;
+  }
+
+  composerInput.disabled = true;
+  composerSubmit.disabled = true;
+  setComposerState('整えています…', 'idle');
+
+  try {
+    const response = await fetch('/api/daylog/submit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        inputText,
+      }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.error || '更新できませんでした。');
+    }
+
+    currentEntries = Array.isArray(payload.entries) ? payload.entries : currentEntries;
+    renderDayLog(currentEntries);
+    composerInput.value = '';
+    setComposerState('更新しました。', 'success');
+  } catch (error) {
+    setComposerState(error instanceof Error ? error.message : '更新できませんでした。', 'error');
+  } finally {
+    composerInput.disabled = !composerEnabled;
+    composerSubmit.disabled = !composerEnabled;
+  }
+}
+
+renderDayLog(currentEntries);
+
+if (composerForm) {
+  composerForm.addEventListener('submit', handleComposerSubmit);
+  loadComposerStatus();
+}

@@ -12,6 +12,14 @@ python3 -m http.server 8000
 
 Then open `http://localhost:8000`.
 
+If you want the daily log input box to use GPT-5.4 and update the page locally, use the Node server instead:
+
+```bash
+OPENAI_API_KEY=your_key_here node scripts/local-server.mjs
+```
+
+That serves the whole site on `http://localhost:8000` and enables the AI-powered form on [`daylog-k7m2.html`](daylog-k7m2.html). GitHub Pages stays static, so the GPT-backed form only works when you run the local server with an API key.
+
 ## Files
 
 - `index.html`: UI and client-side rendering
