@@ -4,9 +4,9 @@ const dayLogEntries = [
     "date": "2026-04-10",
     "notes": [],
     "anki": {
-      "reviewCount": 207,
-      "distinctCards": 177,
-      "minutes": 71
+      "reviewCount": 311,
+      "distinctCards": 237,
+      "minutes": 108
     }
   },
   {
