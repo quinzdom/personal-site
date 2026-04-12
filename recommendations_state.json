@@ -1,21 +1,44 @@
 {
-  "usedBooks": [
-    "rec-man-without-qualities",
-    "rec-native-realm",
-    "rec-demons",
-    "rec-spring-snow",
-    "rec-unnamable",
-    "rec-autobiography-corpse"
-  ],
-  "usedMovies": [
-    "rec-sansho",
-    "rec-yi-yi",
-    "rec-taste-of-cherry",
-    "rec-satantango",
-    "rec-vengeance",
-    "rec-cleo"
-  ],
+  "usedBooks": [],
+  "usedMovies": [],
   "archive": [
+    {
+      "date": "2026-04-12",
+      "books": [
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        },
+        {
+          "title": "The Rings of Saturn",
+          "author": "W.G. Sebald",
+          "coverPath": "images/covers/rec-rings-of-saturn.jpg"
+        },
+        {
+          "title": "Native Realm",
+          "author": "Czesław Miłosz",
+          "coverPath": "images/covers/rec-native-realm.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "The Conformist",
+          "author": "Bernardo Bertolucci, 1970",
+          "coverPath": "images/covers/rec-conformist.jpg"
+        },
+        {
+          "title": "Syndromes and a Century",
+          "author": "Apichatpong Weerasethakul, 2006",
+          "coverPath": "images/covers/rec-syndromes.jpg"
+        },
+        {
+          "title": "Céline and Julie Go Boating",
+          "author": "Jacques Rivette, 1974",
+          "coverPath": "images/covers/rec-celine-julie.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-04-05",
       "books": [
