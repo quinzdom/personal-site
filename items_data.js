@@ -1104,5 +1104,6 @@ const items = [
 {title:"また、同じ夢を見ていた",author:"住野 よる",type:"book",date_read:"",rating:0,cover:"images/covers/bm-12924793.jpg",id:"bm-12924793",ya:false},
 {title:"学歴狂の詩",author:"佐川 恭一",type:"book",date_read:"2026-04-02",rating:0,cover:"images/covers/bm-22523091.jpg",id:"bm-22523091",ya:false},
 {title:"火花",author:"又吉 直樹",type:"book",date_read:"2026-04-06",rating:0,cover:"images/covers/bm-9337453.jpg",id:"bm-9337453",ya:false},
-{title:"サラバ! (下)",author:"西 加奈子",type:"book",date_read:"2026-04-08",rating:0,cover:"images/covers/bm-8317700.jpg",id:"bm-8317700",ya:false}
+{title:"サラバ! (下)",author:"西 加奈子",type:"book",date_read:"2026-04-08",rating:0,cover:"images/covers/bm-8317700.jpg",id:"bm-8317700",ya:false},
+{title:"漢字が日本語になるまで ――音読み・訓読みはなぜ生まれたのか?",author:"円満字 二郎",type:"book",date_read:"2026-04-18",rating:0,cover:"images/covers/bm-19848539.jpg",id:"bm-19848539",ya:false}
 ];
