@@ -1,7 +1,52 @@
 {
-  "usedBooks": [],
-  "usedMovies": [],
+  "usedBooks": [
+    "rec-man-without-qualities",
+    "rec-rings-of-saturn",
+    "rec-spring-snow"
+  ],
+  "usedMovies": [
+    "rec-conformist",
+    "rec-sansho",
+    "rec-celine-julie"
+  ],
   "archive": [
+    {
+      "date": "2026-04-19",
+      "books": [
+        {
+          "title": "The Man Without Qualities",
+          "author": "Robert Musil",
+          "coverPath": "images/covers/rec-man-without-qualities.jpg"
+        },
+        {
+          "title": "The Rings of Saturn",
+          "author": "W.G. Sebald",
+          "coverPath": "images/covers/rec-rings-of-saturn.jpg"
+        },
+        {
+          "title": "Spring Snow",
+          "author": "Yukio Mishima",
+          "coverPath": "images/covers/rec-spring-snow.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "The Conformist",
+          "author": "Bernardo Bertolucci, 1970",
+          "coverPath": "images/covers/rec-conformist.jpg"
+        },
+        {
+          "title": "Sansho the Bailiff",
+          "author": "Kenji Mizoguchi, 1954",
+          "coverPath": "images/covers/rec-sansho.jpg"
+        },
+        {
+          "title": "Céline and Julie Go Boating",
+          "author": "Jacques Rivette, 1974",
+          "coverPath": "images/covers/rec-celine-julie.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-04-12",
       "books": [
