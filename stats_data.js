@@ -1,28 +1,28 @@
 const stats = {
-  "readingHours": 2207,
+  "readingHours": 2225,
   "mangaHours": 63,
-  "movieHours": 1517,
-  "watchingHours": 1517,
+  "movieHours": 1518,
+  "watchingHours": 1518,
   "animeHours": 369,
-  "totalHours": 3787,
-  "screenHours": 2082,
-  "allMediaHours": 4352,
-  "readingDays": 92,
+  "totalHours": 3806,
+  "screenHours": 2083,
+  "allMediaHours": 4371,
+  "readingDays": 92.7,
   "mangaDays": 2.6,
-  "movieDays": 63.2,
-  "watchingDays": 63.2,
+  "movieDays": 63.3,
+  "watchingDays": 63.3,
   "animeDays": 15.4,
   "tvHours": 196,
   "tvDays": 8.2,
-  "totalDays": 157.8,
+  "totalDays": 158.6,
   "screenDays": 86.8,
-  "allMediaDays": 181.3,
+  "allMediaDays": 182.1,
   "minimumWageHourly": 16.9,
   "averageWageHourly": 37.32,
-  "minimumWageValue": 64000,
-  "averageWageValue": 141331,
-  "allMediaMinimumWageValue": 73549,
-  "allMediaAverageWageValue": 162417,
+  "minimumWageValue": 64321,
+  "averageWageValue": 142040,
+  "allMediaMinimumWageValue": 73870,
+  "allMediaAverageWageValue": 163126,
   "yearlyComparison": [
     {
       "year": 2006,
@@ -116,38 +116,40 @@ const stats = {
     },
     {
       "year": 2026,
-      "readingHours": 45.8,
-      "movieHours": 22.5
+      "readingHours": 63.9,
+      "movieHours": 24.3
     }
   ],
   "readingHoursEstimated": true,
   "mangaHoursEstimated": true,
   "animeHoursEstimated": false,
   "readingPagesPerHour": 50,
+  "mangaMinutesPerVolume": 20,
+  "mangaChaptersPerVolumeEstimate": 10,
   "wageSources": {
     "minimumWage": "California statewide minimum wage, effective 2026-01-01 (DIR)",
     "averageWage": "U.S. average hourly earnings, total private, Feb. 2026 (BLS)",
     "averageWagePublished": "2026-03-06"
   },
   "sourceCoverage": {
-    "booksMatched": 337,
-    "booksTotal": 341,
+    "booksMatched": 341,
+    "booksTotal": 345,
     "mangaMatched": 9,
     "mangaTotal": 9,
-    "moviesMatched": 763,
-    "moviesTotal": 763,
+    "moviesMatched": 764,
+    "moviesTotal": 764,
     "animeMatched": 40,
     "animeTotal": 40,
     "tvMatched": 5,
     "tvTotal": 5
   },
   "libraryCounts": {
-    "books": 341,
+    "books": 345,
     "manga": 9,
-    "movies": 763,
+    "movies": 764,
     "anime": 31,
     "tv": 5,
-    "total": 1149
+    "total": 1154
   },
   "manga": {
     "titles": 9,
@@ -280,7 +282,5 @@ const stats = {
     "episodes": 240,
     "hours": 196,
     "days": 8.2
-  },
-  "mangaMinutesPerVolume": 20,
-  "mangaChaptersPerVolumeEstimate": 10
+  }
 };

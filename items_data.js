@@ -289,6 +289,7 @@ const items = [
 {title:"Slaughterhouse-Five",author:"Kurt Vonnegut Jr.",type:"book",date_read:"2012-09-16",rating:3,cover:"images/covers/gr-4981.jpg",id:"gr-4981",ya:false},
 {title:"Of Mice and Men",author:"John Steinbeck",type:"book",date_read:"2011-03-11",rating:4,cover:"images/covers/gr-890.jpg",id:"gr-890",ya:false},
 {title:"The Adventures of Huckleberry Finn",author:"Mark Twain",type:"book",date_read:"2011-03-21",rating:3,cover:"images/covers/gr-2956.jpg",id:"gr-2956",ya:false},
+{title:"Maborosi",author:"1995",type:"movie",date_read:"2026-04-20",rating:0,cover:"images/covers/lb-https-boxd.it-1G9U.jpg",id:"lb-https://boxd.it/1G9U",ya:false},
 {title:"The Last Samurai",author:"2003",type:"movie",date_read:"2026-03-11",rating:0,cover:"images/covers/lb-https-boxd.it-29ZA.jpg",id:"lb-https://boxd.it/29ZA",ya:false},
 {title:"Onibaba",author:"1964",type:"movie",date_read:"2026-03-10",rating:0,cover:"images/covers/lb-https-boxd.it-252a.jpg",id:"lb-https://boxd.it/252a",ya:false},
 {title:"The Worst Person in the World",author:"2021",type:"movie",date_read:"2026-02-20",rating:0,cover:"images/covers/lb-https-boxd.it-oyws.jpg",id:"lb-https://boxd.it/oyws",ya:false},
@@ -1105,5 +1106,6 @@ const items = [
 {title:"学歴狂の詩",author:"佐川 恭一",type:"book",date_read:"2026-04-02",rating:0,cover:"images/covers/bm-22523091.jpg",id:"bm-22523091",ya:false},
 {title:"火花",author:"又吉 直樹",type:"book",date_read:"2026-04-06",rating:0,cover:"images/covers/bm-9337453.jpg",id:"bm-9337453",ya:false},
 {title:"サラバ! (下)",author:"西 加奈子",type:"book",date_read:"2026-04-08",rating:0,cover:"images/covers/bm-8317700.jpg",id:"bm-8317700",ya:false},
-{title:"漢字が日本語になるまで ――音読み・訓読みはなぜ生まれたのか?",author:"円満字 二郎",type:"book",date_read:"2026-04-18",rating:0,cover:"images/covers/bm-19848539.jpg",id:"bm-19848539",ya:false}
+{title:"漢字が日本語になるまで ――音読み・訓読みはなぜ生まれたのか?",author:"円満字 二郎",type:"book",date_read:"2026-04-18",rating:0,cover:"images/covers/bm-19848539.jpg",id:"bm-19848539",ya:false},
+{title:"とらドラ!1",author:"竹宮 ゆゆこ",type:"book",date_read:"2026-04-22",rating:0,cover:"images/covers/bm-575187.jpg",id:"bm-575187",ya:false}
 ];

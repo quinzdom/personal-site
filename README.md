@@ -109,6 +109,7 @@ The site currently uses redistributed Goodreads dates for display, so if you wan
 ## Update Letterboxd movie dates
 
 ```bash
+node scripts/import-letterboxd-rss.mjs
 node scripts/update-movie-dates-from-letterboxd-diary.mjs
 ```
 
