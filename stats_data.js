@@ -1,28 +1,28 @@
 const stats = {
-  "readingHours": 2225,
+  "readingHours": 2231,
   "mangaHours": 63,
   "movieHours": 1518,
   "watchingHours": 1518,
   "animeHours": 369,
-  "totalHours": 3806,
+  "totalHours": 3812,
   "screenHours": 2083,
-  "allMediaHours": 4371,
-  "readingDays": 92.7,
+  "allMediaHours": 4377,
+  "readingDays": 93,
   "mangaDays": 2.6,
   "movieDays": 63.3,
   "watchingDays": 63.3,
   "animeDays": 15.4,
   "tvHours": 196,
   "tvDays": 8.2,
-  "totalDays": 158.6,
+  "totalDays": 158.8,
   "screenDays": 86.8,
-  "allMediaDays": 182.1,
+  "allMediaDays": 182.4,
   "minimumWageHourly": 16.9,
   "averageWageHourly": 37.32,
-  "minimumWageValue": 64321,
-  "averageWageValue": 142040,
-  "allMediaMinimumWageValue": 73870,
-  "allMediaAverageWageValue": 163126,
+  "minimumWageValue": 64423,
+  "averageWageValue": 142264,
+  "allMediaMinimumWageValue": 73971,
+  "allMediaAverageWageValue": 163350,
   "yearlyComparison": [
     {
       "year": 2006,
@@ -116,7 +116,7 @@ const stats = {
     },
     {
       "year": 2026,
-      "readingHours": 63.9,
+      "readingHours": 69.2,
       "movieHours": 24.3
     }
   ],
@@ -132,8 +132,8 @@ const stats = {
     "averageWagePublished": "2026-03-06"
   },
   "sourceCoverage": {
-    "booksMatched": 341,
-    "booksTotal": 345,
+    "booksMatched": 342,
+    "booksTotal": 346,
     "mangaMatched": 9,
     "mangaTotal": 9,
     "moviesMatched": 764,
@@ -144,12 +144,12 @@ const stats = {
     "tvTotal": 5
   },
   "libraryCounts": {
-    "books": 345,
+    "books": 346,
     "manga": 9,
     "movies": 764,
     "anime": 31,
     "tv": 5,
-    "total": 1154
+    "total": 1155
   },
   "manga": {
     "titles": 9,

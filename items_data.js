@@ -1107,5 +1107,6 @@ const items = [
 {title:"火花",author:"又吉 直樹",type:"book",date_read:"2026-04-06",rating:0,cover:"images/covers/bm-9337453.jpg",id:"bm-9337453",ya:false},
 {title:"サラバ! (下)",author:"西 加奈子",type:"book",date_read:"2026-04-08",rating:0,cover:"images/covers/bm-8317700.jpg",id:"bm-8317700",ya:false},
 {title:"漢字が日本語になるまで ――音読み・訓読みはなぜ生まれたのか?",author:"円満字 二郎",type:"book",date_read:"2026-04-18",rating:0,cover:"images/covers/bm-19848539.jpg",id:"bm-19848539",ya:false},
-{title:"とらドラ!1",author:"竹宮 ゆゆこ",type:"book",date_read:"2026-04-22",rating:0,cover:"images/covers/bm-575187.jpg",id:"bm-575187",ya:false}
+{title:"とらドラ!1",author:"竹宮 ゆゆこ",type:"book",date_read:"2026-04-22",rating:0,cover:"images/covers/bm-575187.jpg",id:"bm-575187",ya:false},
+{title:"「松本」の「遺書」",author:"松本 人志",type:"book",date_read:"2026-04-26",rating:0,cover:"images/covers/bm-580261.jpg",id:"bm-580261",ya:false}
 ];
