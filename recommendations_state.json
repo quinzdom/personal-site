@@ -2,14 +2,57 @@
   "usedBooks": [
     "rec-man-without-qualities",
     "rec-rings-of-saturn",
-    "rec-spring-snow"
+    "rec-spring-snow",
+    "rec-unnamable",
+    "rec-autobiography-corpse",
+    "rec-native-realm"
   ],
   "usedMovies": [
     "rec-conformist",
     "rec-sansho",
-    "rec-celine-julie"
+    "rec-celine-julie",
+    "rec-vengeance",
+    "rec-taste-of-cherry",
+    "rec-syndromes"
   ],
   "archive": [
+    {
+      "date": "2026-04-26",
+      "books": [
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        },
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        },
+        {
+          "title": "Native Realm",
+          "author": "Czesław Miłosz",
+          "coverPath": "images/covers/rec-native-realm.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Vengeance Is Mine",
+          "author": "Shohei Imamura, 1979",
+          "coverPath": null
+        },
+        {
+          "title": "Taste of Cherry",
+          "author": "Abbas Kiarostami, 1997",
+          "coverPath": "images/covers/rec-taste-of-cherry.jpg"
+        },
+        {
+          "title": "Syndromes and a Century",
+          "author": "Apichatpong Weerasethakul, 2006",
+          "coverPath": "images/covers/rec-syndromes.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-04-19",
       "books": [
