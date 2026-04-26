@@ -97,6 +97,19 @@ Then in GitHub:
 
 Every push to `main` will redeploy the site.
 
+## Fast Bookmeter publish
+
+For the default "update from Bookmeter and publish" workflow, prioritize getting the main site deployed quickly:
+
+```bash
+node scripts/update-bookmeter-fast.mjs
+git add items_data.js index.html index-grouped-by-month.html images/covers/
+git commit -m "Update Bookmeter reading data"
+git push origin main
+```
+
+This fast path intentionally does not run `node scripts/build-consumption-stats.mjs`, rebuild `stats_data.js`, update `stats.html`, or rebuild `display_metadata.js`. Only refresh stats/metadata when explicitly requested.
+
 ## Update Goodreads book dates
 
 ```bash
