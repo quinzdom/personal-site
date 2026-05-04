@@ -1109,5 +1109,6 @@ const items = [
 {title:"漢字が日本語になるまで ――音読み・訓読みはなぜ生まれたのか?",author:"円満字 二郎",type:"book",date_read:"2026-04-18",rating:0,cover:"images/covers/bm-19848539.jpg",id:"bm-19848539",ya:false},
 {title:"とらドラ!1",author:"竹宮 ゆゆこ",type:"book",date_read:"2026-04-22",rating:0,cover:"images/covers/bm-575187.jpg",id:"bm-575187",ya:false},
 {title:"「松本」の「遺書」",author:"松本 人志",type:"book",date_read:"2026-04-26",rating:0,cover:"images/covers/bm-580261.jpg",id:"bm-580261",ya:false},
-{title:"「弱くても勝てます」: 開成高校野球部のセオリー",author:"高橋 秀実",type:"book",date_read:"2026-04-28",rating:0,cover:"images/covers/bm-7962707.jpg",id:"bm-7962707",ya:false}
+{title:"「弱くても勝てます」: 開成高校野球部のセオリー",author:"高橋 秀実",type:"book",date_read:"2026-04-28",rating:0,cover:"images/covers/bm-7962707.jpg",id:"bm-7962707",ya:false},
+{title:"午後の曳航",author:"三島 由紀夫",type:"book",date_read:"2026-05-03",rating:0,cover:"images/covers/bm-496873.jpg",id:"bm-496873",ya:false}
 ];
