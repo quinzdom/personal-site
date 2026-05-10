@@ -7,8 +7,49 @@
     "rec-autobiography-corpse",
     "rec-native-realm"
   ],
-  "usedMovies": [],
+  "usedMovies": [
+    "rec-conformist",
+    "rec-vengeance",
+    "rec-celine-julie"
+  ],
   "archive": [
+    {
+      "date": "2026-05-10",
+      "books": [
+        {
+          "title": "The Man Without Qualities",
+          "author": "Robert Musil",
+          "coverPath": "images/covers/rec-man-without-qualities.jpg"
+        },
+        {
+          "title": "Spring Snow",
+          "author": "Yukio Mishima",
+          "coverPath": "images/covers/rec-spring-snow.jpg"
+        },
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "The Conformist",
+          "author": "Bernardo Bertolucci, 1970",
+          "coverPath": "images/covers/rec-conformist.jpg"
+        },
+        {
+          "title": "Vengeance Is Mine",
+          "author": "Shohei Imamura, 1979",
+          "coverPath": null
+        },
+        {
+          "title": "Céline and Julie Go Boating",
+          "author": "Jacques Rivette, 1974",
+          "coverPath": "images/covers/rec-celine-julie.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-05-03",
       "books": [
