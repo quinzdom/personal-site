@@ -10,9 +10,49 @@
   "usedMovies": [
     "rec-conformist",
     "rec-vengeance",
-    "rec-celine-julie"
+    "rec-celine-julie",
+    "rec-cleo",
+    "rec-syndromes",
+    "rec-taste-of-cherry"
   ],
   "archive": [
+    {
+      "date": "2026-05-17",
+      "books": [
+        {
+          "title": "Native Realm",
+          "author": "Czesław Miłosz",
+          "coverPath": "images/covers/rec-native-realm.jpg"
+        },
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        },
+        {
+          "title": "The Man Without Qualities",
+          "author": "Robert Musil",
+          "coverPath": "images/covers/rec-man-without-qualities.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Cleo from 5 to 7",
+          "author": "Agnès Varda, 1962",
+          "coverPath": "images/covers/rec-cleo.jpg"
+        },
+        {
+          "title": "Syndromes and a Century",
+          "author": "Apichatpong Weerasethakul, 2006",
+          "coverPath": "images/covers/rec-syndromes.jpg"
+        },
+        {
+          "title": "Taste of Cherry",
+          "author": "Abbas Kiarostami, 1997",
+          "coverPath": "images/covers/rec-taste-of-cherry.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-05-10",
       "books": [
