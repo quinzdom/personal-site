@@ -1110,5 +1110,9 @@ const items = [
 {title:"とらドラ!1",author:"竹宮 ゆゆこ",type:"book",date_read:"2026-04-22",rating:0,cover:"images/covers/bm-575187.jpg",id:"bm-575187",ya:false},
 {title:"「松本」の「遺書」",author:"松本 人志",type:"book",date_read:"2026-04-26",rating:0,cover:"images/covers/bm-580261.jpg",id:"bm-580261",ya:false},
 {title:"「弱くても勝てます」: 開成高校野球部のセオリー",author:"高橋 秀実",type:"book",date_read:"2026-04-28",rating:0,cover:"images/covers/bm-7962707.jpg",id:"bm-7962707",ya:false},
-{title:"午後の曳航",author:"三島 由紀夫",type:"book",date_read:"2026-05-03",rating:0,cover:"images/covers/bm-496873.jpg",id:"bm-496873",ya:false}
+{title:"午後の曳航",author:"三島 由紀夫",type:"book",date_read:"2026-05-03",rating:0,cover:"images/covers/bm-496873.jpg",id:"bm-496873",ya:false},
+{title:"嫌われる勇気 自己啓発の源流「アドラー」の教え",author:"岸見 一郎,古賀 史健",type:"book",date_read:"2026-05-20",rating:0,cover:"images/covers/bm-7813879.jpg",id:"bm-7813879",ya:false},
+{title:"君のクイズ",author:"小川 哲",type:"book",date_read:"2026-05-20",rating:0,cover:"images/covers/bm-20248400.jpg",id:"bm-20248400",ya:false},
+{title:"The MVP Machine: How Baseball's New Nonconformists Are Using Data to Build Better Players",author:"Ben Lindbergh",type:"book",date_read:"2026-05-14",rating:0,cover:"images/covers/gr-42283858.jpg",id:"gr-42283858",ya:false},
+{title:"The Only Rule Is It Has to Work: Our Wild Experiment Building a New Kind of Baseball Team",author:"Ben Lindbergh",type:"book",date_read:"2026-05-17",rating:0,cover:"images/covers/gr-26792284.jpg",id:"gr-26792284",ya:false}
 ];

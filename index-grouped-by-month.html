@@ -192,13 +192,13 @@
     <p id="count"></p>
   </header>
   <div class="filters">
-    <button class="active" data-filter="all">All</button>
-    <button data-filter="book">Books</button>
+    <button data-filter="all">All</button>
+    <button class="active" data-filter="book">Books</button>
     <button data-filter="movie">Movies</button>
   </div>
   <div class="grid" id="grid"></div>
 
-  <script src="items_data.js?v=20260505a"></script>
+  <script src="items_data.js?v=20260520a"></script>
   <script>
     const monthFormatter = new Intl.DateTimeFormat('en-US', {
       month: 'short',
@@ -275,7 +275,7 @@
       });
     });
 
-    render('all');
+    render('book');
   </script>
 </body>
 </html>

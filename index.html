@@ -620,8 +620,8 @@
       <div class="toolbar-section">
         <div class="toolbar-label">Show</div>
         <div class="filters">
-          <button class="active" data-filter="all">All</button>
-          <button data-filter="book">Books</button>
+          <button data-filter="all">All</button>
+          <button class="active" data-filter="book">Books</button>
           <button data-filter="movie">Movies</button>
         </div>
       </div>
@@ -680,7 +680,7 @@
   <button class="fullscreen-exit" id="fullscreen-exit" type="button">Back To UI</button>
   <div class="grid" id="grid"></div>
 
-  <script src="items_data.js?v=20260505a"></script>
+  <script src="items_data.js?v=20260520a"></script>
   <script src="likes_data.js?v=20260423a"></script>
   <script src="anime_data.js?v=20260406a"></script>
   <script src="manga_data.js?v=20260406a"></script>
@@ -808,7 +808,7 @@
       'lb-https://boxd.it/yzY8',
       'lb-https://boxd.it/yZYe',
     ]);
-    let activeFilter = urlState.searchParams.get('filter') || 'all';
+    let activeFilter = urlState.searchParams.get('filter') || 'book';
     let activeView = urlState.searchParams.get('view') || localStorage.getItem(STORAGE_KEY) || 'timeline';
     let activeLayout = urlState.searchParams.get('layout') || localStorage.getItem(LAYOUT_STORAGE_KEY) || 'full';
     let activeLanguage = urlState.searchParams.get('language') || localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'all';
@@ -1054,7 +1054,7 @@
 
     function syncUrlState(options = {}) {
       PageUtils.updateUrlQuery({
-        filter: activeFilter !== 'all' ? activeFilter : '',
+        filter: activeFilter !== 'book' ? activeFilter : '',
         view: activeView !== 'timeline' ? activeView : '',
         layout: activeLayout !== 'full' ? activeLayout : '',
         language: activeLanguage !== 'all' ? activeLanguage : '',
@@ -1211,7 +1211,7 @@
 
     const siteTitle = document.getElementById('site-title');
     function resetAllControls() {
-      activeFilter = 'all';
+      activeFilter = 'book';
       activeView = 'timeline';
       activeLayout = 'default';
       activeLanguage = 'all';
@@ -1282,7 +1282,7 @@
 
     window.addEventListener('popstate', () => {
       const nextUrl = new URL(window.location.href);
-      activeFilter = nextUrl.searchParams.get('filter') || 'all';
+      activeFilter = nextUrl.searchParams.get('filter') || 'book';
       activeView = nextUrl.searchParams.get('view') || localStorage.getItem(STORAGE_KEY) || 'timeline';
       activeLayout = nextUrl.searchParams.get('layout') || localStorage.getItem(LAYOUT_STORAGE_KEY) || 'full';
       activeLanguage = nextUrl.searchParams.get('language') || localStorage.getItem(LANGUAGE_STORAGE_KEY) || 'all';
