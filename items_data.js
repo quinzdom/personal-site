@@ -1114,5 +1114,6 @@ const items = [
 {title:"嫌われる勇気 自己啓発の源流「アドラー」の教え",author:"岸見 一郎,古賀 史健",type:"book",date_read:"2026-05-20",rating:0,cover:"images/covers/bm-7813879.jpg",id:"bm-7813879",ya:false},
 {title:"君のクイズ",author:"小川 哲",type:"book",date_read:"2026-05-20",rating:0,cover:"images/covers/bm-20248400.jpg",id:"bm-20248400",ya:false},
 {title:"The MVP Machine: How Baseball's New Nonconformists Are Using Data to Build Better Players",author:"Ben Lindbergh",type:"book",date_read:"2026-05-14",rating:0,cover:"images/covers/gr-42283858.jpg",id:"gr-42283858",ya:false},
-{title:"The Only Rule Is It Has to Work: Our Wild Experiment Building a New Kind of Baseball Team",author:"Ben Lindbergh",type:"book",date_read:"2026-05-17",rating:0,cover:"images/covers/gr-26792284.jpg",id:"gr-26792284",ya:false}
+{title:"The Only Rule Is It Has to Work: Our Wild Experiment Building a New Kind of Baseball Team",author:"Ben Lindbergh",type:"book",date_read:"2026-05-17",rating:0,cover:"images/covers/gr-26792284.jpg",id:"gr-26792284",ya:false},
+{title:"新装版　わたしが正義について語るなら",author:"やなせ　たかし",type:"book",date_read:"2026-05-23",rating:0,cover:"images/covers/bm-21986209.jpg",id:"bm-21986209",ya:false}
 ];
