@@ -7,8 +7,49 @@
     "rec-autobiography-corpse",
     "rec-native-realm"
   ],
-  "usedMovies": [],
+  "usedMovies": [
+    "rec-taste-of-cherry",
+    "rec-cleo",
+    "rec-vengeance"
+  ],
   "archive": [
+    {
+      "date": "2026-05-31",
+      "books": [
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        },
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        },
+        {
+          "title": "Spring Snow",
+          "author": "Yukio Mishima",
+          "coverPath": "images/covers/rec-spring-snow.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Taste of Cherry",
+          "author": "Abbas Kiarostami, 1997",
+          "coverPath": "images/covers/rec-taste-of-cherry.jpg"
+        },
+        {
+          "title": "Cleo from 5 to 7",
+          "author": "Agnès Varda, 1962",
+          "coverPath": "images/covers/rec-cleo.jpg"
+        },
+        {
+          "title": "Vengeance Is Mine",
+          "author": "Shohei Imamura, 1979",
+          "coverPath": null
+        }
+      ]
+    },
     {
       "date": "2026-05-24",
       "books": [
