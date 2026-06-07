@@ -1,18 +1,51 @@
 {
-  "usedBooks": [
-    "rec-man-without-qualities",
-    "rec-rings-of-saturn",
-    "rec-spring-snow",
-    "rec-unnamable",
-    "rec-autobiography-corpse",
-    "rec-native-realm"
-  ],
+  "usedBooks": [],
   "usedMovies": [
     "rec-taste-of-cherry",
     "rec-cleo",
-    "rec-vengeance"
+    "rec-vengeance",
+    "rec-yi-yi",
+    "rec-conformist",
+    "rec-sansho"
   ],
   "archive": [
+    {
+      "date": "2026-06-07",
+      "books": [
+        {
+          "title": "Native Realm",
+          "author": "Czesław Miłosz",
+          "coverPath": "images/covers/rec-native-realm.jpg"
+        },
+        {
+          "title": "Spring Snow",
+          "author": "Yukio Mishima",
+          "coverPath": "images/covers/rec-spring-snow.jpg"
+        },
+        {
+          "title": "Demons",
+          "author": "Fyodor Dostoevsky",
+          "coverPath": "images/covers/rec-demons.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Yi Yi",
+          "author": "Edward Yang, 2000",
+          "coverPath": "images/covers/rec-yi-yi.jpg"
+        },
+        {
+          "title": "The Conformist",
+          "author": "Bernardo Bertolucci, 1970",
+          "coverPath": "images/covers/rec-conformist.jpg"
+        },
+        {
+          "title": "Sansho the Bailiff",
+          "author": "Kenji Mizoguchi, 1954",
+          "coverPath": "images/covers/rec-sansho.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-05-31",
       "books": [
