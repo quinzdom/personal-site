@@ -1116,5 +1116,6 @@ const items = [
 {title:"The MVP Machine: How Baseball's New Nonconformists Are Using Data to Build Better Players",author:"Ben Lindbergh",type:"book",date_read:"2026-05-14",rating:0,cover:"images/covers/gr-42283858.jpg",id:"gr-42283858",ya:false},
 {title:"The Only Rule Is It Has to Work: Our Wild Experiment Building a New Kind of Baseball Team",author:"Ben Lindbergh",type:"book",date_read:"2026-05-17",rating:0,cover:"images/covers/gr-26792284.jpg",id:"gr-26792284",ya:false},
 {title:"新装版　わたしが正義について語るなら",author:"やなせ　たかし",type:"book",date_read:"2026-05-23",rating:0,cover:"images/covers/bm-21986209.jpg",id:"bm-21986209",ya:false},
-{title:"光の領分",author:"津島 佑子",type:"book",date_read:"2026-06-02",rating:0,cover:"images/covers/bm-373089.jpg",id:"bm-373089",ya:false}
+{title:"光の領分",author:"津島 佑子",type:"book",date_read:"2026-06-02",rating:0,cover:"images/covers/bm-373089.jpg",id:"bm-373089",ya:false},
+{title:"時をかけるゆとり",author:"朝井 リョウ",type:"book",date_read:"2026-06-14",rating:0,cover:"images/covers/bm-8966796.jpg",id:"bm-8966796",ya:false}
 ];

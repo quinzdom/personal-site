@@ -1,14 +1,48 @@
 {
-  "usedBooks": [],
-  "usedMovies": [
-    "rec-taste-of-cherry",
-    "rec-cleo",
-    "rec-vengeance",
-    "rec-yi-yi",
-    "rec-conformist",
-    "rec-sansho"
+  "usedBooks": [
+    "rec-native-realm",
+    "rec-spring-snow",
+    "rec-autobiography-corpse"
   ],
+  "usedMovies": [],
   "archive": [
+    {
+      "date": "2026-06-14",
+      "books": [
+        {
+          "title": "Native Realm",
+          "author": "Czesław Miłosz",
+          "coverPath": "images/covers/rec-native-realm.jpg"
+        },
+        {
+          "title": "Spring Snow",
+          "author": "Yukio Mishima",
+          "coverPath": "images/covers/rec-spring-snow.jpg"
+        },
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Céline and Julie Go Boating",
+          "author": "Jacques Rivette, 1974",
+          "coverPath": "images/covers/rec-celine-julie.jpg"
+        },
+        {
+          "title": "Satantango",
+          "author": "Béla Tarr, 1994",
+          "coverPath": "images/covers/rec-satantango.jpg"
+        },
+        {
+          "title": "Syndromes and a Century",
+          "author": "Apichatpong Weerasethakul, 2006",
+          "coverPath": "images/covers/rec-syndromes.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-06-07",
       "books": [
