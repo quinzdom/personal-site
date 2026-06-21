@@ -2,10 +2,54 @@
   "usedBooks": [
     "rec-native-realm",
     "rec-spring-snow",
-    "rec-autobiography-corpse"
+    "rec-autobiography-corpse",
+    "rec-rings-of-saturn",
+    "rec-demons",
+    "rec-unnamable"
   ],
-  "usedMovies": [],
+  "usedMovies": [
+    "rec-yi-yi",
+    "rec-conformist",
+    "rec-sansho"
+  ],
   "archive": [
+    {
+      "date": "2026-06-21",
+      "books": [
+        {
+          "title": "The Rings of Saturn",
+          "author": "W.G. Sebald",
+          "coverPath": "images/covers/rec-rings-of-saturn.jpg"
+        },
+        {
+          "title": "Demons",
+          "author": "Fyodor Dostoevsky",
+          "coverPath": "images/covers/rec-demons.jpg"
+        },
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Yi Yi",
+          "author": "Edward Yang, 2000",
+          "coverPath": "images/covers/rec-yi-yi.jpg"
+        },
+        {
+          "title": "The Conformist",
+          "author": "Bernardo Bertolucci, 1970",
+          "coverPath": "images/covers/rec-conformist.jpg"
+        },
+        {
+          "title": "Sansho the Bailiff",
+          "author": "Kenji Mizoguchi, 1954",
+          "coverPath": "images/covers/rec-sansho.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-06-14",
       "books": [
