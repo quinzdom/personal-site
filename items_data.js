@@ -1120,5 +1120,6 @@ const items = [
 {title:"時をかけるゆとり",author:"朝井 リョウ",type:"book",date_read:"2026-06-14",rating:0,cover:"images/covers/bm-8966796.jpg",id:"bm-8966796",ya:false},
 {title:"となりの脳世界",author:"村田沙耶香",type:"book",date_read:"2026-06-20",rating:0,cover:"images/covers/bm-13139065.jpg",id:"bm-13139065",ya:false},
 {title:"ボクたちはみんな大人になれなかった",author:"燃え殻",type:"book",date_read:"2026-06-17",rating:0,cover:"images/covers/bm-11918562.jpg",id:"bm-11918562",ya:false},
-{title:"もものかんづめ",author:"さくら ももこ",type:"book",date_read:"2026-06-16",rating:0,cover:"images/covers/bm-550753.jpg",id:"bm-550753",ya:false}
+{title:"もものかんづめ",author:"さくら ももこ",type:"book",date_read:"2026-06-16",rating:0,cover:"images/covers/bm-550753.jpg",id:"bm-550753",ya:false},
+{title:"しろいろの街の、その骨の体温の",author:"村田 沙耶香",type:"book",date_read:"2026-06-23",rating:0,cover:"images/covers/bm-9778693.jpg",id:"bm-9778693",ya:false}
 ];
