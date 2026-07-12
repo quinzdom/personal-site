@@ -1,14 +1,48 @@
 {
-  "usedBooks": [
-    "rec-native-realm",
-    "rec-spring-snow",
-    "rec-autobiography-corpse",
-    "rec-rings-of-saturn",
-    "rec-demons",
-    "rec-unnamable"
+  "usedBooks": [],
+  "usedMovies": [
+    "rec-satantango",
+    "rec-sansho",
+    "rec-taste-of-cherry"
   ],
-  "usedMovies": [],
   "archive": [
+    {
+      "date": "2026-07-12",
+      "books": [
+        {
+          "title": "The Man Without Qualities",
+          "author": "Robert Musil",
+          "coverPath": "images/covers/rec-man-without-qualities.jpg"
+        },
+        {
+          "title": "Demons",
+          "author": "Fyodor Dostoevsky",
+          "coverPath": "images/covers/rec-demons.jpg"
+        },
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Satantango",
+          "author": "Béla Tarr, 1994",
+          "coverPath": "images/covers/rec-satantango.jpg"
+        },
+        {
+          "title": "Sansho the Bailiff",
+          "author": "Kenji Mizoguchi, 1954",
+          "coverPath": "images/covers/rec-sansho.jpg"
+        },
+        {
+          "title": "Taste of Cherry",
+          "author": "Abbas Kiarostami, 1997",
+          "coverPath": "images/covers/rec-taste-of-cherry.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-07-05",
       "books": [
