@@ -1,11 +1,55 @@
 {
-  "usedBooks": [],
+  "usedBooks": [
+    "rec-man-without-qualities",
+    "rec-unnamable",
+    "rec-rings-of-saturn"
+  ],
   "usedMovies": [
     "rec-satantango",
     "rec-sansho",
-    "rec-taste-of-cherry"
+    "rec-taste-of-cherry",
+    "rec-yi-yi",
+    "rec-syndromes",
+    "rec-vengeance"
   ],
   "archive": [
+    {
+      "date": "2026-07-19",
+      "books": [
+        {
+          "title": "The Man Without Qualities",
+          "author": "Robert Musil",
+          "coverPath": "images/covers/rec-man-without-qualities.jpg"
+        },
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        },
+        {
+          "title": "The Rings of Saturn",
+          "author": "W.G. Sebald",
+          "coverPath": "images/covers/rec-rings-of-saturn.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Yi Yi",
+          "author": "Edward Yang, 2000",
+          "coverPath": "images/covers/rec-yi-yi.jpg"
+        },
+        {
+          "title": "Syndromes and a Century",
+          "author": "Apichatpong Weerasethakul, 2006",
+          "coverPath": "images/covers/rec-syndromes.jpg"
+        },
+        {
+          "title": "Vengeance Is Mine",
+          "author": "Shohei Imamura, 1979",
+          "coverPath": null
+        }
+      ]
+    },
     {
       "date": "2026-07-12",
       "books": [
