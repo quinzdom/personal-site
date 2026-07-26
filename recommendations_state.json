@@ -2,17 +2,50 @@
   "usedBooks": [
     "rec-man-without-qualities",
     "rec-unnamable",
-    "rec-rings-of-saturn"
+    "rec-rings-of-saturn",
+    "rec-autobiography-corpse",
+    "rec-spring-snow",
+    "rec-native-realm"
   ],
-  "usedMovies": [
-    "rec-satantango",
-    "rec-sansho",
-    "rec-taste-of-cherry",
-    "rec-yi-yi",
-    "rec-syndromes",
-    "rec-vengeance"
-  ],
+  "usedMovies": [],
   "archive": [
+    {
+      "date": "2026-07-26",
+      "books": [
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        },
+        {
+          "title": "Spring Snow",
+          "author": "Yukio Mishima",
+          "coverPath": "images/covers/rec-spring-snow.jpg"
+        },
+        {
+          "title": "Native Realm",
+          "author": "Czesław Miłosz",
+          "coverPath": "images/covers/rec-native-realm.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Cleo from 5 to 7",
+          "author": "Agnès Varda, 1962",
+          "coverPath": "images/covers/rec-cleo.jpg"
+        },
+        {
+          "title": "Céline and Julie Go Boating",
+          "author": "Jacques Rivette, 1974",
+          "coverPath": "images/covers/rec-celine-julie.jpg"
+        },
+        {
+          "title": "The Conformist",
+          "author": "Bernardo Bertolucci, 1970",
+          "coverPath": "images/covers/rec-conformist.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-07-19",
       "books": [
