@@ -7,8 +7,49 @@
     "rec-spring-snow",
     "rec-native-realm"
   ],
-  "usedMovies": [],
+  "usedMovies": [
+    "rec-satantango",
+    "rec-cleo",
+    "rec-yi-yi"
+  ],
   "archive": [
+    {
+      "date": "2026-08-02",
+      "books": [
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        },
+        {
+          "title": "Spring Snow",
+          "author": "Yukio Mishima",
+          "coverPath": "images/covers/rec-spring-snow.jpg"
+        },
+        {
+          "title": "The Man Without Qualities",
+          "author": "Robert Musil",
+          "coverPath": "images/covers/rec-man-without-qualities.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Satantango",
+          "author": "Béla Tarr, 1994",
+          "coverPath": "images/covers/rec-satantango.jpg"
+        },
+        {
+          "title": "Cleo from 5 to 7",
+          "author": "Agnès Varda, 1962",
+          "coverPath": "images/covers/rec-cleo.jpg"
+        },
+        {
+          "title": "Yi Yi",
+          "author": "Edward Yang, 2000",
+          "coverPath": "images/covers/rec-yi-yi.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-07-26",
       "books": [
