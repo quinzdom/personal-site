@@ -22,7 +22,7 @@ jobs:
           node-version: '20'
 
       - name: Run Bookmeter import
-        run: node scripts/import-bookmeter-read-list.mjs
+        run: node scripts/update-bookmeter-fast.mjs
 
       - name: Generate new recommendations
         run: node scripts/generate-recommendations.mjs
@@ -31,7 +31,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add items_data.js images/covers/ recommendations.html recommendations_state.json
+          git add items_data.js images/covers/ recommendations.html recommendations_state.json index.html index-grouped-by-month.html
           if git diff --cached --quiet; then
             echo "Nothing changed."
           else
