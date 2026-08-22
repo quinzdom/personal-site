@@ -6,9 +6,17 @@ const goals = [
     "context": "Anki",
     "description": "Finish the 漢字書き取り deck on Anki every day.",
     "cadence": "daily",
-    "startDate": "2026-08-22",
+    "startDate": "2026-04-05",
+    "trackedFrom": "2026-08-22",
     "active": true,
-    "done": []
+    "done": [
+      "2026-04-05",
+      "2026-04-07",
+      "2026-04-10",
+      "2026-05-01",
+      "2026-05-02",
+      "2026-05-03"
+    ]
   }
 ];
 const goalsDayStartHour = 4;

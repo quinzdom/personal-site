@@ -69,6 +69,13 @@ function normalizeGoal(goal, index) {
     throw new Error(`Goal "${id}" needs a "startDate" formatted as YYYY-MM-DD.`);
   }
 
+  // Days before trackedFrom only count when they were actually recorded, so a
+  // sparse backfill does not turn every unrecorded day into a missed day.
+  const trackedFrom = normalizeDate(goal.trackedFrom) || startDate;
+  if (trackedFrom < startDate) {
+    throw new Error(`Goal "${id}" has a "trackedFrom" (${trackedFrom}) before its "startDate" (${startDate}).`);
+  }
+
   return {
     id,
     title,
@@ -76,6 +83,7 @@ function normalizeGoal(goal, index) {
     description: String(goal.description || '').trim(),
     cadence: String(goal.cadence || 'daily').trim() || 'daily',
     startDate,
+    trackedFrom,
     active: goal.active !== false,
     done: normalizeDoneDates(goal.done, startDate),
   };

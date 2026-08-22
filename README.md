@@ -26,7 +26,7 @@ That serves the whole site on `http://localhost:8000` and enables the AI-powered
 - `anime.html`: dedicated anime page
 - `tv.html`: dedicated TV page
 - `stats.html`: compact stats page
-- `goals.html`: goals dashboard
+- `goals.html`: private goals dashboard (unlisted, `noindex`, not linked from any page)
 - `items_data.js`: tracked books and movies
 - `anime_data.js`: generated grouped anime data
 - `tv_data.js`: generated TV data
@@ -175,8 +175,54 @@ Days roll over at 4 AM, matching the Anki day used by the daily log, so a late-n
 session still counts toward the day before. Streaks and completion rates are worked out
 in the browser against the current date, so the page stays correct without a rebuild.
 
-To add another goal, append an object to `goals.json` with a unique `id`, a `title`, and
-a `startDate`; `context`, `description`, and `active` are optional.
+The page is deliberately unlisted: it carries a `noindex` tag and nothing links to it, so
+it is only reachable by typing the URL. It is not added to `robots.txt`, because that file
+is public and a `Disallow` line there would advertise the path while also stopping crawlers
+from ever reading the `noindex` tag.
+
+### Goal fields
+
+- `id`, `title`, `startDate`: required.
+- `context`, `description`, `active`: optional.
+- `trackedFrom`: optional, defaults to `startDate`. Days on or after it count against the
+  goal, so an unlisted day is a missed day. Days before it only count when they are listed
+  in `done`; anything else renders as "no record" and stays out of the streak and rate math.
+  This is what keeps a sparse backfill from turning every unrecorded day into a miss.
+
+## Import Anki history into a goal
+
+`scripts/import-anki-goal-history.mjs` is a one-shot backfill. It does not install anything
+and does not run in the background.
+
+Read a deck straight from the local Anki collection:
+
+```bash
+node scripts/import-anki-goal-history.mjs --goal kanji-writing --deck "漢字書き取り"
+```
+
+Add `--list-decks` to print the exact deck names, `--dry-run` to preview without writing,
+`--min-reviews N` to require more than one review before a day counts, and
+`--collection <path>` if the collection is not at
+`~/Library/Application Support/Anki2/User 1/collection.anki2`.
+
+Subdecks are included, cards sitting in a filtered deck count toward their home deck, and
+manual reschedules are ignored. Because the Anki review log is complete, this import also
+moves `trackedFrom` back to the first review day: from that day on, a day with no reviews
+really was a missed day.
+
+The fallback source is the daily log, which only holds whole-collection totals for the
+handful of days it recorded:
+
+```bash
+node scripts/import-anki-goal-history.mjs --goal kanji-writing --from-daylog
+```
+
+That source is sparse and not deck-specific, so it leaves `trackedFrom` alone and the
+unrecorded days stay as "no record" rather than misses.
+
+Both modes merge into the existing `done` list rather than replacing it, so re-running is
+safe. Fix an individual day afterwards with `--done` / `--undo` on
+`scripts/build-goals-data.mjs`.
 
 ## Sync Anki into the daily log
 

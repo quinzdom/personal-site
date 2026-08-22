@@ -60,6 +60,12 @@ function countCurrentStreak(doneSet, startDate, today) {
   return streak;
 }
 
+// A day only counts against the goal once continuous tracking has started.
+// Earlier days are shown, but only the ones we actually have a record for.
+function isTracked(goal, date, today) {
+  return date >= goal.trackedFrom && date <= today;
+}
+
 function countLongestStreak(doneDates) {
   let longest = 0;
   let running = 0;
@@ -77,10 +83,11 @@ function countLongestStreak(doneDates) {
 function summarizeGoal(goal, today) {
   const doneDates = Array.isArray(goal.done) ? goal.done.filter((date) => date <= today) : [];
   const doneSet = new Set(doneDates);
-  const trackedDays = Math.max(0, daysBetween(goal.startDate, today) + 1);
-  const windowStart = trackedDays > 30 ? addDays(today, -29) : goal.startDate;
+  const trackedDays = Math.max(0, daysBetween(goal.trackedFrom, today) + 1);
+  const windowStart = trackedDays > 30 ? addDays(today, -29) : goal.trackedFrom;
   const windowDays = Math.max(1, daysBetween(windowStart, today) + 1);
   const windowDone = doneDates.filter((date) => date >= windowStart).length;
+  const earlierDone = doneDates.filter((date) => date < goal.trackedFrom).length;
 
   return {
     doneDates,
@@ -88,8 +95,9 @@ function summarizeGoal(goal, today) {
     trackedDays,
     windowDays,
     windowDone,
+    earlierDone,
     doneToday: doneSet.has(today),
-    currentStreak: countCurrentStreak(doneSet, goal.startDate, today),
+    currentStreak: countCurrentStreak(doneSet, goal.trackedFrom, today),
     longestStreak: countLongestStreak(doneDates),
     rate: Math.round((windowDone / windowDays) * 100),
   };
@@ -147,16 +155,24 @@ function renderMonthLabels(weeks) {
 }
 
 function renderHeatCell(date, goal, summary, today) {
-  const isTracked = date >= goal.startDate && date <= today;
-
-  if (!isTracked) {
+  if (date < goal.startDate || date > today) {
     return '<span class="heat-cell" data-state="inactive"></span>';
   }
 
   const isDone = summary.doneSet.has(date);
   const isToday = date === today;
-  const state = isDone ? 'done' : (isToday ? 'pending' : 'missed');
-  const label = `${cellDateFormatter.format(toUtcDate(date))} — ${state === 'pending' ? 'not yet' : state}`;
+  let state = 'missed';
+
+  if (isDone) {
+    state = 'done';
+  } else if (isToday) {
+    state = 'pending';
+  } else if (!isTracked(goal, date, today)) {
+    state = 'untracked';
+  }
+
+  const stateLabels = { done: 'done', missed: 'missed', pending: 'not yet', untracked: 'no record' };
+  const label = `${cellDateFormatter.format(toUtcDate(date))} — ${stateLabels[state]}`;
 
   return `
     <span
@@ -192,6 +208,11 @@ function renderHeatmap(goal, summary, today) {
         <span class="heat-legend-cell heat-cell" data-state="missed"></span>
         <span class="heat-legend-cell heat-cell" data-state="done"></span>
         <span>Done</span>
+        ${goal.trackedFrom > goal.startDate ? `
+          <span class="heat-legend-gap"></span>
+          <span class="heat-legend-cell heat-cell" data-state="untracked"></span>
+          <span>No record</span>
+        ` : ''}
       </div>
     </div>
   `;
@@ -241,7 +262,14 @@ function renderGoal(goal, today) {
           '',
           `${summary.windowDone} of ${summary.windowDays}`
         )}
-        ${renderStat('Days done', summary.doneDates.length, '', `tracking ${summary.trackedDays}`)}
+        ${renderStat(
+          'Days done',
+          summary.doneDates.length,
+          '',
+          summary.earlierDone
+            ? `${summary.earlierDone} from earlier records`
+            : `tracking ${summary.trackedDays}`
+        )}
       </div>
       ${hasHistory
         ? renderHeatmap(goal, summary, today)
