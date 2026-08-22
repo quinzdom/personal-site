@@ -1,0 +1,12 @@
+[
+  {
+    "id": "kanji-writing",
+    "title": "漢字書き取り",
+    "context": "Anki",
+    "description": "Finish the 漢字書き取り deck on Anki every day.",
+    "cadence": "daily",
+    "startDate": "2026-08-22",
+    "active": true,
+    "done": []
+  }
+]

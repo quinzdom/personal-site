@@ -26,11 +26,13 @@ That serves the whole site on `http://localhost:8000` and enables the AI-powered
 - `anime.html`: dedicated anime page
 - `tv.html`: dedicated TV page
 - `stats.html`: compact stats page
+- `goals.html`: goals dashboard
 - `items_data.js`: tracked books and movies
 - `anime_data.js`: generated grouped anime data
 - `tv_data.js`: generated TV data
 - `likes_data.js`: generated Letterboxd liked-movie set used by the favorites filter
 - `stats_data.js`: generated reading, watching, and wage stats shown in the header
+- `goals_data.js`: generated goal definitions and completed days
 - `daylog-k7m2.html`: private daily log page
 - `daylog_data.js`: generated daily log data used by the private log page
 - `images/covers/`: local cover images
@@ -45,10 +47,12 @@ The project is compacted around a few shared pieces now:
 - `styles/page-chrome.css`: shared page header and nav styling
 - `styles/media-grid-page.css`: shared poster-grid page styling used by anime and TV
 - `styles/stats-page.css`: stats page styling
+- `styles/goals-page.css`: goals page styling
 - `scripts/page-utils.js`: shared client-side helpers for page rendering
 - `scripts/anime-page.js`: anime page behavior
 - `scripts/tv-page.js`: TV page behavior
 - `scripts/stats-page.js`: stats page behavior
+- `scripts/goals-page.js`: goals page behavior
 
 ## Source data
 
@@ -69,6 +73,10 @@ TV is currently sourced from:
 Daily log entries are currently sourced from:
 
 - `data-source/daylog/entries.json`
+
+Goals are currently sourced from:
+
+- `data-source/goals/goals.json`
 
 Then generated into `tv_data.js` with:
 
@@ -133,7 +141,42 @@ node scripts/build-liked-movie-data.mjs
 node scripts/build-consumption-stats.mjs
 node scripts/build-tv-data.mjs
 node scripts/build-daylog-data.mjs
+node scripts/build-goals-data.mjs
 ```
+
+## Track goals
+
+Goals are updated by hand. `data-source/goals/goals.json` is the source of truth, and
+`goals.html` reads the generated `goals_data.js`.
+
+Mark today done for a goal:
+
+```bash
+node scripts/build-goals-data.mjs --done kanji-writing
+```
+
+Undo it, or log a different day:
+
+```bash
+node scripts/build-goals-data.mjs --undo kanji-writing
+node scripts/build-goals-data.mjs --done kanji-writing --date=2026-08-21
+```
+
+Both commands update `goals.json` and rebuild `goals_data.js`. You can also edit the
+`done` list in `goals.json` directly and then rebuild:
+
+```bash
+node scripts/build-goals-data.mjs
+```
+
+Commit `data-source/goals/goals.json` and `goals_data.js` together to publish.
+
+Days roll over at 4 AM, matching the Anki day used by the daily log, so a late-night
+session still counts toward the day before. Streaks and completion rates are worked out
+in the browser against the current date, so the page stays correct without a rebuild.
+
+To add another goal, append an object to `goals.json` with a unique `id`, a `title`, and
+a `startDate`; `context`, `description`, and `active` are optional.
 
 ## Sync Anki into the daily log
 

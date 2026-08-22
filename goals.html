@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>goals</title>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8XQHBWBCK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-G8XQHBWBCK');
+  </script>
+  <link rel="stylesheet" href="styles/page-chrome.css">
+  <link rel="stylesheet" href="styles/goals-page.css">
+</head>
+<body>
+  <header>
+    <div class="header-copy">
+      <div class="header-main">
+        <h1>Goals</h1>
+      </div>
+      <div class="header-subline">
+        <p>Things I am trying to do every day, and whether I actually did them.</p>
+        <div class="header-links">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="stats.html" class="nav-link">Stats</a>
+          <span class="nav-link-current" aria-current="page">Goals</span>
+          <a href="recommendations.html" class="nav-link">Recommendations</a>
+          <a href="reading-list.html" class="nav-link">Reading List</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="goals-sheet">
+      <section class="goals-group">
+        <div class="group-label">Today</div>
+        <div id="today-summary"></div>
+      </section>
+
+      <div class="goals-divider"></div>
+
+      <div id="goals-list"></div>
+
+      <p class="note">A day counts once it is marked done in <code>data-source/goals/goals.json</code>. Days roll over at 4 AM, so a late-night session still counts toward the day before.</p>
+    </div>
+  </main>
+
+  <script src="goals_data.js?v=20260822a"></script>
+  <script src="scripts/page-utils.js"></script>
+  <script src="scripts/goals-page.js?v=20260822a"></script>
+</body>
+</html>
