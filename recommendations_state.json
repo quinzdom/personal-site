@@ -7,8 +7,49 @@
     "rec-spring-snow",
     "rec-native-realm"
   ],
-  "usedMovies": [],
+  "usedMovies": [
+    "rec-sansho",
+    "rec-yi-yi",
+    "rec-celine-julie"
+  ],
   "archive": [
+    {
+      "date": "2026-08-23",
+      "books": [
+        {
+          "title": "Native Realm",
+          "author": "Czesław Miłosz",
+          "coverPath": "images/covers/rec-native-realm.jpg"
+        },
+        {
+          "title": "Spring Snow",
+          "author": "Yukio Mishima",
+          "coverPath": "images/covers/rec-spring-snow.jpg"
+        },
+        {
+          "title": "The Man Without Qualities",
+          "author": "Robert Musil",
+          "coverPath": "images/covers/rec-man-without-qualities.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Sansho the Bailiff",
+          "author": "Kenji Mizoguchi, 1954",
+          "coverPath": "images/covers/rec-sansho.jpg"
+        },
+        {
+          "title": "Yi Yi",
+          "author": "Edward Yang, 2000",
+          "coverPath": "images/covers/rec-yi-yi.jpg"
+        },
+        {
+          "title": "Céline and Julie Go Boating",
+          "author": "Jacques Rivette, 1974",
+          "coverPath": "images/covers/rec-celine-julie.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-08-16",
       "books": [
