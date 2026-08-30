@@ -10,9 +10,49 @@
   "usedMovies": [
     "rec-sansho",
     "rec-yi-yi",
-    "rec-celine-julie"
+    "rec-celine-julie",
+    "rec-syndromes",
+    "rec-taste-of-cherry",
+    "rec-conformist"
   ],
   "archive": [
+    {
+      "date": "2026-08-30",
+      "books": [
+        {
+          "title": "Spring Snow",
+          "author": "Yukio Mishima",
+          "coverPath": "images/covers/rec-spring-snow.jpg"
+        },
+        {
+          "title": "The Man Without Qualities",
+          "author": "Robert Musil",
+          "coverPath": "images/covers/rec-man-without-qualities.jpg"
+        },
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Syndromes and a Century",
+          "author": "Apichatpong Weerasethakul, 2006",
+          "coverPath": "images/covers/rec-syndromes.jpg"
+        },
+        {
+          "title": "Taste of Cherry",
+          "author": "Abbas Kiarostami, 1997",
+          "coverPath": "images/covers/rec-taste-of-cherry.jpg"
+        },
+        {
+          "title": "The Conformist",
+          "author": "Bernardo Bertolucci, 1970",
+          "coverPath": "images/covers/rec-conformist.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-08-23",
       "books": [
