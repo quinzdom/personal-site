@@ -1,21 +1,44 @@
 {
-  "usedBooks": [
-    "rec-man-without-qualities",
-    "rec-unnamable",
-    "rec-rings-of-saturn",
-    "rec-autobiography-corpse",
-    "rec-spring-snow",
-    "rec-native-realm"
-  ],
-  "usedMovies": [
-    "rec-sansho",
-    "rec-yi-yi",
-    "rec-celine-julie",
-    "rec-syndromes",
-    "rec-taste-of-cherry",
-    "rec-conformist"
-  ],
+  "usedBooks": [],
+  "usedMovies": [],
   "archive": [
+    {
+      "date": "2026-09-06",
+      "books": [
+        {
+          "title": "The Man Without Qualities",
+          "author": "Robert Musil",
+          "coverPath": "images/covers/rec-man-without-qualities.jpg"
+        },
+        {
+          "title": "Demons",
+          "author": "Fyodor Dostoevsky",
+          "coverPath": "images/covers/rec-demons.jpg"
+        },
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Vengeance Is Mine",
+          "author": "Shohei Imamura, 1979",
+          "coverPath": null
+        },
+        {
+          "title": "Cleo from 5 to 7",
+          "author": "Agnès Varda, 1962",
+          "coverPath": "images/covers/rec-cleo.jpg"
+        },
+        {
+          "title": "Satantango",
+          "author": "Béla Tarr, 1994",
+          "coverPath": "images/covers/rec-satantango.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-08-30",
       "books": [
