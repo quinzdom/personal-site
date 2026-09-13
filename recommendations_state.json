@@ -1,7 +1,52 @@
 {
-  "usedBooks": [],
-  "usedMovies": [],
+  "usedBooks": [
+    "rec-unnamable",
+    "rec-rings-of-saturn",
+    "rec-demons"
+  ],
+  "usedMovies": [
+    "rec-vengeance",
+    "rec-taste-of-cherry",
+    "rec-syndromes"
+  ],
   "archive": [
+    {
+      "date": "2026-09-13",
+      "books": [
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        },
+        {
+          "title": "The Rings of Saturn",
+          "author": "W.G. Sebald",
+          "coverPath": "images/covers/rec-rings-of-saturn.jpg"
+        },
+        {
+          "title": "Demons",
+          "author": "Fyodor Dostoevsky",
+          "coverPath": "images/covers/rec-demons.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Vengeance Is Mine",
+          "author": "Shohei Imamura, 1979",
+          "coverPath": null
+        },
+        {
+          "title": "Taste of Cherry",
+          "author": "Abbas Kiarostami, 1997",
+          "coverPath": "images/covers/rec-taste-of-cherry.jpg"
+        },
+        {
+          "title": "Syndromes and a Century",
+          "author": "Apichatpong Weerasethakul, 2006",
+          "coverPath": "images/covers/rec-syndromes.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-09-06",
       "books": [
