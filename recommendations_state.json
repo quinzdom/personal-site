@@ -7,15 +7,45 @@
     "rec-native-realm",
     "rec-autobiography-corpse"
   ],
-  "usedMovies": [
-    "rec-vengeance",
-    "rec-taste-of-cherry",
-    "rec-syndromes",
-    "rec-celine-julie",
-    "rec-yi-yi",
-    "rec-sansho"
-  ],
+  "usedMovies": [],
   "archive": [
+    {
+      "date": "2026-09-27",
+      "books": [
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        },
+        {
+          "title": "The Rings of Saturn",
+          "author": "W.G. Sebald",
+          "coverPath": "images/covers/rec-rings-of-saturn.jpg"
+        },
+        {
+          "title": "The Man Without Qualities",
+          "author": "Robert Musil",
+          "coverPath": "images/covers/rec-man-without-qualities.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "The Conformist",
+          "author": "Bernardo Bertolucci, 1970",
+          "coverPath": "images/covers/rec-conformist.jpg"
+        },
+        {
+          "title": "Cleo from 5 to 7",
+          "author": "Agnès Varda, 1962",
+          "coverPath": "images/covers/rec-cleo.jpg"
+        },
+        {
+          "title": "Satantango",
+          "author": "Béla Tarr, 1994",
+          "coverPath": "images/covers/rec-satantango.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-09-20",
       "books": [
