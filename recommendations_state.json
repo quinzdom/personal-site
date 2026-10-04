@@ -7,8 +7,49 @@
     "rec-native-realm",
     "rec-autobiography-corpse"
   ],
-  "usedMovies": [],
+  "usedMovies": [
+    "rec-taste-of-cherry",
+    "rec-yi-yi",
+    "rec-syndromes"
+  ],
   "archive": [
+    {
+      "date": "2026-10-04",
+      "books": [
+        {
+          "title": "The Man Without Qualities",
+          "author": "Robert Musil",
+          "coverPath": "images/covers/rec-man-without-qualities.jpg"
+        },
+        {
+          "title": "Native Realm",
+          "author": "Czesław Miłosz",
+          "coverPath": "images/covers/rec-native-realm.jpg"
+        },
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Taste of Cherry",
+          "author": "Abbas Kiarostami, 1997",
+          "coverPath": "images/covers/rec-taste-of-cherry.jpg"
+        },
+        {
+          "title": "Yi Yi",
+          "author": "Edward Yang, 2000",
+          "coverPath": "images/covers/rec-yi-yi.jpg"
+        },
+        {
+          "title": "Syndromes and a Century",
+          "author": "Apichatpong Weerasethakul, 2006",
+          "coverPath": "images/covers/rec-syndromes.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-09-27",
       "books": [
