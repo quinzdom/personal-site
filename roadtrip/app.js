@@ -14,7 +14,7 @@
   // Trip cost assumptions (prices as of Oct 5, 2026)
   var GAS_PRICE = 4.37;       // $/gal, AAA US average regular
   var GAS_MPG = 27;           // typical US car
-  var KWH_PRICE = 0.625;      // $/kWh, US average Tesla Supercharger, non-member
+  var KWH_PRICE = 0.434;      // $/kWh, US average Tesla Supercharger peak rate for Tesla owners (dcfctracker)
   var MODEL_Y_KWH_MI = 0.28;  // Tesla Model Y at highway speeds
   var STATES = 'AL AZ AR CA CO CT DE DC FL GA ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' ');
 
@@ -596,7 +596,7 @@
     return out;
   }
   try { syncCode = localStorage.getItem(CODE_KEY) || ''; tripId = localStorage.getItem(TRIP_KEY); } catch (err) { /* ignore */ }
-  if (!/^[a-z0-9]{10,32}$/.test(syncCode)) syncCode = randId(12);
+  if (!/^[a-z0-9]{4,32}$/.test(syncCode)) syncCode = randId(12);
   function remember() {
     try { localStorage.setItem(CODE_KEY, syncCode); localStorage.setItem(TRIP_KEY, tripId || ''); } catch (err) { /* ignore */ }
   }
@@ -696,7 +696,7 @@
     var next = prompt('Your sync code is ' + syncCode + '.\nTo see your trips from another device, enter that device’s code here:', '');
     if (next == null) return;
     next = next.trim().toLowerCase();
-    if (!/^[a-z0-9]{10,32}$/.test(next)) { if (next) alert('That doesn’t look like a sync code.'); return; }
+    if (!/^[a-z0-9]{4,32}$/.test(next)) { if (next) alert('That doesn’t look like a sync code.'); return; }
     flushSync();
     syncCode = next; tripId = null; savedTrips = [];
     remember(); renderSaved(); loadSaved();
