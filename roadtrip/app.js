@@ -14,7 +14,16 @@
   // Trip cost assumptions (prices as of Oct 5, 2026)
   var GAS_PRICE = 4.37;       // $/gal, AAA US average regular
   var GAS_MPG = 27;           // typical US car
-  var KWH_PRICE = 0.434;      // $/kWh, US average Tesla Supercharger peak rate for Tesla owners (dcfctracker)
+  // Supercharger standard (non-member) peak $/kWh by state, dcfctracker.com, Oct 5 2026
+  var SC_PEAK = { AL: .579, AZ: .748, AR: .560, CA: .736, CO: .529, CT: .691, DE: .675, DC: .910, FL: .568, GA: .635, ID: .570,
+    IL: .556, IN: .605, IA: .549, KS: .502, KY: .570, LA: .587, ME: .615, MD: .611, MA: .588, MI: .621, MN: .571, MS: .581,
+    MO: .476, MT: .594, NE: .407, NV: .667, NH: .682, NJ: .700, NM: .537, NY: .562, NC: .618, ND: .570, OH: .686, OK: .529,
+    OR: .599, PA: .597, RI: .625, SC: .651, SD: .600, TN: .567, TX: .523, UT: .560, VT: .558, VA: .655, WA: .602, WV: .619,
+    WI: .530, WY: .602 };
+  // Tesla owners pay ~69% of the standard rate ($0.434 vs $0.625 national); road-trip charging is assumed
+  // 3/4 daytime peak and 1/4 off-peak, which runs about a third cheaper
+  var SC_OWNER_BLEND = 0.434 / 0.625 * (0.75 + 0.25 * 0.66);
+  var SC_NATIONAL = 0.625;
   var MODEL_Y_KWH_MI = 0.28;  // Tesla Model Y at highway speeds
   var STATES = 'AL AZ AR CA CO CT DE DC FL GA ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' ');
 
@@ -82,8 +91,17 @@
   }
   var bounds = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
   var states = new Path2D(), neighbors = ringsToPath(B.nb, new Path2D()), lakes = ringsToPath(B.lakes, new Path2D());
+  var stateShapes = [];
   B.states.forEach(function (s) {
     ringsToPath(s.r, states);
+    var shape = { st: s.p, path: ringsToPath(s.r, new Path2D()), x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
+    s.r.forEach(function (a) {
+      for (var i = 0, x = 0, y = 0; i < a.length; i += 2) {
+        x += a[i]; y += a[i + 1];
+        shape.x0 = Math.min(shape.x0, x); shape.x1 = Math.max(shape.x1, x); shape.y0 = Math.min(shape.y0, y); shape.y1 = Math.max(shape.y1, y);
+      }
+    });
+    stateShapes.push(shape);
     s.r.forEach(function (a) {
       var x = 0, y = 0;
       for (var i = 0; i < a.length; i += 2) {
@@ -243,6 +261,31 @@
       legs.push(leg);
     }
   }
+  // Charging cost of a leg: its miles split by the state each stretch of road is in, priced at that state's Supercharger rate
+  function stateAt(x, y) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    for (var k = 0; k < stateShapes.length; k++) {
+      var sh = stateShapes[k];
+      if (x >= sh.x0 && x <= sh.x1 && y >= sh.y0 && y <= sh.y1 && ctx.isPointInPath(sh.path, x, y, 'evenodd')) return sh.st;
+    }
+    return '';
+  }
+  function legChargeCost(leg) {
+    if (leg.chargeCost != null) return leg.chargeCost;
+    var byState = {}, total = 0, p = leg.points, last = '';
+    for (var i = 1; i < p.length; i++) {
+      var d = Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]);
+      if (!d) continue;
+      last = stateAt((p[i][0] + p[i - 1][0]) / 2, (p[i][1] + p[i - 1][1]) / 2) || last;
+      byState[last] = (byState[last] || 0) + d;
+      total += d;
+    }
+    var cost = 0;
+    Object.keys(byState).forEach(function (st) {
+      cost += leg.miles * byState[st] / total * MODEL_Y_KWH_MI * (SC_PEAK[st] || SC_NATIONAL) * SC_OWNER_BLEND;
+    });
+    return (leg.chargeCost = total ? cost : leg.miles * MODEL_Y_KWH_MI * SC_NATIONAL * SC_OWNER_BLEND);
+  }
   function changed(flash) {
     beforeKerouac = null;
     $('kerouac').setAttribute('aria-pressed', 'false');
@@ -273,13 +316,13 @@
     return b;
   }
   function renderList(flash) {
-    var list = $('stops'), mi = 0, min = 0;
+    var list = $('stops'), mi = 0, min = 0, charge = 0;
     list.textContent = '';
     stops.forEach(function (st, i) {
       var leg = legs[i - 1];
       if (i > 0) {
         list.appendChild(el('li', 'leg', !leg ? 'No highway route' : fmtMiles(leg.miles) + ' mi · ' + fmtTime(leg.minutes)));
-        if (leg) { mi += leg.miles; min += leg.minutes; }
+        if (leg) { mi += leg.miles; min += leg.minutes; charge += legChargeCost(leg); }
       }
       var row = el('li', 'stop' + (flash === i ? ' flash' : ''));
       row.dataset.i = i; row.tabIndex = 0;
@@ -292,8 +335,10 @@
     $('summary').textContent = stops.length < 2 ? 'Add stops to plan a drive.'
       : stops.length + ' stops · ' + fmtMiles(mi) + ' mi · ' + fmtTime(min) + ' driving';
     $('cost').hidden = stops.length < 2;
-    $('cost').textContent = 'Tesla Model Y \u2248 $' + fmtMiles(mi * MODEL_Y_KWH_MI * KWH_PRICE) +
+    $('cost').textContent = 'Tesla Model Y \u2248 $' + fmtMiles(charge) +
       ' electricity \u00b7 Gas car \u2248 $' + fmtMiles(mi / GAS_MPG * GAS_PRICE);
+    if (mi) $('cost').title = 'Supercharging at about $' + (charge / (mi * MODEL_Y_KWH_MI)).toFixed(2) + '/kWh, the average of state prices along this route ' +
+      '(Tesla owner rate, mostly daytime charging) at 0.28 kWh/mi. Gas at $' + GAS_PRICE + '/gal, 27 mpg (US average, Oct 2026).';
     $('empty').hidden = stops.length > 0;
     $('actions').hidden = stops.length === 0;
   }
