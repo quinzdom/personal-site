@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Road Trip Planner</title>
+  <meta name="description" content="Plan a road trip across the United States: add stops and get miles and drive time for every leg.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="panel">
+      <h1>Road Trip</h1>
+      <div class="search">
+        <input id="q" type="text" placeholder="Add a city, town or national park" autocomplete="off" spellcheck="false"
+               aria-label="Add a stop" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest">
+        <ul class="suggest" id="suggest" role="listbox" hidden></ul>
+      </div>
+      <p class="summary" id="summary"></p>
+      <ol class="stops" id="stops"></ol>
+      <p class="empty" id="empty">Search above, or click the map to drop a stop.</p>
+      <div class="actions" id="actions" hidden>
+        <button type="button" class="btn" id="copy">Copy link</button>
+        <button type="button" class="btn quiet" id="clear">Clear</button>
+      </div>
+    </aside>
+
+    <main class="map-wrap" id="map-wrap">
+      <canvas id="map" role="img" aria-label="Map of the United States. Click to add a stop."></canvas>
+      <div class="zoom">
+        <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
+        <button type="button" id="zoom-out" aria-label="Zoom out">&minus;</button>
+        <button type="button" id="zoom-fit" aria-label="Fit trip">&#9633;</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="data/basemap.js"></script>
+  <script src="data/places.js"></script>
+  <script src="data/roads.js"></script>
+  <script src="projection.js"></script>
+  <script src="router.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
