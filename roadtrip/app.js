@@ -231,7 +231,7 @@
   }
 
   // ---------------------------------------------------------------- stops and legs
-  var stops = [], legs = [], legCache = new Map(), beforeKerouac = null;
+  var stops = [], legs = [], legCache = new Map(), beforeKerouac = null, tripId = null;
   function computeLegs() {
     legs = [];
     for (var i = 0; i + 1 < stops.length; i++) {
@@ -535,11 +535,13 @@
   function save() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(stops.map(function (s) { return [s.name, s.st, s.k, s.x, s.y]; }))); } catch (err) { /* storage unavailable */ }
     try { history.replaceState(null, '', shareUrl()); } catch (err) { /* e.g. sandboxed preview */ }
+    queueSync();
   }
   function load() {
-    var m = location.hash.match(/^#trip=([A-Za-z0-9_-]+)$/), fromLink = m && decodeTrip(m[1]);
-    if (fromLink) return fromLink;
-    try { return validStops(JSON.parse(localStorage.getItem(STORE_KEY))) || []; } catch (err) { return []; }
+    var m = location.hash.match(/^#trip=([A-Za-z0-9_-]+)$/), fromLink = m && decodeTrip(m[1]), local = [];
+    try { local = validStops(JSON.parse(localStorage.getItem(STORE_KEY))) || []; } catch (err) { /* ignore */ }
+    if (fromLink && JSON.stringify(fromLink) !== JSON.stringify(local)) { tripId = null; return fromLink; }
+    return local;
   }
   $('copy').addEventListener('click', function () {
     var b = $('copy');
@@ -549,8 +551,9 @@
     }, function () { b.textContent = 'Copy from the address bar'; });
   });
   $('clear').addEventListener('click', function () {
-    if (!confirm('Clear all stops?')) return;
-    stops = []; changed(); fitTrip(); q.focus();
+    flushSync();
+    setTrip(null, []);
+    q.focus();
   });
 
   // Toggle Kerouac's first crossing from On the Road (1947); turning it off restores the previous trip
@@ -563,10 +566,13 @@
       return placeToStop(best);
     });
   }
+  // Shown without saving; editing it saves it as a new trip
+  var kerouacPrevId = null;
   $('kerouac').addEventListener('click', function () {
     var on = beforeKerouac === null, prev = stops;
-    stops = on ? kerouacStops() : beforeKerouac;
-    changed(); fitTrip();
+    flushSync();
+    if (on) { kerouacPrevId = tripId; setTrip(null, kerouacStops()); }
+    else setTrip(kerouacPrevId, beforeKerouac);
     beforeKerouac = on ? prev : null;
     $('kerouac').setAttribute('aria-pressed', String(on));
   });
@@ -578,10 +584,133 @@
     try { localStorage.setItem('roadtrip:theme', root.dataset.theme); } catch (err) { /* storage unavailable */ }
   });
 
+
+  // ---------------------------------------------------------------- saved trips (server)
+  // Trips sync to the Road Trip API under a private sync code; any device with the same code sees the same list
+  var API = 'https://roadtrip-api.darkwebs.workers.dev';
+  var CODE_KEY = 'roadtrip:code', TRIP_KEY = 'roadtrip:trip';
+  var syncCode = '', savedTrips = [], syncTimer = 0, syncPaused = false;
+  function randId(n) {
+    var a = crypto.getRandomValues(new Uint8Array(n)), abc = 'abcdefghijkmnpqrstuvwxyz23456789', out = '';
+    for (var i = 0; i < n; i++) out += abc[a[i] % abc.length];
+    return out;
+  }
+  try { syncCode = localStorage.getItem(CODE_KEY) || ''; tripId = localStorage.getItem(TRIP_KEY); } catch (err) { /* ignore */ }
+  if (!/^[a-z0-9]{10,32}$/.test(syncCode)) syncCode = randId(12);
+  function remember() {
+    try { localStorage.setItem(CODE_KEY, syncCode); localStorage.setItem(TRIP_KEY, tripId || ''); } catch (err) { /* ignore */ }
+  }
+  function api(method, path, body) {
+    return fetch(API + path, {
+      method: method,
+      headers: body ? { 'X-Sync-Code': syncCode, 'Content-Type': 'application/json' } : { 'X-Sync-Code': syncCode },
+      body: body ? JSON.stringify(body) : undefined
+    }).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  }
+  function status(text) { $('sync-status').textContent = text; }
+  function tripName(list) {
+    var a = list[0].name, b = list[list.length - 1].name;
+    return list.length === 1 ? a : a === b ? a + ' loop' : a + ' → ' + b;
+  }
+  function packStops() { return stops.map(function (s) { return [s.name, s.st || '', s.k, s.x, s.y]; }); }
+
+  function queueSync() {
+    if (syncPaused || !stops.length) return;
+    clearTimeout(syncTimer);
+    status('Saving…');
+    syncTimer = setTimeout(syncNow, 800);
+  }
+  function flushSync() { if (syncTimer) { clearTimeout(syncTimer); syncNow(); } }
+  function syncNow() {
+    syncTimer = 0;
+    if (!stops.length) return;
+    if (!tripId) tripId = randId(12);
+    remember();
+    var id = tripId, trip = { id: id, name: tripName(stops), stops: packStops() };
+    api('PUT', '/trips/' + id, { name: trip.name, stops: trip.stops }).then(function (res) {
+      trip.updated = res.updated;
+      savedTrips = [trip].concat(savedTrips.filter(function (t) { return t.id !== id; }));
+      renderSaved();
+      status('Saved');
+    }, function () { status('Not saved — offline?'); });
+  }
+  // Fetch this code's trips; the trip on screen is linked to a saved one with the same stops, or saved as new
+  function loadSaved() {
+    api('GET', '/trips').then(function (list) {
+      savedTrips = list;
+      if (!tripId && stops.length) {
+        var mine = JSON.stringify(packStops()), same = list.filter(function (t) { return JSON.stringify(t.stops) === mine; })[0];
+        if (same) { tripId = same.id; remember(); } else syncNow();
+      }
+      renderSaved();
+      status(list.length ? 'Synced' : '');
+    }, function () { status('Couldn\u2019t reach the server'); });
+  }
+  // Show a trip without re-saving it
+  function setTrip(id, list) {
+    tripId = id;
+    stops = list;
+    syncPaused = true;
+    changed();
+    syncPaused = false;
+    remember();
+    renderSaved();
+    fitTrip();
+  }
+  function renderSaved() {
+    var ul = $('saved');
+    ul.textContent = '';
+    savedTrips.forEach(function (t) {
+      var li = el('li', t.id === tripId ? 'current' : '');
+      var open = el('button', 'saved-open');
+      open.type = 'button'; open.dataset.id = t.id;
+      open.appendChild(el('span', 'saved-name', t.name));
+      open.appendChild(el('span', 'saved-meta', t.stops.length + (t.stops.length === 1 ? ' stop' : ' stops')));
+      li.appendChild(open);
+      var del = btn('×', 'Delete ' + t.name, 'delete', 0);
+      del.dataset.id = t.id;
+      li.appendChild(del);
+      ul.appendChild(li);
+    });
+    $('saved-wrap').hidden = !savedTrips.length;
+    $('sync-code').textContent = syncCode;
+  }
+  $('saved').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-id]');
+    if (!b) return;
+    var t = savedTrips.filter(function (x) { return x.id === b.dataset.id; })[0];
+    if (!t) return;
+    if (b.dataset.act === 'delete') {
+      if (!confirm('Delete “' + t.name + '”?')) return;
+      api('DELETE', '/trips/' + t.id).then(function () {
+        savedTrips = savedTrips.filter(function (x) { return x !== t; });
+        if (tripId === t.id) { tripId = null; remember(); }
+        renderSaved();
+      }, function () { status('Couldn’t delete — offline?'); });
+      return;
+    }
+    flushSync();
+    setTrip(t.id, validStops(t.stops) || []);
+  });
+  $('sync-code').addEventListener('click', function () {
+    var next = prompt('Your sync code is ' + syncCode + '.\nTo see your trips from another device, enter that device’s code here:', '');
+    if (next == null) return;
+    next = next.trim().toLowerCase();
+    if (!/^[a-z0-9]{10,32}$/.test(next)) { if (next) alert('That doesn’t look like a sync code.'); return; }
+    flushSync();
+    syncCode = next; tripId = null; savedTrips = [];
+    remember(); renderSaved(); loadSaved();
+  });
+
   // ---------------------------------------------------------------- start
   readColors();
   stops = load();
+  syncPaused = true;
   changed();
+  syncPaused = false;
+  remember();
+  renderSaved();
+  loadSaved();
   new ResizeObserver(resize).observe(wrap);
   if (document.fonts) document.fonts.ready.then(requestRender);
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { readColors(); requestRender(); });
