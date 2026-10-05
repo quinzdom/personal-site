@@ -97,6 +97,7 @@ h1 { flex: 1; margin: 0; font-size: 20px; font-weight: 600; }
 .suggest .s-credit:hover { background: none; }
 
 .summary { margin: 16px 0 8px; color: var(--ink-2); }
+.cost { margin: -4px 0 10px; color: var(--ink-2); font-size: 13.5px; }
 .stops { margin: 0; padding: 0; list-style: none; }
 .stop { display: flex; align-items: center; gap: 4px; padding: 4px 0; border-radius: 6px; cursor: grab; user-select: none; position: relative; }
 .stop .num { touch-action: none; }

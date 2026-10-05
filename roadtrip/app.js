@@ -11,6 +11,11 @@
   var P = DATA.places, NPL = P.name.length;
   var STORE_KEY = 'roadtrip:v1';
   var MAX_STOPS = 60;
+  // Trip cost assumptions (prices as of Oct 5, 2026)
+  var GAS_PRICE = 4.37;       // $/gal, AAA US average regular
+  var GAS_MPG = 27;           // typical US car
+  var KWH_PRICE = 0.625;      // $/kWh, US average Tesla Supercharger, non-member
+  var MODEL_Y_KWH_MI = 0.28;  // Tesla Model Y at highway speeds
   var STATES = 'AL AZ AR CA CO CT DE DC FL GA ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY'.split(' ');
 
   function $(id) { return document.getElementById(id); }
@@ -286,6 +291,9 @@
     });
     $('summary').textContent = stops.length < 2 ? 'Add stops to plan a drive.'
       : stops.length + ' stops · ' + fmtMiles(mi) + ' mi · ' + fmtTime(min) + ' driving';
+    $('cost').hidden = stops.length < 2;
+    $('cost').textContent = 'Tesla Model Y \u2248 $' + fmtMiles(mi * MODEL_Y_KWH_MI * KWH_PRICE) +
+      ' electricity \u00b7 Gas car \u2248 $' + fmtMiles(mi / GAS_MPG * GAS_PRICE);
     $('empty').hidden = stops.length > 0;
     $('actions').hidden = stops.length === 0;
   }
