@@ -92,6 +92,9 @@ h1 { flex: 1; margin: 0; font-size: 20px; font-weight: 600; }
 .suggest li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 8px; border-radius: 6px; cursor: pointer; }
 .suggest li[aria-selected="true"], .suggest li:hover { background: var(--hover-accent); }
 .suggest .s-meta, .s-none { color: var(--ink-2); }
+.suggest .s-meta { flex: none; max-width: 50%; text-align: right; font-size: 13px; }
+.suggest .s-credit { display: block; padding: 4px 8px 2px; font-size: 11px; color: var(--ink-2); cursor: default; }
+.suggest .s-credit:hover { background: none; }
 
 .summary { margin: 16px 0 8px; color: var(--ink-2); }
 .stops { margin: 0; padding: 0; list-style: none; }

@@ -301,19 +301,49 @@
   });
 
   // ---------------------------------------------------------------- search box
-  var q = $('q'), sug = $('suggest'), sugItems = [], sugSel = -1;
-  function openSuggest(items) {
+  // Built-in towns and parks show instantly; any address or place comes from Photon (OpenStreetMap) a moment later
+  var q = $('q'), sug = $('suggest'), sugItems = [], sugSel = -1, remoteTimer = 0, remoteReq = null;
+  var STATE_CODES = {};
+  B.states.forEach(function (s) { STATE_CODES[s.n] = s.p; });
+
+  function localItems(raw) {
+    return search(raw).map(function (i) { return { stop: placeToStop(i), name: P.name[i], meta: P.st[i] }; });
+  }
+  function inLower48(x, y) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    return ctx.isPointInPath(states, x, y, 'evenodd');
+  }
+  function remoteSearch(raw) {
+    if (remoteReq) remoteReq.abort();
+    remoteReq = new AbortController();
+    var c = window.AlbersUSA.inverse(view.cx, view.cy);
+    var url = 'https://photon.komoot.io/api/?limit=10&lang=en&bbox=-125,24,-66,50&lat=' + c[1].toFixed(3) + '&lon=' + c[0].toFixed(3) + '&q=' + encodeURIComponent(raw);
+    return fetch(url, { signal: remoteReq.signal }).then(function (r) { return r.json(); }).then(function (data) {
+      var out = [];
+      data.features.forEach(function (f) {
+        var p = f.properties, ll = f.geometry.coordinates, xy = window.AlbersUSA.forward(ll[0], ll[1]);
+        var st = STATE_CODES[p.state] || '';
+        var name = p.name || [p.housenumber, p.street].filter(Boolean).join(' ') || p.city;
+        if (p.countrycode !== 'US' || !name || !inLower48(xy[0], xy[1])) return;
+        var place = p.city && p.city !== name ? p.city : p.county || '';
+        out.push({ stop: { name: name, st: st, k: 3, x: Math.round(xy[0]), y: Math.round(xy[1]) }, name: name, meta: [place, st].filter(Boolean).join(', ') });
+      });
+      return out;
+    });
+  }
+  function openSuggest(items, osm, pending) {
     sugItems = items; sugSel = -1;
     sug.textContent = '';
-    if (!items.length) sug.appendChild(el('li', 's-none', 'No match. Try a nearby town.'));
-    items.forEach(function (i, n) {
+    if (!items.length) sug.appendChild(el('li', 's-none', pending ? 'Searching…' : 'No match.'));
+    items.forEach(function (it, n) {
       var li = el('li');
       li.id = 'sug-' + n; li.dataset.n = n;
       li.setAttribute('role', 'option'); li.setAttribute('aria-selected', 'false');
-      li.appendChild(el('span', 's-name', P.name[i]));
-      li.appendChild(el('span', 's-meta', P.st[i]));
+      li.appendChild(el('span', 's-name', it.name));
+      li.appendChild(el('span', 's-meta', it.meta));
       sug.appendChild(li);
     });
+    if (osm) sug.appendChild(el('li', 's-credit', '© OpenStreetMap'));
     sug.hidden = false;
     q.setAttribute('aria-expanded', 'true');
   }
@@ -329,10 +359,31 @@
   function choose(n) {
     if (sugItems[n] == null) return;
     q.value = '';
-    addStop(placeToStop(sugItems[n]));
+    clearTimeout(remoteTimer);
+    if (remoteReq) remoteReq.abort();
+    addStop(sugItems[n].stop);
     closeSuggest();
   }
-  q.addEventListener('input', function () { if (q.value.trim()) openSuggest(search(q.value)); else closeSuggest(); });
+  q.addEventListener('input', function () {
+    var raw = q.value.trim();
+    clearTimeout(remoteTimer);
+    if (!raw) { closeSuggest(); return; }
+    var local = localItems(raw);
+    openSuggest(local, false, raw.length >= 3);
+    if (raw.length < 3) return;
+    remoteTimer = setTimeout(function () {
+      remoteSearch(raw).then(function (remote) {
+        if (q.value.trim() !== raw) return;
+        var seen = {};
+        local = local.slice(0, 4);
+        local.forEach(function (it) { seen[it.name.toLowerCase() + '|' + it.stop.st] = 1; });
+        remote = remote.filter(function (it) { return !seen[it.name.toLowerCase() + '|' + it.stop.st]; }).slice(0, 8 - local.length);
+        var keep = sugSel >= 0 ? sugItems[sugSel] : null;
+        openSuggest(local.concat(remote), true);
+        if (keep) highlight(sugItems.indexOf(keep));
+      }, function () { /* offline or aborted: keep the built-in results */ });
+    }, 300);
+  });
   q.addEventListener('keydown', function (ev) {
     var n = sugItems.length;
     if (ev.key === 'ArrowDown' && n) { highlight((sugSel + 1) % n); ev.preventDefault(); }
