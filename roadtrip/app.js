@@ -226,7 +226,7 @@
   }
 
   // ---------------------------------------------------------------- stops and legs
-  var stops = [], legs = [], legCache = new Map();
+  var stops = [], legs = [], legCache = new Map(), beforeKerouac = null;
   function computeLegs() {
     legs = [];
     for (var i = 0; i + 1 < stops.length; i++) {
@@ -239,6 +239,8 @@
     }
   }
   function changed(flash) {
+    beforeKerouac = null;
+    $('kerouac').setAttribute('aria-pressed', 'false');
     computeLegs();
     renderList(flash);
     save();
@@ -445,6 +447,31 @@
   $('clear').addEventListener('click', function () {
     if (!confirm('Clear all stops?')) return;
     stops = []; changed(); fitTrip(); q.focus();
+  });
+
+  // Toggle Kerouac's first crossing from On the Road (1947); turning it off restores the previous trip
+  var KEROUAC = [['New York City', 'NY'], ['Chicago', 'IL'], ['Des Moines', 'IA'], ['Cheyenne', 'WY'], ['Denver', 'CO'],
+    ['Salt Lake City', 'UT'], ['San Francisco', 'CA'], ['Los Angeles', 'CA'], ['Pittsburgh', 'PA'], ['New York City', 'NY']];
+  function kerouacStops() {
+    return KEROUAC.map(function (w) {
+      var best = -1;
+      for (var i = 0; i < NPL; i++) if (P.name[i] === w[0] && P.st[i] === w[1] && (best < 0 || P.pop[i] > P.pop[best])) best = i;
+      return placeToStop(best);
+    });
+  }
+  $('kerouac').addEventListener('click', function () {
+    var on = beforeKerouac === null, prev = stops;
+    stops = on ? kerouacStops() : beforeKerouac;
+    changed(); fitTrip();
+    beforeKerouac = on ? prev : null;
+    $('kerouac').setAttribute('aria-pressed', String(on));
+  });
+
+  $('theme').addEventListener('click', function () {
+    var root = document.documentElement;
+    var dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('roadtrip:theme', root.dataset.theme); } catch (err) { /* storage unavailable */ }
   });
 
   // ---------------------------------------------------------------- start

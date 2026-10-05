@@ -5,17 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Road Trip Planner</title>
   <meta name="description" content="Plan a road trip across the United States: add stops and get miles and drive time for every leg.">
+  <script>try { var t = localStorage.getItem('roadtrip:theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="app">
     <aside class="panel">
-      <h1>Road Trip</h1>
+      <div class="head">
+        <h1>Road Trip</h1>
+        <button type="button" id="theme" aria-label="Toggle dark mode">&#9680;</button>
+      </div>
       <div class="search">
         <input id="q" type="text" placeholder="Add a city, town or national park" autocomplete="off" spellcheck="false"
                aria-label="Add a stop" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest">
         <ul class="suggest" id="suggest" role="listbox" hidden></ul>
       </div>
+      <button type="button" class="chip" id="kerouac" aria-pressed="false">Kerouac, 1947</button>
       <p class="summary" id="summary"></p>
       <ol class="stops" id="stops"></ol>
       <p class="empty" id="empty">Search above, or click the map to drop a stop.</p>

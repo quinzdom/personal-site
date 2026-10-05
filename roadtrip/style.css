@@ -24,7 +24,7 @@
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --ink: #ececec;
     --ink-2: #9a9a9a;
     --line: #2e2e2e;
@@ -47,6 +47,28 @@
     color-scheme: dark;
   }
 }
+:root[data-theme="dark"] {
+  --ink: #ececec;
+  --ink-2: #9a9a9a;
+  --line: #2e2e2e;
+  --bg: #161616;
+  --accent: #5b9cff;
+  --on-accent: #0b0b0b;
+  --hover: #262626;
+  --hover-accent: #1e2a40;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --map-water: #0f0f10;
+  --map-neighbor: #1a1a1a;
+  --map-land: #1f1f1f;
+  --map-border: #3a3a3a;
+  --map-road: #2a2a2a;
+  --map-interstate: #484848;
+  --map-label: #d6d6d6;
+  --map-halo: #1f1f1f;
+  --map-route: #5b9cff;
+  --map-route-ink: #0b0b0b;
+  color-scheme: dark;
+}
 
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
@@ -58,7 +80,7 @@ button { cursor: pointer; }
 
 .app { display: grid; grid-template-columns: 340px 1fr; height: 100%; }
 .panel { padding: 20px; border-right: 1px solid var(--line); overflow-y: auto; }
-h1 { margin: 0 0 16px; font-size: 20px; font-weight: 600; }
+h1 { flex: 1; margin: 0; font-size: 20px; font-weight: 600; }
 
 .search { position: relative; }
 #q { width: 100%; height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
@@ -106,3 +128,11 @@ h1 { margin: 0 0 16px; font-size: 20px; font-weight: 600; }
   .map-wrap { height: 60vh; order: -1; }
   .app { display: flex; flex-direction: column; }
 }
+
+.chip { margin-top: 12px; height: 30px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: none; color: var(--ink-2); font-size: 13px; }
+.chip:hover { color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+
+.head { display: flex; align-items: center; margin-bottom: 16px; }
+#theme { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 8px; background: none; color: var(--ink-2); font-size: 15px; }
+#theme:hover { color: var(--ink); }
