@@ -277,10 +277,10 @@
         if (leg) { mi += leg.miles; min += leg.minutes; }
       }
       var row = el('li', 'stop' + (flash === i ? ' flash' : ''));
+      row.dataset.i = i; row.tabIndex = 0;
+      row.setAttribute('aria-label', 'Stop ' + (i + 1) + ', ' + st.name + '. Drag, or Alt and arrow keys, to reorder.');
       row.appendChild(el('span', 'num', String(i + 1)));
       row.appendChild(el('span', 'stop-name', st.k === 0 && st.st ? st.name + ', ' + st.st : st.name));
-      row.appendChild(btn('↑', 'Move ' + st.name + ' earlier', 'up', i, i === 0));
-      row.appendChild(btn('↓', 'Move ' + st.name + ' later', 'down', i, i === stops.length - 1));
       row.appendChild(btn('×', 'Remove ' + st.name, 'remove', i));
       list.appendChild(row);
     });
@@ -289,16 +289,61 @@
     $('empty').hidden = stops.length > 0;
     $('actions').hidden = stops.length === 0;
   }
+  function moveStop(from, to) {
+    if (to < 0 || to >= stops.length || to === from) return;
+    stops.splice(to, 0, stops.splice(from, 1)[0]);
+    changed(to);
+  }
   $('stops').addEventListener('click', function (ev) {
-    var b = ev.target.closest('button[data-act]');
-    if (!b) return;
-    var i = +b.dataset.i, j = b.dataset.act === 'up' ? i - 1 : i + 1;
-    if (b.dataset.act === 'remove') { stops.splice(i, 1); changed(); return; }
-    var t = stops[i]; stops[i] = stops[j]; stops[j] = t;
-    changed(j);
-    var moved = $('stops').querySelector('.stop.flash [data-act="' + b.dataset.act + '"]');
-    if (moved && !moved.disabled) moved.focus();
+    var b = ev.target.closest('button[data-act="remove"]');
+    if (b) { stops.splice(+b.dataset.i, 1); changed(); }
   });
+  $('stops').addEventListener('keydown', function (ev) {
+    var row = ev.target.closest('.stop');
+    if (!row || !ev.altKey || (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown')) return;
+    ev.preventDefault();
+    var i = +row.dataset.i, j = i + (ev.key === 'ArrowUp' ? -1 : 1);
+    moveStop(i, j);
+    var moved = $('stops').querySelector('.stop[data-i="' + j + '"]');
+    if (moved) moved.focus();
+  });
+
+  // Drag to reorder: anywhere on a row with a mouse, by the number badge on touch so the list still scrolls
+  var drag = null;
+  $('stops').addEventListener('pointerdown', function (ev) {
+    var row = ev.target.closest('.stop');
+    if (!row || ev.button > 0 || ev.target.closest('button')) return;
+    if (ev.pointerType !== 'mouse' && !ev.target.closest('.num')) return;
+    ev.preventDefault();
+    row.setPointerCapture(ev.pointerId);
+    drag = { row: row, from: +row.dataset.i, to: +row.dataset.i, y0: ev.clientY, moved: false };
+  });
+  $('stops').addEventListener('pointermove', function (ev) {
+    if (!drag) return;
+    var dy = ev.clientY - drag.y0;
+    if (!drag.moved && Math.abs(dy) < 4) return;
+    drag.moved = true;
+    drag.row.classList.add('dragging');
+    drag.row.style.transform = 'translateY(' + dy + 'px)';
+    // insertion point: how many other stops sit above the pointer
+    var rows = Array.prototype.filter.call($('stops').querySelectorAll('.stop'), function (r) { return r !== drag.row; });
+    var to = 0;
+    rows.forEach(function (r) { var b = r.getBoundingClientRect(); if (ev.clientY > b.top + b.height / 2) to++; });
+    drag.to = to;
+    rows.forEach(function (r, k) {
+      r.classList.toggle('drop-above', k === to);
+      r.classList.toggle('drop-below', to === rows.length && k === rows.length - 1);
+    });
+  });
+  function endDrag() {
+    if (!drag) return;
+    var d = drag;
+    drag = null;
+    d.row.style.transform = '';
+    if (d.moved) moveStop(d.from, d.to);
+  }
+  $('stops').addEventListener('pointerup', endDrag);
+  $('stops').addEventListener('pointercancel', function () { if (drag) { drag.moved = false; endDrag(); renderList(); } });
 
   // ---------------------------------------------------------------- search box
   // Built-in towns and parks show instantly; any address or place comes from Photon (OpenStreetMap) a moment later

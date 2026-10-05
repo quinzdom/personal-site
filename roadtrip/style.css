@@ -98,7 +98,12 @@ h1 { flex: 1; margin: 0; font-size: 20px; font-weight: 600; }
 
 .summary { margin: 16px 0 8px; color: var(--ink-2); }
 .stops { margin: 0; padding: 0; list-style: none; }
-.stop { display: flex; align-items: center; gap: 4px; padding: 4px 0; }
+.stop { display: flex; align-items: center; gap: 4px; padding: 4px 0; border-radius: 6px; cursor: grab; user-select: none; position: relative; }
+.stop .num { touch-action: none; }
+.stop.dragging { z-index: 2; cursor: grabbing; background: var(--bg); box-shadow: 0 4px 14px var(--shadow); }
+.stop.drop-above::before, .stop.drop-below::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; background: var(--accent); }
+.stop.drop-above::before { top: -2px; }
+.stop.drop-below::after { bottom: -2px; }
 .stop.flash { animation: flash 1s ease-out; }
 @keyframes flash { from { background: var(--hover-accent); } }
 .num {
