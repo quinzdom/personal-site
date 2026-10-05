@@ -101,6 +101,7 @@
         shape.x0 = Math.min(shape.x0, x); shape.x1 = Math.max(shape.x1, x); shape.y0 = Math.min(shape.y0, y); shape.y1 = Math.max(shape.y1, y);
       }
     });
+    shape.name = s.n; shape.lx = s.lx; shape.ly = s.ly; shape.w = Math.sqrt(s.a) * 10;
     stateShapes.push(shape);
     s.r.forEach(function (a) {
       var x = 0, y = 0;
@@ -130,7 +131,7 @@
 
   function readColors() {
     var cs = getComputedStyle(document.documentElement);
-    ['water', 'land', 'neighbor', 'border', 'road', 'interstate', 'label', 'halo', 'route', 'route-ink'].forEach(function (k) {
+    ['water', 'land', 'neighbor', 'border', 'road', 'interstate', 'label', 'halo', 'route', 'route-ink', 'state'].forEach(function (k) {
       colors[k] = cs.getPropertyValue('--map-' + k).trim();
     });
   }
@@ -238,6 +239,27 @@
     for (var c = 0; c < cities.length && P.pop[cities[c]] >= minPop && hits.length < 150; c++) {
       drawPlace(cities[c], (P.pop[cities[c]] >= 1e6 ? '700 ' : '400 ') + '12px ' + FONT);
     }
+    if (z < 7) drawStateNames();
+  }
+  // Spaced capitals at each state's label point: the full name where it fits, else the postal code
+  function drawStateNames() {
+    var font = '600 11px ' + FONT, spaced = 'letterSpacing' in ctx;
+    ctx.save();
+    ctx.font = font; ctx.fillStyle = colors.state;
+    if (spaced) ctx.letterSpacing = '1.5px';
+    stateShapes.forEach(function (st) {
+      var p = toScreen(st.lx, st.ly);
+      if (p[0] < 0 || p[0] > W || p[1] < 0 || p[1] > H) return;
+      var room = st.w * view.s, text = st.name.toUpperCase(), w = ctx.measureText(text).width;
+      if (w > room) { text = st.st; w = ctx.measureText(text).width; }
+      if (w > room * 1.8) return;
+      // try the label point, then just above or below it if a town label is there
+      var x = p[0] - w / 2, tries = [0, -14, 14];
+      for (var k = 0; k < tries.length; k++) {
+        if (reserve(x - 2, p[1] + tries[k] - 6, x + w + 2, p[1] + tries[k] + 6)) { ctx.fillText(text, x, p[1] + tries[k] + 4); return; }
+      }
+    });
+    ctx.restore();
   }
   function drawPlace(i, font) {
     var p = toScreen(P.x[i], P.y[i]);

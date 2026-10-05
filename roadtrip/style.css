@@ -18,6 +18,7 @@
   --map-road: #e2e2e2;
   --map-interstate: #c8c8c8;
   --map-label: #333;
+  --map-state: #8c8c8c;
   --map-halo: #fff;
   --map-route: #2563eb;
   --map-route-ink: #fff;
@@ -41,6 +42,7 @@
     --map-road: #2a2a2a;
     --map-interstate: #484848;
     --map-label: #d6d6d6;
+  --map-state: #7d7d7d;
     --map-halo: #1f1f1f;
     --map-route: #5b9cff;
     --map-route-ink: #0b0b0b;
@@ -64,6 +66,7 @@
   --map-road: #2a2a2a;
   --map-interstate: #484848;
   --map-label: #d6d6d6;
+  --map-state: #7d7d7d;
   --map-halo: #1f1f1f;
   --map-route: #5b9cff;
   --map-route-ink: #0b0b0b;
