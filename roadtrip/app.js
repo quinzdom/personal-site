@@ -14,6 +14,12 @@
   // Trip cost assumptions (prices as of Oct 5, 2026)
   var GAS_PRICE = 4.37;       // $/gal, AAA US average regular
   var GAS_MPG = 27;           // typical US car
+  // AAA average regular $/gal by state, Oct 5 2026
+  var GAS_STATE = { AL: 3.98, AZ: 4.75, AR: 3.96, CA: 6.39, CO: 4.13, CT: 4.45, DE: 4.23, DC: 4.45, FL: 4.06, GA: 3.85, ID: 4.95,
+    IL: 4.66, IN: 3.74, IA: 4.11, KS: 4.05, KY: 4.02, LA: 3.94, ME: 4.40, MD: 4.23, MA: 4.35, MI: 4.46, MN: 4.21, MS: 3.94,
+    MO: 4.03, MT: 4.51, NE: 4.21, NV: 5.48, NH: 4.34, NJ: 4.31, NM: 4.34, NY: 4.47, NC: 4.03, ND: 4.16, OH: 3.88, OK: 3.98,
+    OR: 5.04, PA: 4.48, RI: 4.34, SC: 3.92, SD: 4.19, TN: 3.94, TX: 3.91, UT: 4.92, VT: 4.43, VA: 4.12, WA: 5.48, WV: 4.28,
+    WI: 4.15, WY: 4.45 };
   // Supercharger standard (non-member) peak $/kWh by state, dcfctracker.com, Oct 5 2026
   var SC_PEAK = { AL: .579, AZ: .748, AR: .560, CA: .736, CO: .529, CT: .691, DE: .675, DC: .910, FL: .568, GA: .635, ID: .570,
     IL: .556, IN: .605, IA: .549, KS: .502, KY: .570, LA: .587, ME: .615, MD: .611, MA: .588, MI: .621, MN: .571, MS: .581,
@@ -283,7 +289,8 @@
       legs.push(leg);
     }
   }
-  // Charging cost of a leg: its miles split by the state each stretch of road is in, priced at that state's Supercharger rate
+  // Fuel costs of a leg: its miles split by the state each stretch of road is in, priced at that state's
+  // Supercharger rate and gas price
   function stateAt(x, y) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     for (var k = 0; k < stateShapes.length; k++) {
@@ -292,8 +299,8 @@
     }
     return '';
   }
-  function legChargeCost(leg) {
-    if (leg.chargeCost != null) return leg.chargeCost;
+  function legCosts(leg) {
+    if (leg.costs) return leg.costs;
     var byState = {}, total = 0, p = leg.points, last = '';
     for (var i = 1; i < p.length; i++) {
       var d = Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]);
@@ -302,11 +309,14 @@
       byState[last] = (byState[last] || 0) + d;
       total += d;
     }
-    var cost = 0;
+    if (!total) byState = { '': total = 1 };
+    var charge = 0, gas = 0;
     Object.keys(byState).forEach(function (st) {
-      cost += leg.miles * byState[st] / total * MODEL_Y_KWH_MI * (SC_PEAK[st] || SC_NATIONAL) * SC_OWNER_BLEND;
+      var mi = leg.miles * byState[st] / total;
+      charge += mi * MODEL_Y_KWH_MI * (SC_PEAK[st] || SC_NATIONAL) * SC_OWNER_BLEND;
+      gas += mi / GAS_MPG * (GAS_STATE[st] || GAS_PRICE);
     });
-    return (leg.chargeCost = total ? cost : leg.miles * MODEL_Y_KWH_MI * SC_NATIONAL * SC_OWNER_BLEND);
+    return (leg.costs = { charge: charge, gas: gas });
   }
   function changed(flash) {
     beforeKerouac = null;
@@ -338,13 +348,13 @@
     return b;
   }
   function renderList(flash) {
-    var list = $('stops'), mi = 0, min = 0, charge = 0;
+    var list = $('stops'), mi = 0, min = 0, charge = 0, gas = 0;
     list.textContent = '';
     stops.forEach(function (st, i) {
       var leg = legs[i - 1];
       if (i > 0) {
         list.appendChild(el('li', 'leg', !leg ? 'No highway route' : fmtMiles(leg.miles) + ' mi · ' + fmtTime(leg.minutes)));
-        if (leg) { mi += leg.miles; min += leg.minutes; charge += legChargeCost(leg); }
+        if (leg) { var c = legCosts(leg); mi += leg.miles; min += leg.minutes; charge += c.charge; gas += c.gas; }
       }
       var row = el('li', 'stop' + (flash === i ? ' flash' : ''));
       row.dataset.i = i; row.tabIndex = 0;
@@ -358,9 +368,10 @@
       : stops.length + ' stops · ' + fmtMiles(mi) + ' mi · ' + fmtTime(min) + ' driving';
     $('cost').hidden = stops.length < 2;
     $('cost').textContent = 'Tesla Model Y \u2248 $' + fmtMiles(charge) +
-      ' electricity \u00b7 Gas car \u2248 $' + fmtMiles(mi / GAS_MPG * GAS_PRICE);
+      ' electricity \u00b7 Gas car \u2248 $' + fmtMiles(gas);
     if (mi) $('cost').title = 'Supercharging at about $' + (charge / (mi * MODEL_Y_KWH_MI)).toFixed(2) + '/kWh, the average of state prices along this route ' +
-      '(Tesla owner rate, mostly daytime charging) at 0.28 kWh/mi. Gas at $' + GAS_PRICE + '/gal, 27 mpg (US average, Oct 2026).';
+      '(Tesla owner rate, mostly daytime charging) at 0.28 kWh/mi. Gas at about $' + (gas / mi * GAS_MPG).toFixed(2) +
+      '/gal, the average of state prices along this route (AAA, Oct 2026), at 27 mpg.';
     $('empty').hidden = stops.length > 0;
     $('actions').hidden = stops.length === 0;
   }
