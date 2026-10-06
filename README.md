@@ -26,12 +26,14 @@ That serves the whole site on `http://localhost:8000` and enables the AI-powered
 - `anime.html`: dedicated anime page
 - `tv.html`: dedicated TV page
 - `stats.html`: compact stats page
+- `listening.html`: Spotify listening history (music and podcasts since 2014)
 - `goals.html`: private goals dashboard (unlisted, `noindex`, not linked from any page)
 - `items_data.js`: tracked books and movies
 - `anime_data.js`: generated grouped anime data
 - `tv_data.js`: generated TV data
 - `likes_data.js`: generated Letterboxd liked-movie set used by the favorites filter
 - `stats_data.js`: generated reading, watching, and wage stats shown in the header
+- `listening_data.js`: generated Spotify listening aggregates used by the listening page
 - `goals_data.js`: generated goal definitions and completed days
 - `daylog-k7m2.html`: private daily log page
 - `daylog_data.js`: generated daily log data used by the private log page
@@ -47,11 +49,13 @@ The project is compacted around a few shared pieces now:
 - `styles/page-chrome.css`: shared page header and nav styling
 - `styles/media-grid-page.css`: shared poster-grid page styling used by anime and TV
 - `styles/stats-page.css`: stats page styling
+- `styles/listening-page.css`: listening page styling
 - `styles/goals-page.css`: goals page styling
 - `scripts/page-utils.js`: shared client-side helpers for page rendering
 - `scripts/anime-page.js`: anime page behavior
 - `scripts/tv-page.js`: TV page behavior
 - `scripts/stats-page.js`: stats page behavior
+- `scripts/listening-page.js`: listening page behavior
 - `scripts/goals-page.js`: goals page behavior
 
 ## Source data
@@ -65,6 +69,8 @@ This repo is set up to be self-contained. The checked-in raw exports live here:
 - `data-source/letterboxd/likes/films.csv`
 
 Bookmeter is the only exception: those books were imported from the live Bookmeter site, not from a local export file.
+
+Spotify is the other exception: the raw export logs the IP address of every stream, so it stays out of the repo and only the aggregates in `listening_data.js` are committed.
 
 TV is currently sourced from:
 
@@ -117,6 +123,16 @@ git push origin main
 ```
 
 This fast path intentionally does not run `node scripts/build-consumption-stats.mjs`, rebuild `stats_data.js`, update `stats.html`, or rebuild `display_metadata.js`. Only refresh stats/metadata when explicitly requested.
+
+## Update Spotify listening
+
+Request the Extended Streaming History from Spotify's privacy page, unzip it, then:
+
+```bash
+node scripts/build-listening-data.mjs ~/Downloads/my_spotify_data
+```
+
+Point it at the unzipped folder that holds the `Streaming_History_Audio_*.json` files. It rewrites `listening_data.js`; bump the `?v=` cache key on that script tag in `listening.html`, then commit both files to publish.
 
 ## Update Goodreads book dates
 

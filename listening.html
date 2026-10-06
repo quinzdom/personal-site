@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>listening</title>
+  <meta name="description" content="Twelve years of Spotify listening, from December 2014 to October 2026: music and podcasts by month and year, top artists, songs and shows, daily rhythm and records.">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8XQHBWBCK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-G8XQHBWBCK');
+  </script>
+  <link rel="stylesheet" href="styles/page-chrome.css">
+  <link rel="stylesheet" href="styles/listening-page.css">
+</head>
+<body class="listening">
+  <header>
+    <div class="header-copy">
+      <div class="header-main">
+        <h1>Twelve Years of Listening</h1>
+      </div>
+      <div class="header-subline">
+        <p id="listening-subline">Spotify, December 2014 to October 2026</p>
+        <div class="header-links">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="stats.html" class="nav-link">Stats</a>
+          <span class="nav-link-current" aria-current="page">Listening</span>
+          <a href="recommendations.html" class="nav-link">Recommendations</a>
+          <a href="reading-list.html" class="nav-link">Reading List</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="ls-main">
+    <div class="ls-sheet">
+      <section class="ls-summary" aria-label="Totals">
+        <div class="ls-hero">
+          <div class="ls-label">Total listening</div>
+          <div class="ls-hero-fig" id="hero-hours"></div>
+          <p class="ls-hero-sub" id="hero-sub"></p>
+        </div>
+        <dl class="ls-kpis" id="kpis"></dl>
+      </section>
+
+      <nav class="ls-jump" aria-label="Sections">
+        <a href="#months">Month by month</a>
+        <a href="#sides">Two countries</a>
+        <a href="#years">Year by year</a>
+        <a href="#artists">Artists</a>
+        <a href="#songs">Songs and albums</a>
+        <a href="#podcasts">Podcasts</a>
+        <a href="#clock">Daily rhythm</a>
+        <a href="#habits">Habits</a>
+        <a href="#records">Records</a>
+        <a href="#notes">Notes</a>
+      </nav>
+
+      <section class="ls-section" id="months">
+        <div class="ls-head"><h2 class="ls-label">Month by month</h2><p class="ls-take" id="take-months"></p></div>
+        <figure class="ls-panel">
+          <div class="ls-panel-top">
+            <div class="ls-legend"><span><i class="key music"></i>Music</span><span><i class="key podcast"></i>Podcasts</span></div>
+            <span class="ls-unit">Hours per month</span>
+          </div>
+          <div class="ls-chart" id="monthly-chart" role="img" aria-label="Stacked monthly hours of music and podcasts"></div>
+          <details class="ls-tv"><summary>Table view</summary><div class="ls-tablewrap" id="monthly-table"></div></details>
+        </figure>
+      </section>
+
+      <section class="ls-section" id="sides">
+        <div class="ls-head"><h2 class="ls-label">Two countries, two sides</h2><p class="ls-take" id="take-sides"></p></div>
+        <div class="ls-ledger" id="ledger"></div>
+      </section>
+
+      <section class="ls-section" id="years">
+        <div class="ls-head"><h2 class="ls-label">Year by year</h2><p class="ls-take" id="take-years"></p></div>
+        <div class="ls-ywrap" id="year-table"></div>
+        <p class="ls-keynote" id="year-note"></p>
+      </section>
+
+      <section class="ls-section" id="artists">
+        <div class="ls-head"><h2 class="ls-label">The artists I kept coming back to</h2><p class="ls-take" id="take-artists"></p></div>
+        <div class="ls-rank" id="artist-list"></div>
+        <p class="ls-keynote">Squares run from 2014 to 2026. Darker means more hours, scaled to that artist’s own peak year.</p>
+        <details class="ls-tv"><summary>Hours by year, table view</summary><div class="ls-tablewrap" id="artist-table"></div></details>
+      </section>
+
+      <section class="ls-section" id="songs">
+        <div class="ls-head"><h2 class="ls-label">Songs and albums</h2><p class="ls-take" id="take-songs"></p></div>
+        <div class="ls-cols">
+          <div><h3 class="ls-sub">Most-played songs</h3><ol class="ls-list" id="song-list"></ol></div>
+          <div><h3 class="ls-sub">Albums with the most hours</h3><ol class="ls-list" id="album-list"></ol></div>
+        </div>
+      </section>
+
+      <section class="ls-section" id="podcasts">
+        <div class="ls-head"><h2 class="ls-label">The talk years</h2><p class="ls-take" id="take-podcasts"></p></div>
+        <div class="ls-rank" id="show-list"></div>
+        <p class="ls-keynote">Video marks shows I mostly watched rather than heard. Squares run from 2014 to 2026, scaled to each show’s own peak.</p>
+        <details class="ls-tv"><summary>Hours by year, table view</summary><div class="ls-tablewrap" id="show-table"></div></details>
+      </section>
+
+      <section class="ls-section" id="clock">
+        <div class="ls-head"><h2 class="ls-label">Daily rhythm</h2><p class="ls-take" id="take-clock"></p></div>
+        <div class="ls-clocks" id="clocks"></div>
+        <div class="ls-scale"><span>0%</span><span class="ramp"></span><span id="scale-max"></span></div>
+        <details class="ls-tv"><summary>Share of listening by hour, table view</summary><div class="ls-tablewrap" id="hour-table"></div></details>
+      </section>
+
+      <section class="ls-section" id="habits">
+        <div class="ls-head"><h2 class="ls-label">Habits</h2><p class="ls-take" id="take-habits"></p></div>
+        <div class="ls-multi" id="habit-charts"></div>
+        <details class="ls-tv"><summary>Table view</summary><div class="ls-tablewrap" id="habit-table"></div></details>
+      </section>
+
+      <section class="ls-section" id="records">
+        <div class="ls-head"><h2 class="ls-label">Records and rediscoveries</h2><p class="ls-take" id="take-records"></p></div>
+        <div class="ls-records" id="record-grid"></div>
+        <div class="ls-after">
+          <div><h3 class="ls-sub">Gone quiet</h3><p class="ls-note">My most-played songs that haven’t come up in two years.</p><ol class="ls-list plain" id="lost-list"></ol></div>
+          <div><h3 class="ls-sub">Where I pressed play</h3><p class="ls-note" id="country-note"></p><div class="ls-chips" id="country-chips"></div></div>
+        </div>
+      </section>
+
+      <section class="ls-section" id="notes">
+        <div class="ls-head"><h2 class="ls-label">How this was counted</h2></div>
+        <ul class="ls-notes" id="notes-list"></ul>
+      </section>
+    </div>
+  </main>
+
+  <div id="ls-tip" role="tooltip" hidden></div>
+
+  <script src="listening_data.js?v=20261007a"></script>
+  <script src="scripts/page-utils.js"></script>
+  <script src="scripts/listening-page.js"></script>
+</body>
+</html>
