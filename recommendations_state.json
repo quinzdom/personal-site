@@ -10,9 +10,49 @@
   "usedMovies": [
     "rec-taste-of-cherry",
     "rec-yi-yi",
-    "rec-syndromes"
+    "rec-syndromes",
+    "rec-vengeance",
+    "rec-satantango",
+    "rec-conformist"
   ],
   "archive": [
+    {
+      "date": "2026-10-11",
+      "books": [
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        },
+        {
+          "title": "Demons",
+          "author": "Fyodor Dostoevsky",
+          "coverPath": "images/covers/rec-demons.jpg"
+        },
+        {
+          "title": "The Rings of Saturn",
+          "author": "W.G. Sebald",
+          "coverPath": "images/covers/rec-rings-of-saturn.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Vengeance Is Mine",
+          "author": "Shohei Imamura, 1979",
+          "coverPath": null
+        },
+        {
+          "title": "Satantango",
+          "author": "Béla Tarr, 1994",
+          "coverPath": "images/covers/rec-satantango.jpg"
+        },
+        {
+          "title": "The Conformist",
+          "author": "Bernardo Bertolucci, 1970",
+          "coverPath": "images/covers/rec-conformist.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-10-04",
       "books": [
