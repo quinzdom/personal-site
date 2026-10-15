@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crowns of Europe</title>
+<style>
+/* Layout: a reference-book page. One wide timeline panel, with the selected ruler's entry pinned beside it. */
+:root{
+  --bg:#f4f5f7; --surface:#ffffff; --track:#e8ebef;
+  --ink:#15181d; --muted:#5a616d; --faint:#8a909b;
+  --line:#e3e6eb; --line-strong:#cdd2d9;
+  --hover:rgba(21,24,29,.035); --sel:rgba(21,24,29,.07);
+  --c-eng:#2a78d6; --c-fr:#eb6834; --c-hre:#1baf7a; --c-es:#eda100; --c-ru:#e87ba4; --c-ne:#008300;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1114; --surface:#16191d; --track:#20242a;
+  --ink:#eceef1; --muted:#a3a9b3; --faint:#737a85;
+  --line:#23272d; --line-strong:#343a42;
+  --hover:rgba(255,255,255,.035); --sel:rgba(255,255,255,.07);
+  --c-eng:#3987e5; --c-fr:#d95926; --c-hre:#199e70; --c-es:#c98500; --c-ru:#d55181; --c-ne:#008300;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1114; --surface:#16191d; --track:#20242a;
+  --ink:#eceef1; --muted:#a3a9b3; --faint:#737a85;
+  --line:#23272d; --line-strong:#343a42;
+  --hover:rgba(255,255,255,.035); --sel:rgba(255,255,255,.07);
+  --c-eng:#3987e5; --c-fr:#d95926; --c-hre:#199e70; --c-es:#c98500; --c-ru:#d55181; --c-ne:#008300;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.page{max-width:1240px;margin:0 auto;padding-inline:clamp(16px,4vw,40px);padding-block:36px 56px;display:flex;flex-direction:column;gap:24px}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+.eyebrow,.ctl-label,.stats dt,.kv dt,.card h3,th{font-family:var(--mono);font-size:11px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+h1{font-family:var(--serif);font-weight:500;font-size:clamp(40px,6vw,60px);line-height:1.02;letter-spacing:-.015em;margin:6px 0 0;text-wrap:balance}
+.lede{max-width:62ch;margin:12px 0 0;font-size:16px;color:var(--muted)}
+
+.controls{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end}
+.ctl{display:flex;flex-direction:column;gap:8px;min-width:0}
+.toggles{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.toggle{display:inline-flex;align-items:center;gap:8px;padding:5px 10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);font-size:13px;line-height:1.3}
+.toggle:hover{border-color:var(--faint)}
+.toggle .sw{width:10px;height:10px;border-radius:3px;background:var(--c);border:1.5px solid var(--c);flex:none}
+.toggle .n{font-family:var(--mono);font-size:11px;color:var(--faint)}
+.toggle[aria-pressed="false"]{background:transparent;color:var(--faint)}
+.toggle[aria-pressed="false"] .sw{background:transparent}
+.linkbtn{font-size:13px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line-strong);padding:5px 4px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:3px;background:var(--track);border-radius:10px}
+.seg button{padding:5px 12px;border-radius:7px;font-size:13px;color:var(--muted)}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:500;box-shadow:0 0 0 1px var(--line-strong)}
+select{font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--line-strong);border-radius:8px;padding:6px 10px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;margin:0;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.stats div{background:var(--surface);padding:12px 16px;min-width:0}
+.stats dd{margin:4px 0 0;font-size:14px;font-weight:500}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:24px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.chart-panel{padding:12px 14px 16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.chart{min-height:300px;user-select:none;-webkit-user-select:none}
+.chart svg{display:block}
+.grid line{stroke:var(--line);stroke-width:1}
+.axis{stroke:var(--line-strong);stroke-width:1}
+.tick{font:11px var(--mono);fill:var(--faint)}
+.hit{fill:transparent}
+.row{cursor:pointer;outline:none}
+.row:hover .hit{fill:var(--hover)}
+.row.sel .hit{fill:var(--sel)}
+.row:focus-visible .hit{stroke:var(--ink);stroke-width:1.5}
+.ring{fill:none;stroke:var(--ink);stroke-width:1.5;display:none}
+.row.sel .ring{display:inline}
+.lbl{font:500 13px var(--sans);fill:var(--ink)}
+.yrs{font:11px var(--mono);fill:var(--faint)}
+.empty{font:14px var(--sans);fill:var(--muted)}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);font-size:13px;line-height:1.4}
+.chip:hover{border-color:var(--ink)}
+.chip .sw{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+.none{font-size:13px;color:var(--faint)}
+
+.card{padding:22px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.card-realm{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);margin:0}
+.card-realm .sw{width:10px;height:10px;border-radius:3px;background:var(--c)}
+.card h2{font-family:var(--serif);font-weight:500;font-size:34px;line-height:1.05;letter-spacing:-.01em;margin:6px 0 0;text-wrap:balance}
+.aka{font-family:var(--serif);font-style:italic;font-size:17px;color:var(--muted);margin:0}
+.ctitle{margin:6px 0 0;font-size:14px}
+.life{width:100%;height:auto;display:block;margin:16px 0 4px}
+.lifeline{stroke:var(--line-strong);stroke-width:2;stroke-linecap:round}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin:10px 0 14px;padding-block:14px;border-block:1px solid var(--line)}
+.kv dd{margin:3px 0 0;font:500 14px var(--mono);font-variant-numeric:tabular-nums}
+.kv .wide{grid-column:1/-1}
+.kv .wide dd{font:400 14px var(--sans)}
+.facts{list-style:none;padding:0;margin:0 0 14px;display:flex;flex-direction:column;gap:8px}
+.facts li{padding-left:16px;position:relative;line-height:1.5}
+.facts li::before{content:"";position:absolute;left:1px;top:.6em;width:6px;height:6px;border-radius:50%;background:var(--c)}
+.card h3{margin:4px 0 8px}
+.bio{margin:0 0 10px}
+.bio p{font-family:var(--serif);font-size:16px;line-height:1.62;margin:0 0 12px}
+.card-nav{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:16px}
+.btn{padding:6px 12px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);font-size:13px}
+.btn:hover{border-color:var(--ink)}
+
+details.panel{padding:0 18px}
+summary{font-size:15px;font-weight:500;padding:14px 0;cursor:pointer}
+.tbl-wrap{overflow-x:auto;padding-bottom:12px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+td.num{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+td button{text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line-strong);text-align:left}
+.foot{font-size:13px;color:var(--faint);max-width:72ch;margin:0}
+.flag{display:block;flex:none;border-radius:2px}
+.flagfig{display:flex;gap:12px;align-items:flex-start;margin:14px 0 0}
+.flagfig figcaption{font-size:13px;line-height:1.45;color:var(--muted)}
+.tag{display:inline-block;margin:0 6px 2px 0;padding:0 6px;border:1px solid var(--line-strong);border-radius:4px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.tflag{display:inline-flex;align-items:center;gap:8px}
+
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+</head>
+<body>
+<svg id="sprite" width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false"></svg>
+<div class="page">
+  <header>
+    <p class="eyebrow">768–1916 · 20 rulers</p>
+    <h1>Crowns of Europe</h1>
+    <p class="lede">Twenty rulers who shaped Europe, from Charlemagne in 768 to Franz Joseph in 1916. Select a bar to read about that ruler.</p>
+  </header>
+
+  <section class="controls" aria-label="Chart controls">
+    <div class="ctl">
+      <span class="ctl-label" id="realms-label">Realms</span>
+      <div class="toggles" id="realms" role="group" aria-labelledby="realms-label"></div>
+    </div>
+    <div class="ctl">
+      <span class="ctl-label" id="eras-label">Zoom</span>
+      <div class="seg" id="eras" role="group" aria-labelledby="eras-label"></div>
+    </div>
+    <div class="ctl">
+      <label class="ctl-label" for="sort">Order</label>
+      <select id="sort">
+        <option value="chrono">By date of accession</option>
+        <option value="length">Longest reign first</option>
+        <option value="realm">By realm</option>
+        <option value="age">Youngest on the throne first</option>
+      </select>
+    </div>
+  </section>
+
+  <dl class="stats" id="stats"></dl>
+
+  <main class="layout">
+    <section class="panel chart-panel" aria-label="Reign timeline">
+      <div class="chart" id="chart"></div>
+    </section>
+    <aside class="panel card" id="card" aria-live="polite"></aside>
+  </main>
+
+  <details class="panel">
+    <summary>All rulers as a table</summary>
+    <div class="tbl-wrap"><table id="tbl"></table></div>
+  </details>
+
+  <p class="foot">Reigns run from accession to the end of the reign in each ruler’s main realm, to the nearest month. Birth years marked “c.” are uncertain, so those ages are approximate. Every bar is labelled, so colour is never the only way to tell realms apart. Each flag is the flag, royal banner or emblem used during that reign. Rulers who lived before heraldry are shown with the banner later tradition gave them, marked “Later tradition”.</p>
+</div>
+
+<script>
+const GROUPS={
+  eng:{name:"England & Britain"},
+  fr:{name:"France & the Franks"},
+  hre:{name:"Holy Roman Empire & Austria"},
+  es:{name:"Castile & Spain"},
+  ru:{name:"Russia"},
+  ne:{name:"Sweden & Prussia"}
+};
+const ORDER=["eng","fr","hre","es","ru","ne"];
+const ERAS=[
+  {id:"all",name:"All years",d:[750,1930]},
+  {id:"mid",name:"Middle Ages",d:[750,1510]},
+  {id:"early",name:"Early modern",d:[1450,1800]},
+  {id:"rev",name:"Age of revolutions",d:[1730,1925]}
+];
+const RULERS=[
+{id:"charlemagne",n:"Charlemagne",aka:"Charles the Great",g:"fr",t:"King of the Franks, emperor from 800",s:[768,10],e:[814,1],b:748,approx:true,d:814,age:20,end:"Died at Aachen, still on the throne",f:["Crowned emperor by Pope Leo III in Rome on Christmas Day 800.","Ruled most of western Europe, from the Pyrenees to the Elbe.","Sponsored a revival of learning now called the Carolingian Renaissance."]},
+{id:"alfred",n:"Alfred the Great",aka:"King of the Anglo-Saxons",g:"eng",t:"King of Wessex",s:[871,4],e:[899,10],b:849,approx:true,d:899,age:22,end:"Died on the throne",f:["Beat the Viking Great Heathen Army at Edington in 878.","Built a network of fortified towns, called burhs, across Wessex.","Had Latin books translated into English so more people could read them."]},
+{id:"otto",n:"Otto the Great",aka:"Otto I",g:"hre",t:"King of East Francia, emperor from 962",s:[936,7],e:[973,5],b:912,d:973,age:23,end:"Died on the throne",f:["Crushed the Magyar raiders at the Lechfeld in 955.","Crowned emperor in Rome in 962, often counted as the start of the Holy Roman Empire."]},
+{id:"william",n:"William the Conqueror",aka:"William I",g:"eng",t:"King of England, Duke of Normandy",s:[1066,12],e:[1087,9],b:1028,approx:true,d:1087,age:38,end:"Died of injuries from a riding accident",f:["Won the Battle of Hastings on 14 October 1066.","Ordered the Domesday Book, a survey of all England, in 1086.","Began the White Tower, the stone keep of the Tower of London."]},
+{id:"barbarossa",n:"Frederick Barbarossa",aka:"Frederick I",g:"hre",t:"King of Germany, emperor from 1155",s:[1152,3],e:[1190,6],b:1122,d:1190,age:29,end:"Drowned crossing a river on the Third Crusade",f:["“Barbarossa” is Italian for “red beard”.","Spent decades fighting the cities of northern Italy.","Legend says he sleeps inside the Kyffhäuser mountain, waiting to return."]},
+{id:"isabella",n:"Isabella I",aka:"Isabella the Catholic",g:"es",t:"Queen of Castile",s:[1474,12],e:[1504,11],b:1451,d:1504,age:23,end:"Died on the throne",f:["Her marriage to Ferdinand of Aragon joined the crowns of Spain.","Completed the conquest of Granada in 1492.","Paid for Columbus’s first voyage the same year."]},
+{id:"henry-viii",n:"Henry VIII",aka:"Bluff King Hal",g:"eng",t:"King of England",s:[1509,4],e:[1547,1],b:1491,d:1547,age:17,end:"Died on the throne",f:["Married six times.","Broke with Rome and made himself head of the Church of England in 1534.","Closed the monasteries and took their lands."]},
+{id:"charles-v",n:"Charles V",aka:"Charles I of Spain",g:"hre",t:"King of Spain, emperor from 1519",s:[1516,1],e:[1556,1],b:1500,d:1558,age:15,end:"Abdicated and retired to the monastery of Yuste",f:["Ruled Spain, the Netherlands, much of Italy, the Holy Roman Empire and Spain’s American colonies.","Faced Martin Luther at the Diet of Worms in 1521.","Gave up his crowns in 1556, worn out by decades of war."]},
+{id:"ivan-iv",n:"Ivan the Terrible",aka:"Ivan IV",g:"ru",t:"Grand Prince of Moscow, tsar from 1547",s:[1533,12],e:[1584,3],b:1530,d:1584,age:3,end:"Died on the throne",f:["The first ruler crowned Tsar of All Russia, in 1547.","Conquered Kazan in 1552 and Astrakhan in 1556.","Killed his own son and heir in a fit of rage in 1581."]},
+{id:"philip-ii",n:"Philip II",aka:"Philip the Prudent",g:"es",t:"King of Spain, and of Portugal from 1581",s:[1556,1],e:[1598,9],b:1527,d:1598,age:28,end:"Died on the throne",f:["Sent the Spanish Armada against England in 1588.","The Philippines are named after him.","Built El Escorial, a palace and monastery outside Madrid."]},
+{id:"elizabeth-i",n:"Elizabeth I",aka:"The Virgin Queen, Gloriana",g:"eng",t:"Queen of England and Ireland",s:[1558,11],e:[1603,3],b:1533,d:1603,age:25,end:"Died on the throne",f:["Her navy saw off the Spanish Armada in 1588.","Never married, and was celebrated as the Virgin Queen.","Shakespeare wrote his early plays during her reign."]},
+{id:"gustavus",n:"Gustavus Adolphus",aka:"The Lion of the North",g:"ne",t:"King of Sweden",s:[1611,10],e:[1632,11],b:1594,d:1632,age:16,end:"Killed at the Battle of Lützen",f:["Made Sweden a great power in the Thirty Years’ War.","His mobile artillery and drilled infantry were copied across Europe."]},
+{id:"louis-xiv",n:"Louis XIV",aka:"The Sun King",g:"fr",t:"King of France",s:[1643,5],e:[1715,9],b:1638,d:1715,age:4,end:"Died on the throne",f:["Reigned 72 years, longer than any other monarch of a major European state.","Moved the court to his new palace at Versailles in 1682.","Became king at 4; his mother and Cardinal Mazarin ran France until he was 22."]},
+{id:"peter",n:"Peter the Great",aka:"Peter I",g:"ru",t:"Tsar, emperor of Russia from 1721",s:[1682,5],e:[1725,2],b:1672,d:1725,age:9,end:"Died on the throne",f:["Toured western Europe in 1697–98, partly under a false name.","Founded St Petersburg in 1703 and made it his capital.","Took the title Emperor of All Russia in 1721."]},
+{id:"maria-theresa",n:"Maria Theresa",aka:"",g:"hre",t:"Archduchess of Austria, Queen of Hungary and Bohemia",s:[1740,10],e:[1780,11],b:1717,d:1780,age:23,end:"Died on the throne",f:["The only woman to rule the Habsburg lands in her own right.","Fought the War of the Austrian Succession to keep her throne.","Had 16 children, among them Marie Antoinette."]},
+{id:"frederick-great",n:"Frederick the Great",aka:"Frederick II of Prussia, “Old Fritz”",g:"ne",t:"King of Prussia",s:[1740,5],e:[1786,8],b:1712,d:1786,age:28,end:"Died on the throne",f:["Seized Silesia from Maria Theresa in 1740.","Survived the Seven Years’ War against Austria, France and Russia.","Played the flute and wrote music for it."]},
+{id:"catherine",n:"Catherine the Great",aka:"Catherine II",g:"ru",t:"Empress of Russia",s:[1762,7],e:[1796,11],b:1729,d:1796,age:33,end:"Died on the throne",f:["Born a German princess, Sophie of Anhalt-Zerbst.","Took the throne from her husband, Peter III, in a coup.","Wrote to Voltaire and Diderot, and bought Diderot’s library."]},
+{id:"napoleon",n:"Napoleon",aka:"Napoleon Bonaparte",g:"fr",t:"Emperor of the French",s:[1804,5],e:[1815,6],b:1769,d:1821,age:34,lenNum:10,lenText:"10 years + 100 days",end:"Abdicated twice, died in exile on St Helena",f:["Crowned himself emperor in Notre-Dame in 1804.","His Civil Code still shapes law across much of Europe.","Came back from exile for the Hundred Days, then lost at Waterloo in 1815."]},
+{id:"victoria",n:"Victoria",aka:"The grandmother of Europe",g:"eng",t:"Queen of the United Kingdom, Empress of India from 1876",s:[1837,6],e:[1901,1],b:1819,d:1901,age:18,end:"Died on the throne",f:["Reigned 63 years, a British record until Elizabeth II.","Her children married into so many royal houses that she was called the grandmother of Europe."]},
+{id:"franz-joseph",n:"Franz Joseph",aka:"Franz Joseph I",g:"hre",t:"Emperor of Austria, King of Hungary",s:[1848,12],e:[1916,11],b:1830,d:1916,age:18,end:"Died during the First World War",f:["Agreed the Compromise of 1867 that created Austria-Hungary.","His heir, Franz Ferdinand, was shot at Sarajevo in 1914, setting off the First World War.","Reigned almost 68 years."]}
+];
+RULERS.forEach(r=>{r.sD=r.s[0]+(r.s[1]-.5)/12;r.eD=r.e[0]+(r.e[1]-.5)/12;r.len=r.lenNum??Math.floor(r.eD-r.sD)});
+const byId=Object.fromEntries(RULERS.map(r=>[r.id,r]));
+const BIOS={
+charlemagne:[
+"Son of Pippin the Short, the first Carolingian king, Charles shared the Frankish kingdom with his brother Carloman until Carloman’s death in 771 left him sole ruler. Almost every year of his reign brought a campaign. He annexed the Lombard kingdom in 774 and fought the Saxons for three decades, in a war marked by forced conversion and the massacre at Verden in 782. He destroyed the Avar khaganate in the 790s and pushed a frontier march south of the Pyrenees; the ambush of his rearguard at Roncevaux in 778 became the core of the Song of Roland.",
+"His coronation by Pope Leo III on Christmas Day 800 revived a western imperial title, angered Constantinople (which recognised it only in 812) and set the terms of church–empire relations for centuries. His biographer Einhard claims Charles would not have entered St Peter’s that day had he known the pope’s intention, a claim most historians read as conventional modesty.",
+"Government rested on counts supervised by travelling royal envoys, the missi dominici, and on written decrees called capitularies. At Aachen, scholars led by Alcuin of York drove a reform of script (Carolingian minuscule), liturgy and clerical education that preserved much of surviving classical Latin literature. The division of the empire among his grandsons at Verdun in 843 foreshadowed the later split between France and Germany, which is why both claim him as a founder."
+],
+alfred:[
+"The youngest of five sons of King Æthelwulf, Alfred was never expected to rule. He succeeded his brother Æthelred in 871, in the middle of the invasion by the Great Heathen Army, which had already destroyed the kingdoms of Northumbria and East Anglia. Early in 878 a surprise Viking attack at Chippenham drove him into the Somerset marshes at Athelney, the setting of the later legend of the burnt cakes. Within months he rallied the West Saxon levies, defeated Guthrum at Edington and stood sponsor at his baptism; a later treaty fixed the frontier with the Danelaw.",
+"His lasting achievement was structural. A network of fortified burhs, later recorded in the document known as the Burghal Hidage, placed a defended centre within a day’s march of most of Wessex, and he divided the army so that half was always in the field. He built ships, issued a law code drawing on earlier West Saxon and Mercian law, and from the late 880s styled himself “king of the Anglo-Saxons”, a step towards the single English kingdom his grandson Æthelstan would rule.",
+"Alfred lamented the collapse of Latin learning and sponsored English translations of works such as Gregory the Great’s Pastoral Care and Boethius’s Consolation of Philosophy. Much of his image comes from Asser’s Life of King Alfred, whose authenticity Alfred Smyth challenged in the 1990s; most scholars still accept it as genuine."
+],
+otto:[
+"Otto succeeded his father Henry I, the first Saxon king of East Francia, and had himself crowned at Aachen in 936 on Charlemagne’s throne, a deliberate claim to the Carolingian inheritance. His first two decades were consumed by rebellions involving his half-brother Thankmar, his brother Henry and his son Liudolf. He answered by binding the church into royal government: bishops and abbots, who could not found rival dynasties, received counties and royal rights. Historians long called this the “imperial church system”, though it is now seen as less systematic than once thought.",
+"Victory over the Magyars at the Lechfeld near Augsburg in 955 ended half a century of raids and gave him immense prestige; the same year he defeated the Slavs on the Recknitz. Intervening in Italy, he married the widowed queen Adelaide in 951, and in 962 Pope John XII crowned him emperor, only to be deposed by Otto the following year. The Privilegium Ottonianum confirmed the papacy’s lands while requiring an oath to the emperor before a new pope’s consecration.",
+"He founded the archbishopric of Magdeburg in 968 as a base for missions among the Slavs, and in 972 obtained a Byzantine bride, Theophanu, for his son Otto II, a form of recognition from Constantinople. Otto’s revival of the western empire lasted, in some form, until 1806."
+],
+william:[
+"The illegitimate son of Duke Robert I of Normandy, William inherited the duchy at about eight in 1035 and survived a violent minority in which several of his guardians were murdered. Victory at Val-ès-Dunes in 1047, won with the help of King Henry I of France, and later at Varaville in 1057 secured his rule, and his conquest of Maine in 1063 rehearsed methods he would use in England.",
+"His claim to the English throne rested on an alleged promise by his kinsman Edward the Confessor and on an oath sworn by Harold Godwinson, scenes the Bayeux Tapestry presents from the Norman side. Harold’s victory over Harald Hardrada at Stamford Bridge left the English army exhausted when William landed at Pevensey. Harold was killed at Hastings on 14 October 1066, and William was crowned in Westminster Abbey on Christmas Day.",
+"Revolts were crushed with exceptional severity, above all in the Harrying of the North in 1069–70, which the chronicler Orderic Vitalis condemned decades later. Within a generation the English aristocracy and senior clergy had been almost entirely replaced by continental newcomers, a network of castles covered the country, and the Domesday survey of 1086 recorded landholding in detail unmatched anywhere in medieval Europe. The Conquest tied England to France for centuries and transformed its language, architecture and church."
+],
+barbarossa:[
+"Frederick of the Staufer dynasty was elected king of the Germans in 1152, partly because his mother was a Welf, which promised reconciliation between the two great rival houses. Crowned emperor in 1155, he promoted the idea of the “Holy Empire” (sacrum imperium, a term his chancery used from 1157) and, at the Diet of Roncaglia in 1158, claimed sweeping imperial rights in Italy with the backing of Roman-law jurists from Bologna.",
+"Italy defined and frustrated his reign. He razed Milan in 1162, but the Lombard League, allied with Pope Alexander III, defeated him at Legnano in 1176. At Venice in 1177 he recognised Alexander, abandoning the antipopes he had backed through an eighteen-year schism, and the Peace of Constance in 1183 conceded the cities’ self-government. In Germany he broke his cousin Henry the Lion, duke of Saxony and Bavaria, in 1180 and redistributed his duchies.",
+"After Saladin took Jerusalem in 1187, Frederick led the largest army of the Third Crusade overland through Hungary and Anatolia and defeated the Seljuks at Iconium, only to drown in the Saleph river in Cilicia in June 1190. Nineteenth-century nationalists turned him into the emperor sleeping beneath the Kyffhäuser, and Hitler borrowed his name for the 1941 invasion of the Soviet Union."
+],
+isabella:[
+"Isabella’s accession was close to a coup. When her half-brother Henry IV died in 1474 she had herself proclaimed queen at Segovia, setting aside his daughter Joanna, whom her supporters branded illegitimate as “la Beltraneja”. The war with Portugal, which backed Joanna, ended in Isabella’s favour in 1479, the year her husband Ferdinand inherited Aragon. Their union was dynastic rather than institutional: each kingdom kept its own laws, and Isabella guarded Castile’s sovereignty jealously.",
+"The monarchs tamed the Castilian nobility, used the Santa Hermandad as a rural police and militia, and in 1478 obtained papal approval for a Castilian Inquisition under royal control, aimed at converts from Judaism suspected of secret practice. In January 1492 Granada, the last Muslim state in Iberia, surrendered after a ten-year war; three months later the Alhambra Decree gave Spain’s Jews the choice of conversion or expulsion. That same year Isabella backed Columbus’s first voyage, and the Treaty of Tordesillas in 1494 divided the Atlantic world with Portugal.",
+"Her daughters were married into the dynasties of Europe: Catherine to the Tudors in England and Joanna to the Habsburgs, whose son became Charles V. The Catholic Church opened a cause for her beatification in 1958; it remains contested because of the Inquisition and the expulsion of the Jews."
+],
+"henry-viii":[
+"Henry became heir only when his elder brother Arthur died in 1502, and on his accession he married Arthur’s widow, Catherine of Aragon. Educated in the humanist mould, the young king spent heavily on wars against France and Scotland; his army’s victory at Flodden in 1513 killed James IV of Scotland. Thomas Wolsey ran government for him until 1529, when he fell for failing to obtain an annulment from a pope then under the control of Charles V, Catherine’s nephew.",
+"The “King’s Great Matter” became a constitutional revolution. Under Thomas Cromwell’s direction, acts of Parliament ended appeals to Rome in 1533 and declared the king Supreme Head of the Church of England in 1534; Thomas More and John Fisher were executed for refusing to accept the new order. The dissolution of the monasteries between 1536 and 1541 transferred vast estates to the crown, much of it soon sold to the gentry, and provoked the Pilgrimage of Grace. Wales was absorbed into the English legal system by the Laws in Wales Acts, and Ireland was made a kingdom in 1542.",
+"Henry married six times; two of his wives were executed. In doctrine he remained conservative, and his reign left the English church in a theological limbo that his three children, all of whom reigned, resolved in turn towards Protestantism, back to Rome, and finally to a Protestant settlement."
+],
+"charles-v":[
+"Charles inherited an unparalleled concentration of territory through the marriages of his grandparents: the Burgundian Netherlands in 1506, Castile with its American possessions and Aragon with southern Italy in 1516, and the Habsburg Austrian lands in 1519, which he soon passed to his brother Ferdinand. Elected emperor in 1519 with the help of loans from the Fugger bank, he saw his role as a universal Catholic monarchy in the medieval sense.",
+"The Reformation and France tested that vision. At Worms in 1521 he heard Luther and declared him an outlaw, but wars with Francis I, whom his army captured at Pavia in 1525, and the Ottoman threat, from the siege of Vienna in 1529 to campaigns in the Mediterranean including Tunis in 1535, repeatedly forced compromises with the German Protestant princes. His unpaid troops sacked Rome in 1527. Victory over the Schmalkaldic League at Mühlberg in 1547 proved hollow; the Peace of Augsburg in 1555, negotiated by Ferdinand, accepted that each prince would choose his territory’s religion.",
+"Meanwhile Cortés and Pizarro conquered the Aztec and Inca empires in his name, and the New Laws of 1542, prompted by Bartolomé de las Casas, tried to curb the exploitation of indigenous people. Exhausted and crippled by gout, Charles abdicated in a series of ceremonies in 1555–56, dividing his inheritance between his son Philip and his brother Ferdinand, and died at Yuste in 1558."
+],
+"ivan-iv":[
+"Ivan became grand prince at three. His mother, Elena Glinskaya, governed until her death, probably by poison, in 1538, after which boyar factions fought over the boy, an experience he later blamed for his hatred of the aristocracy. In 1547 he was crowned tsar, the first Muscovite ruler formally crowned with that title. In the following decade, with a circle of advisers sometimes called the Chosen Council, he issued a new law code (1550), summoned an early assembly of the land, reformed local government and created a standing musketeer corps, the streltsy.",
+"The conquest of the khanates of Kazan in 1552 and Astrakhan in 1556 gave Muscovy the whole Volga and opened the road to Siberia, whose conquest the Cossack Yermak began around 1582; St Basil’s Cathedral in Red Square commemorates Kazan. But the Livonian War (1558–83) for an outlet on the Baltic ended in defeat by Poland-Lithuania and Sweden, and in 1571 the Crimean Tatars burned Moscow.",
+"After his first wife Anastasia died in 1560, Ivan turned on real and imagined enemies. The oprichnina (1565–72) split the realm and created a private royal domain policed by black-clad oprichniki, who terrorised boyars, clergy and towns; the sack of Novgorod in 1570 killed thousands. In 1581 he struck his son and heir Ivan with his staff, killing him, and the succession of his frail son Fyodor led, after 1598, to the Time of Troubles. His Russian epithet, Grozny, means “formidable” or “awe-inspiring” rather than simply “terrible”."
+],
+"philip-ii":[
+"Philip received Spain, the Netherlands, Milan, Naples and the Americas from his father in 1556, though not the imperial title. Through his marriage to Mary I he was briefly king of England (1554–58), and in 1580 he enforced his claim to Portugal, uniting the whole Iberian peninsula and both colonial empires under one crown. Silver from Potosí and Zacatecas financed his wars, yet the crown still suspended payments to its creditors in 1557, 1560, 1575 and 1596.",
+"A tireless bureaucrat who governed on paper from El Escorial, he was nicknamed “the Prudent” for his caution. His victories included St Quentin over France in 1557 and, in alliance with Venice and the papacy, Lepanto over the Ottoman fleet in 1571. But religious repression and new taxes in the Netherlands provoked the Dutch Revolt from 1566–68, which he never defeated; the northern provinces renounced him in 1581. The Armada of 1588, meant to escort an invasion army from Flanders, was broken up by English fireships at Gravelines and by storms.",
+"The Black Legend, a Protestant portrait of Philip as a fanatic who murdered his own son Don Carlos, was fed by his fugitive secretary Antonio Pérez and by William of Orange’s Apology, and shaped his reputation for centuries. Modern historians such as Geoffrey Parker present a more complex figure: conscientious, devout and hard-working, but chronically overcommitted."
+],
+"elizabeth-i":[
+"Elizabeth’s mother, Anne Boleyn, was executed when she was two, and she was declared illegitimate; under her half-sister Mary I she was sent to the Tower after Wyatt’s Rebellion. Succeeding in 1558 at twenty-five, she enacted the Religious Settlement of 1559: a Protestant church with traditional ceremony and a deliberately ambiguous communion service, which she defended against both Catholic and Puritan pressure. She was credited with not wishing to “make windows into men’s souls”, but after the pope excommunicated her in 1570 and a series of plots followed, Catholics faced heavy fines and missionary priests execution.",
+"Her refusal to marry kept her diplomatic options open and avoided subordinating England to a foreign consort, but left the succession unresolved throughout her reign. Mary, Queen of Scots, a prisoner in England from 1568, was executed in 1587 after the Babington Plot; the following year the Armada was defeated. An undeclared war with Spain continued until 1604, alongside a ruinous war in Ireland against Hugh O’Neill, Earl of Tyrone.",
+"William Cecil and Francis Walsingham gave her an effective council and intelligence service. The reign saw Drake’s circumnavigation (1577–80), the first English colonial ventures, the Poor Laws of 1598 and 1601, and the literary flowering of Spenser, Marlowe and Shakespeare. Her image as Gloriana was carefully constructed through portraits and royal progresses, and partly masked the economic strain and factional conflict of her final decade."
+],
+gustavus:[
+"Gustavus inherited three wars at sixteen, against Denmark, Russia and Poland, and with his chancellor Axel Oxenstierna turned a poor and thinly populated kingdom into a European power. The Peace of Knäred in 1613 bought peace with Denmark at the price of a heavy ransom for the fortress of Älvsborg; the Treaty of Stolbovo in 1617 shut Russia out of the Baltic; and the war with Poland won Riga and most of Livonia.",
+"At home he reorganised central government into permanent departments, endowed Uppsala University and founded grammar schools, and built a national army based on conscription. His military reforms, which developed Dutch models, combined smaller and more flexible units of pike and musket, salvo fire, light regimental artillery and cavalry trained to charge home, and they were widely imitated.",
+"In 1630 he landed in Pomerania, partly to protect German Protestantism and partly to secure Sweden’s Baltic interests, subsidised by Catholic France under Richelieu. His victory at Breitenfeld in 1631 reversed the Catholic tide of the Thirty Years’ War and carried him into southern Germany. He was killed in the fog at Lützen in November 1632, in a battle his army won. At the Peace of Westphalia in 1648 Sweden gained Western Pomerania, Wismar and Bremen-Verden, and the Swedish estates honoured him with the name Magnus, “the Great”."
+],
+"louis-xiv":[
+"Louis’s minority was overshadowed by the Fronde (1648–53), revolts by the Paris Parlement and the great nobles that forced the royal family to flee the capital, an experience usually credited with his later determination to dominate the nobility. When Cardinal Mazarin died in 1661 he announced he would govern without a chief minister, and he did so for fifty-four years.",
+"Colbert reformed royal finance, built the navy and promoted manufactures and overseas trading companies; Louvois expanded the army to an unprecedented size; Vauban fortified the frontiers. Versailles, where the court settled in 1682, turned the high nobility into courtiers bound by ritual and patronage. Royal academies and his patronage of Molière, Racine and Lully helped make French the language of Europe’s elites. Historians now stress that this “absolutism” depended on bargains with provincial elites rather than on command alone.",
+"Louis fought four major wars, the War of Devolution, the Dutch War, the Nine Years’ War and the War of the Spanish Succession, gaining Franche-Comté, Strasbourg and a Bourbon king in Madrid at a ruinous fiscal and human cost. The revocation of the Edict of Nantes in 1685 drove perhaps 150,000 to 200,000 Huguenots abroad. He outlived his son and his eldest grandson, and was succeeded by his five-year-old great-grandson, Louis XV."
+],
+peter:[
+"Proclaimed tsar at nine in 1682, jointly with his half-brother Ivan V and under the regency of his half-sister Sophia, Peter spent much of his youth near Moscow’s foreign quarter, absorbing Dutch and German technology and manners. He overthrew Sophia in 1689 and ruled alone from Ivan’s death in 1696. His Grand Embassy of 1697–98 took him to the Dutch Republic and England, where he worked in shipyards under a false name; he came home to crush a revolt of the streltsy and to order his nobles to shave their beards.",
+"The Great Northern War (1700–21) against Sweden began with defeat at Narva but turned at Poltava in 1709, where he destroyed the army of Charles XII. The Treaty of Nystad in 1721 gave Russia Livonia, Estonia, Ingria and part of Karelia, and the Senate proclaimed him Emperor of All Russia. St Petersburg, built from 1703 by conscripted labour at a terrible cost in lives, became the capital in 1712.",
+"To sustain the war he created a regular army and navy based on conscription, a Senate, administrative colleges on the Swedish model, a poll tax and the Table of Ranks (1722), which tied noble status to state service. He abolished the patriarchate and replaced it with the Holy Synod, in effect a government department. His son Alexei, who opposed the reforms, was tried for treason and died after torture in 1718, and Peter’s law letting the ruler name an heir left the succession unstable for decades."
+],
+"maria-theresa":[
+"Her father, Charles VI, spent years securing international recognition of the Pragmatic Sanction so that she could inherit the Habsburg lands, but on his death in 1740 Prussia invaded Silesia while Bavaria, France, Saxony and Spain contested her inheritance. Her appeal to the Hungarian diet in 1741 won troops, and the War of the Austrian Succession (1740–48) kept the monarchy intact, though Silesia was lost. Her husband, Francis Stephen of Lorraine, was elected emperor in 1745.",
+"Determined to recover Silesia, she backed reforms led by Haugwitz and Kaunitz: centralised administration and finance, taxation of noble land in the Austrian and Bohemian lands, a larger standing army and a military academy at Wiener Neustadt. Kaunitz’s “diplomatic revolution” of 1756 allied Austria with its old enemy France, but the Seven Years’ War ended in 1763 with Silesia still Prussian.",
+"She introduced compulsory primary schooling in 1774 and limited the labour that lords could demand of their peasants. With her son Joseph II, co-regent from 1765, she joined, reluctantly, in the First Partition of Poland in 1772, gaining Galicia. Devout and openly hostile to Jews and Protestants, she was nonetheless one of the most effective reformers of her century. Of her sixteen children, Joseph II and Leopold II became emperors and Marie Antoinette queen of France."
+],
+"frederick-great":[
+"Frederick’s youth was dominated by conflict with his father, the drill-obsessed Frederick William I. After a failed attempt to flee in 1730 he was imprisoned and made to watch the execution of his friend Hans Hermann von Katte. As crown prince he wrote the Anti-Machiavel, arguing that a ruler should be the first servant of his people; months after his accession in 1740 he invaded Silesia without a declaration of war.",
+"Silesia, rich and populous, raised Prussia’s population by roughly half and made it a great power. In the Seven Years’ War (1756–63) he faced Austria, France, Russia and Sweden together; brilliant victories at Rossbach and Leuthen in 1757 were followed by near-annihilation at Kunersdorf in 1759. He was saved by the death of Empress Elizabeth of Russia in 1762, the “Miracle of the House of Brandenburg”, and kept Silesia at the Peace of Hubertusburg. In 1772 he took West Prussia in the First Partition of Poland, linking his scattered territories.",
+"At home he rebuilt devastated provinces, drained the Oder marshes, promoted the potato, largely abolished judicial torture in 1740 and began a codification of Prussian law completed after his death. An enlightened absolutist who wrote in French and hosted Voltaire, he nonetheless preserved serfdom and the privileges of the Junker officer class. Later cults, from German nationalism to Nazi propaganda, made him a contested symbol."
+],
+catherine:[
+"Born Sophie of Anhalt-Zerbst, a minor German princess, she married the future Peter III in 1745, converted to Orthodoxy and learned Russian with a dedication her husband never showed. Six months after his accession, in July 1762, Guards regiments led by the Orlov brothers proclaimed her empress, and Peter was killed in custody days later. A usurper without a drop of Russian blood, she ruled for thirty-four years.",
+"Her Instruction (Nakaz) of 1767 for a Legislative Commission borrowed heavily from Montesquieu and Beccaria, though the commission produced no code. Pugachev’s rebellion (1773–75), a vast rising of Cossacks and peasants, ended any appetite for reforming serfdom. Instead the provincial reform of 1775 and the Charter to the Nobility of 1785 strengthened noble control, and serfdom spread into Ukraine. She founded the Smolny Institute for noble girls, began the Hermitage collection, and corresponded with Voltaire and Diderot.",
+"Expansion was her greatest legacy. Two wars with the Ottomans (1768–74 and 1787–92) won the northern Black Sea coast and the annexation of Crimea in 1783, and Sevastopol and Odessa were founded on her conquests. The three partitions of Poland (1772, 1793 and 1795) moved Russia’s border deep into central Europe. Grigory Potemkin, her partner and viceroy in the south, developed “New Russia”; the story of his fake “Potemkin villages” is largely a critics’ exaggeration."
+],
+napoleon:[
+"A Corsican of minor noble birth, Napoleon rose through the opportunities of the Revolution: artillery commander at the siege of Toulon (1793), victor in Italy (1796–97) and leader of the expedition to Egypt (1798–99). The coup of 18 Brumaire in November 1799 made him First Consul. The Concordat of 1801 reconciled France with the Catholic Church, and the Civil Code of 1804 entrenched legal equality, property rights and patriarchal family law. In December 1804 he crowned himself emperor in Notre-Dame, with Pope Pius VII looking on.",
+"Austerlitz (1805), Jena-Auerstedt (1806) and Friedland (1807) made him master of the continent. The Holy Roman Empire was dissolved in 1806, his brothers were given satellite kingdoms, and the Continental System tried to strangle British trade, Trafalgar (1805) having ended any prospect of invasion. The Peninsular War from 1808 drained his armies, and the invasion of Russia in 1812 destroyed the Grande Armée. Defeated at Leipzig in 1813, he abdicated in April 1814 and was exiled to Elba.",
+"He returned in March 1815 for the Hundred Days, which ended at Waterloo, and died on St Helena in 1821. His prefects, lycées, Legion of Honour and Bank of France outlived him, and the export of his code reshaped law across much of Europe and Latin America. Historians still divide over whether he consolidated the Revolution or betrayed it; in 1802 he restored slavery in the French colonies."
+],
+victoria:[
+"A granddaughter of George III, Victoria became heir because none of her uncles left a legitimate surviving child. Her mother raised her under the restrictive “Kensington System” devised with the comptroller Sir John Conroy. Succeeding at eighteen in 1837, she leaned first on the prime minister Lord Melbourne and then on her husband, Prince Albert of Saxe-Coburg and Gotha, whom she married in 1840. Albert professionalised the monarchy’s business, championed the Great Exhibition of 1851 and steered the crown towards political neutrality.",
+"After Albert’s death in 1861 she withdrew into mourning for more than a decade, provoking open republican criticism, until Disraeli coaxed her back into public life and, in 1876, gave her the title Empress of India; the Crown had taken over the government of India from the East India Company in 1858. Her Golden and Diamond Jubilees of 1887 and 1897 became festivals of empire.",
+"The Reform Acts of 1867 and 1884 widened the electorate and made her a constitutional sovereign whose influence depended on persuasion and correspondence, though she favoured Disraeli over Gladstone with little attempt at concealment. Through her nine children and forty-two grandchildren she was linked to the ruling houses of Germany, Russia, Spain, Greece, Norway, Sweden and Romania, a family network that could not prevent the First World War thirteen years after her death."
+],
+"franz-joseph":[
+"Franz Joseph came to the throne at eighteen in December 1848, when his uncle Ferdinand abdicated amid revolution. Russian intervention helped crush the Hungarian uprising in 1849, followed by the execution of rebel generals at Arad. He then ruled for a decade as a neo-absolutist, until defeat by France and Piedmont-Sardinia at Solferino in 1859 cost him Lombardy, and defeat by Prussia at Königgrätz in 1866 ended Austria’s leadership in Germany and cost him Venetia.",
+"The Compromise of 1867 created the Dual Monarchy: Austria and Hungary became separate states with their own parliaments, joined by the emperor-king, a common army, a common foreign policy and the finances to pay for them, with economic terms renegotiated every ten years. It satisfied the Magyar elite but not the Czechs, Poles, South Slavs and others, whose national demands dominated politics until 1918. Vienna meanwhile flourished; the Ringstrasse, Freud, Mahler, Klimt and Schnitzler all belong to his reign.",
+"His private life was a run of tragedies: his brother Maximilian was executed in Mexico in 1867, his son Rudolf died in a murder-suicide at Mayerling in 1889, and his wife Elisabeth was assassinated by an anarchist in Geneva in 1898. The occupation (1878) and annexation (1908) of Bosnia-Herzegovina drew Austria deeper into Balkan rivalries. After his nephew and heir Franz Ferdinand was assassinated at Sarajevo, he approved the ultimatum to Serbia that began the First World War. He died in November 1916, two years before his empire dissolved."
+]
+};
+
+const CH={
+  eagle:`<symbol id="ch-eagle" viewBox="0 0 100 100"><path d="M44 36L8 16l2 10-6 2 8 6-6 6 10 2-6 8 12-1-4 9 24-6zM56 36l36-20-2 10 6 2-8 6 6 6-10 2 6 8-12-1 4 9-24-6z"/><ellipse cx="50" cy="50" rx="10" ry="19"/><circle cx="45" cy="20" r="7"/><path d="M34 21l7-4v7zM41 24h8l3 10-6 2zM42 66h16l8 20-9-5-7 9-7-9-9 5zM44 62l-9 11-4-1-1 5 8 1 10-12zM56 62l9 11 4-1 1 5-8 1-10-12z"/></symbol>`,
+  eagle2:`<symbol id="ch-eagle2" viewBox="0 0 100 100"><path d="M44 36L8 16l2 10-6 2 8 6-6 6 10 2-6 8 12-1-4 9 24-6zM56 36l36-20-2 10 6 2-8 6 6 6-10 2 6 8-12-1 4 9-24-6z"/><ellipse cx="50" cy="50" rx="10" ry="19"/><circle cx="36" cy="18" r="6.5"/><circle cx="64" cy="18" r="6.5"/><path d="M25 19l6-4v7zM75 19l-6-4v7zM39 22l5-2 6 14-5 2zM61 22l-5-2-6 14 5 2zM42 66h16l8 20-9-5-7 9-7-9-9 5zM44 62l-9 11-4-1-1 5 8 1 10-12zM56 62l9 11 4-1 1 5-8 1-10-12z"/></symbol>`,
+  lion:`<symbol id="ch-lion" viewBox="0 0 60 34"><path d="M14 10c6-3 24-3 32 0 4 2 4 10 0 12H14c-4-2-4-10 0-12zM14 20l-3 12h4l3-11zM21 21l-1 11h4l1-11zM38 21l-2 11h4l2-11zM44 20l2 12h4l-3-13zM46 12c6-2 8-8 6-11 4 2 4 8 0 12l-4 2z"/><circle cx="11" cy="10" r="7"/></symbol>`,
+  castle:`<symbol id="ch-castle" viewBox="0 0 40 36"><path fill-rule="evenodd" d="M4 36V16h4v-4h4v4h3V6h3V2h4v4h3v10h3v-4h4v4h4v20zM17 36v-9a3 3 0 0 1 6 0v9z"/></symbol>`,
+  fleur:`<symbol id="ch-fleur" viewBox="0 0 20 24"><path d="M10 0c3 4 3.5 9 0 14-3.5-5-3-10 0-14zM8.6 14.5c-2.6 1-7.1-.5-7.4-4.5-.2-2.5 2.2-3.6 3.8-2.4-1.4.6-1.6 2.4-.2 3.6 1.2 1 2.8 1.4 4.2 1.8zM11.4 14.5c2.6 1 7.1-.5 7.4-4.5.2-2.5-2.2-3.6-3.8-2.4 1.4.6 1.6 2.4.2 3.6-1.2 1-2.8 1.4-4.2 1.8zM4.5 14.5h11v2.1h-11zM8 17l2 6.5 2-6.5z"/></symbol>`,
+  wyvern:`<symbol id="ch-wyvern" viewBox="0 0 60 50"><path d="M8 12c2-4 8-5 11-2l3 4c-2 2-6 2-8 1l-8 1zM18 12c6 2 8 10 12 14 6 4 14 4 16 10s-4 10-10 8c6-2 6-6 2-7-6-2-14-3-16-9-2-6-6-10-6-13zM26 22L40 4l2 8 6-4-2 10 6-2-8 10zM28 32l-4 10h4l3-8zM34 34l-1 10h4v-9z"/></symbol>`
+};
+const OR="#f2c300",GU="#c8102e",AR="#ffffff",SA="#141414";
+const EAGLE_GOLD=`<rect width="30" height="20" fill="${OR}"/><use href="#ch-eagle" x="6" y="1" width="18" height="18" fill="${SA}"/>`;
+const EAGLE2_GOLD=`<rect width="30" height="20" fill="${OR}"/><use href="#ch-eagle2" x="6" y="1" width="18" height="18" fill="${SA}"/>`;
+const BLACK_GOLD=`<rect width="30" height="10" fill="${SA}"/><rect y="10" width="30" height="10" fill="${OR}"/>`;
+const FLAGS={
+  oriflamme:{shape:"M0 0H30L23 5L30 10L23 15L30 20H0Z",body:`<rect width="30" height="20" fill="#d21f1b"/>`,tag:"Later tradition",cap:"The Oriflamme, a red war banner of the French kings. Medieval legend made it Charlemagne’s."},
+  wessex:{body:`<rect width="30" height="20" fill="${GU}"/><use href="#ch-wyvern" x="5" y="2" width="20" height="16.7" fill="${OR}"/>`,tag:"Later tradition",cap:"A golden wyvern on red, the dragon emblem later linked to Wessex. There were no flags in Alfred’s day."},
+  ottonian:{body:EAGLE_GOLD,tag:"Later tradition",cap:"A black eagle on gold. It became the imperial emblem about two centuries after Otto."},
+  normandy:{body:`<rect width="30" height="20" fill="${GU}"/><use href="#ch-lion" x="7" y="1.5" width="16" height="9" fill="${OR}"/><use href="#ch-lion" x="7" y="10" width="16" height="9" fill="${OR}"/>`,tag:"Later tradition",cap:"Two gold lions on red, arms later credited to the dukes of Normandy. Heraldry began after William’s time."},
+  reich:{body:EAGLE_GOLD,cap:"The imperial banner: a black eagle on gold, used by the emperors from the late 1100s."},
+  castile:{body:`<rect width="15" height="10" fill="${GU}"/><rect x="15" width="15" height="10" fill="${AR}"/><rect y="10" width="15" height="10" fill="${AR}"/><rect x="15" y="10" width="15" height="10" fill="${GU}"/><use href="#ch-castle" x="3.5" y="1.4" width="8" height="7.2" fill="${OR}"/><use href="#ch-castle" x="18.5" y="11.4" width="8" height="7.2" fill="${OR}"/><use href="#ch-lion" x="17.5" y="2.2" width="10" height="5.7" fill="#6b2a7a" transform="rotate(-50 22.5 5)"/><use href="#ch-lion" x="2.5" y="12.2" width="10" height="5.7" fill="#6b2a7a" transform="rotate(-50 7.5 15)"/>`,cap:"The royal banner of Castile and León: castles for Castile, lions for León."},
+  stgeorge:{body:`<rect width="30" height="20" fill="${AR}"/><rect x="12.5" width="5" height="20" fill="${GU}"/><rect y="7.5" width="30" height="5" fill="${GU}"/>`,cap:"St George’s Cross, the flag of England since the Middle Ages."},
+  imperial2:{body:EAGLE2_GOLD,cap:"The imperial banner: a black double-headed eagle on gold."},
+  muscovy:{body:`<rect width="30" height="20" fill="#b3141c"/><use href="#ch-eagle2" x="6" y="1" width="18" height="18" fill="${OR}"/>`,tag:"Royal emblem",cap:"The double-headed eagle, Moscow’s emblem since Ivan III. Russia had no national flag yet."},
+  burgundy:{body:`<rect width="30" height="20" fill="${AR}"/><path d="M3 2L27 18M27 2L3 18" stroke="${GU}" stroke-width="3.4" stroke-linecap="round"/><g fill="${GU}"><circle cx="9.5" cy="5" r="1.9"/><circle cx="20.5" cy="15" r="1.9"/><circle cx="21.5" cy="7" r="1.9"/><circle cx="8.5" cy="13" r="1.9"/></g>`,cap:"The Cross of Burgundy, the flag of Habsburg Spain."},
+  sweden:{body:`<rect width="30" height="20" fill="#006aa7"/><rect x="9.4" width="3.8" height="20" fill="#fecc02"/><rect y="8" width="30" height="4" fill="#fecc02"/>`,cap:"Blue with a gold cross, flown by Swedish ships from the 1500s."},
+  bourbon:{body:`<rect width="30" height="20" fill="#1d3f94"/><use href="#ch-fleur" x="4.5" y="1.8" width="6" height="7.2" fill="${OR}"/><use href="#ch-fleur" x="19.5" y="1.8" width="6" height="7.2" fill="${OR}"/><use href="#ch-fleur" x="12" y="10.8" width="6" height="7.2" fill="${OR}"/>`,cap:"The royal banner of France: gold fleurs-de-lis on blue."},
+  russiaTri:{body:`<rect width="30" height="6.7" fill="#ffffff"/><rect y="6.6" width="30" height="6.8" fill="#0039a6"/><rect y="13.3" width="30" height="6.7" fill="#d52b1e"/>`,cap:"White, blue and red: the tricolour Peter set for Russian merchant ships in 1705."},
+  habsburg:{body:BLACK_GOLD,cap:"Black and gold, the colours of the Habsburg monarchy."},
+  prussia:{body:`<rect width="30" height="20" fill="${AR}"/><use href="#ch-eagle" x="6" y="1" width="18" height="18" fill="${SA}"/>`,cap:"The royal flag of Prussia: a black eagle on white."},
+  russiaStd:{body:EAGLE2_GOLD,cap:"The imperial standard of Russia: a black double-headed eagle on gold."},
+  france:{body:`<rect width="10.2" height="20" fill="#002395"/><rect x="10" width="10.2" height="20" fill="#ffffff"/><rect x="20" width="10" height="20" fill="#ed2939"/>`,cap:"The tricolour of revolutionary and imperial France."},
+  union:{body:`<rect width="30" height="20" fill="#012169"/><path d="M0 0L30 20M30 0L0 20" stroke="#ffffff" stroke-width="4"/><path d="M0 0L30 20M30 0L0 20" stroke="${GU}" stroke-width="1.4"/><rect x="12" width="6" height="20" fill="#ffffff"/><rect y="7" width="30" height="6" fill="#ffffff"/><rect x="13.3" width="3.4" height="20" fill="${GU}"/><rect y="8.3" width="30" height="3.4" fill="${GU}"/>`,cap:"The Union Flag of the United Kingdom, in this form since 1801."},
+  austria:{body:BLACK_GOLD,cap:"Black and gold, the colours of the Austrian Empire."}
+};
+const RF={charlemagne:"oriflamme",alfred:"wessex",otto:"ottonian",william:"normandy",barbarossa:"reich",isabella:"castile","henry-viii":"stgeorge","charles-v":"imperial2","ivan-iv":"muscovy","philip-ii":"burgundy","elizabeth-i":"stgeorge",gustavus:"sweden","louis-xiv":"bourbon",peter:"russiaTri","maria-theresa":"habsburg","frederick-great":"prussia",catherine:"russiaStd",napoleon:"france",victoria:"union","franz-joseph":"austria"};
+document.getElementById("sprite").innerHTML=Object.values(CH).join("")+Object.entries(FLAGS).map(([k,v])=>{const sh=v.shape||"M0 0H30V20H0Z";return`<symbol id="fl-${k}" viewBox="0 0 30 20"><clipPath id="clip-${k}"><path d="${sh}"/></clipPath><g clip-path="url(#clip-${k})">${v.body}</g><path d="${sh}" fill="none" stroke="rgba(128,128,128,.55)" stroke-width=".8"/></symbol>`}).join("");
+const flagSvg=(id,w,h)=>`<svg class="flag" width="${w}" height="${h}" viewBox="0 0 30 20" aria-hidden="true" focusable="false"><use href="#fl-${RF[id]}"/></svg>`;
+const flagFig=r=>{const fl=FLAGS[RF[r.id]];return`<figure class="flagfig"><svg class="flag" width="54" height="36" viewBox="0 0 30 20" role="img" aria-label="${fl.cap}"><use href="#fl-${RF[r.id]}"/></svg><figcaption>${fl.tag?`<span class="tag">${fl.tag}</span>`:""}${fl.cap}</figcaption></figure>`};
+
+const $=s=>document.querySelector(s);
+const chartEl=$("#chart"),cardEl=$("#card"),statsEl=$("#stats");
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const f=n=>n.toFixed(1);
+const lenText=r=>r.lenText||`${r.len} years`;
+const reigning=(r,Y)=>r.sD<Y+1&&r.eD>Y;
+const chip=r=>`<button class="chip" data-go="${r.id}"><span class="sw" style="--c:var(--c-${r.g})"></span>${r.n}</button>`;
+
+const NAME_FONT='500 13px -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,sans-serif',YR_FONT='11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
+const ctx=document.createElement("canvas").getContext("2d");
+let mcache={};
+function measure(t,font){const k=font+"|"+t;if(mcache[k]==null){ctx.font=font;mcache[k]=ctx.measureText(t).width}return mcache[k]}
+
+let initial="elizabeth-i";
+try{const h=location.hash.slice(1);if(byId[h])initial=h}catch(e){}
+const state={sel:initial,year:1590,realms:new Set(ORDER),era:"all",dom:[750,1930],target:[750,1930],sort:"chrono"};
+const SORTS={
+  chrono:(a,b)=>a.sD-b.sD,
+  length:(a,b)=>b.len-a.len||a.sD-b.sD,
+  realm:(a,b)=>ORDER.indexOf(a.g)-ORDER.indexOf(b.g)||a.sD-b.sD,
+  age:(a,b)=>a.age-b.age||a.sD-b.sD
+};
+const visible=()=>RULERS.filter(r=>state.realms.has(r.g)&&r.eD>state.target[0]&&r.sD<state.target[1]).sort(SORTS[state.sort]);
+
+let L=null;
+function draw(){
+  const W=Math.max(280,Math.floor(chartEl.clientWidth)),narrow=W<520;
+  const RH=narrow?40:28,TOP=34,BOT=28,PL=4,PR=4;
+  const rows=visible();
+  const H=TOP+Math.max(rows.length,2)*RH+BOT;
+  const[d0,d1]=state.dom,sx=v=>PL+(v-d0)/(d1-d0)*(W-PL-PR);
+  const ae=document.activeElement;
+  const focusRow=ae&&ae.closest?ae.closest(".row"):null,focusId=focusRow?focusRow.dataset.id:null;
+  const span=d1-d0,step=span>700?100:span>300?50:span>120?25:10;
+  let grid="",lbl="";
+  for(let y=Math.ceil(d0/step)*step;y<=d1;y+=step){
+    const X=f(sx(y));grid+=`<line x1="${X}" x2="${X}" y1="${TOP-4}" y2="${H-BOT+2}"/>`;
+    if(+X>16&&+X<W-16)lbl+=`<text class="tick" x="${X}" y="${TOP-12}" text-anchor="middle">${y}</text><text class="tick" x="${X}" y="${H-BOT+18}" text-anchor="middle">${y}</text>`;
+  }
+  let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="Reign timeline, ${rows.length} rulers"><defs><clipPath id="plotclip"><rect x="${PL}" y="0" width="${W-PL-PR}" height="${H}"/></clipPath></defs>`;
+  s+=`<g class="grid" aria-hidden="true">${grid}</g><g aria-hidden="true">${lbl}</g><line class="axis" x1="0" x2="${W}" y1="${TOP-4}" y2="${TOP-4}"/><line class="axis" x1="0" x2="${W}" y1="${H-BOT+2}" y2="${H-BOT+2}"/><g class="rows">`;
+  const lay=[];
+  rows.forEach((r,i)=>{
+    const top=TOP+i*RH,BH=narrow?10:12,cy=narrow?top+27:top+RH/2;
+    const bx=Math.max(sx(r.sD),PL),be=Math.min(sx(r.eD),W-PR),bw=Math.max(be-bx,3);
+    const yrs=`${r.s[0]}–${r.e[0]}`,lw=27+measure(r.n,NAME_FONT)+6+measure(yrs,YR_FONT);
+    let lx,ly;
+    if(narrow){ly=top+15;lx=Math.min(Math.max(bx,PL+2),W-PR-lw)}
+    else{ly=cy+4.5;if(bx+bw+8+lw<=W-PR)lx=bx+bw+8;else if(bx-8-lw>=PL)lx=bx-8-lw;else lx=Math.max(PL,W-PR-lw)}
+    const sel=r.id===state.sel;
+    const ring=`<rect class="ring" x="${f(bx-3)}" y="${f(cy-BH/2-3)}" width="${f(bw+6)}" height="${BH+6}" rx="5"/>`;
+    s+=`<g class="row${sel?" sel":""}" data-id="${r.id}" tabindex="0" role="button" aria-pressed="${sel}" aria-label="${r.n}, ${GROUPS[r.g].name}, reigned ${r.s[0]} to ${r.e[0]}"><rect class="hit" x="0" y="${top+1}" width="${W}" height="${RH-2}" rx="6"/>${ring}<g clip-path="url(#plotclip)"><rect x="${f(bx)}" y="${f(cy-BH/2)}" width="${f(bw)}" height="${BH}" rx="3" style="fill:var(--c-${r.g})"/></g><use href="#fl-${RF[r.id]}" x="${f(lx)}" y="${f(ly-11.5)}" width="21" height="14"/><text class="lbl" x="${f(lx+27)}" y="${f(ly)}">${r.n}<tspan class="yrs" dx="6">${yrs}</tspan></text></g>`;
+    lay.push({r,cy});
+  });
+  if(!rows.length)s+=`<text class="empty" x="${PL+8}" y="${TOP+30}">Every realm is switched off. Turn one back on above.</text>`;
+  s+=`</g></svg>`;
+  chartEl.innerHTML=s;
+  L={W,H,TOP,BOT,PL,PR,sx,lay,d0,d1};
+  if(focusId){const el=chartEl.querySelector(`.row[data-id="${focusId}"]`);if(el)el.focus({preventScroll:true})}
+}
+
+function renderStats(){
+  const rows=visible();
+  if(!rows.length){statsEl.innerHTML=`<div><dt>Rulers shown</dt><dd>None. Switch a realm back on.</dd></div>`;return}
+  const longest=rows.reduce((a,b)=>b.len>a.len?b:a),shortest=rows.reduce((a,b)=>b.len<a.len?b:a);
+  const minAge=Math.min(...rows.map(r=>r.age)),young=rows.filter(r=>r.age===minAge).map(r=>r.n);
+  statsEl.innerHTML=[["Rulers shown",rows.length],["Longest reign",`${longest.n}, ${longest.len} years`],["Shortest reign",`${shortest.n}, ${shortest.len} years`],["Youngest on the throne",`${young.join(" and ")}, age ${minAge}`]].map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+}
+function lifeSvg(r){
+  const W=300,H=40,P=1,x=v=>P+(v-r.b)/(r.d+1-r.b)*(W-2*P);
+  const a=x(r.sD),b=Math.max(x(r.eD),a+3);
+  return`<svg class="life" viewBox="0 0 ${W} ${H}" role="img" aria-label="Lifetime ${r.b} to ${r.d}, with the reign from ${r.s[0]} to ${r.e[0]} marked"><line class="lifeline" x1="${P+1}" x2="${W-P-1}" y1="12" y2="12"/><rect x="${f(a)}" y="7" width="${f(b-a)}" height="10" rx="3" style="fill:var(--c-${r.g})"/><text class="tick" x="${P}" y="${H-4}">born ${r.approx?"c. ":""}${r.b}</text><text class="tick" x="${W-P}" y="${H-4}" text-anchor="end">died ${r.d}</text></svg>`;
+}
+function renderCard(){
+  const r=byId[state.sel],G=GROUPS[r.g];
+  const others=RULERS.filter(o=>o!==r&&o.sD<r.eD&&o.eD>r.sD).sort(SORTS.chrono);
+  let seq=visible();if(!seq.includes(r))seq=RULERS.slice().sort(SORTS[state.sort]);
+  const i=seq.indexOf(r),prev=seq[(i-1+seq.length)%seq.length],next=seq[(i+1)%seq.length];
+  cardEl.style.setProperty("--c",`var(--c-${r.g})`);
+  cardEl.innerHTML=`<p class="card-realm"><span class="sw"></span>${G.name}</p>
+<h2>${r.n}</h2>${r.aka?`<p class="aka">${r.aka}</p>`:""}
+<p class="ctitle">${r.t}</p>
+${flagFig(r)}
+${lifeSvg(r)}
+<dl class="kv"><div><dt>Reign</dt><dd>${r.s[0]}–${r.e[0]}</dd></div><div><dt>Length</dt><dd>${lenText(r)}</dd></div><div><dt>Born</dt><dd>${r.approx?"c. ":""}${r.b}</dd></div><div><dt>Age at accession</dt><dd>${r.approx?"about ":""}${r.age}</dd></div><div class="wide"><dt>How the reign ended</dt><dd>${r.end}</dd></div></dl>
+<h3>At a glance</h3>
+<ul class="facts">${r.f.map(x=>`<li>${x}</li>`).join("")}</ul>
+<h3>Biography</h3>
+<div class="bio">${(BIOS[r.id]||[]).map(p=>`<p>${p}</p>`).join("")}</div>
+<h3>Reigned at the same time</h3>
+<div class="chips">${others.length?others.map(chip).join(""):`<span class="none">No one else on this chart</span>`}</div>
+<nav class="card-nav" aria-label="Browse rulers">${prev!==r?`<button class="btn" data-go="${prev.id}">← ${prev.n}</button><button class="btn" data-go="${next.id}">${next.n} →</button>`:""}</nav>`;
+}
+
+function select(id,scroll){
+  if(!byId[id])return;
+  state.sel=id;
+  chartEl.querySelectorAll(".row").forEach(g=>{const on=g.dataset.id===id;g.classList.toggle("sel",on);g.setAttribute("aria-pressed",on)});
+  renderCard();
+  try{history.replaceState(null,"","#"+id)}catch(e){}
+  if(scroll&&matchMedia("(max-width:900px)").matches)cardEl.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"});
+}
+
+let anim=0;
+function setEra(id){
+  const e=ERAS.find(x=>x.id===id);state.era=id;
+  const from=state.dom.slice(),to=e.d.slice();state.target=to;
+  renderEras();renderStats();renderCard();
+  cancelAnimationFrame(anim);
+  if(reduce){state.dom=to;draw();return}
+  const t0=performance.now(),D=200;
+  const stepF=now=>{const k=Math.min(1,(now-t0)/D),q=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;state.dom=[from[0]+(to[0]-from[0])*q,from[1]+(to[1]-from[1])*q];draw();if(k<1)anim=requestAnimationFrame(stepF)};
+  anim=requestAnimationFrame(stepF);
+}
+
+function renderRealms(){
+  const all=state.realms.size===ORDER.length;
+  $("#realms").innerHTML=ORDER.map(g=>`<button class="toggle" data-realm="${g}" aria-pressed="${state.realms.has(g)}" style="--c:var(--c-${g})"><span class="sw"></span>${GROUPS[g].name}<span class="n">${RULERS.filter(r=>r.g===g).length}</span></button>`).join("")+(all?"":`<button class="linkbtn" data-realm="all">Show all</button>`);
+}
+function renderEras(){
+  $("#eras").innerHTML=ERAS.map(e=>`<button data-era="${e.id}" aria-pressed="${e.id===state.era}" title="${e.d[0]}–${e.d[1]}">${e.name}</button>`).join("");
+}
+function renderTable(){
+  $("#tbl").innerHTML=`<thead><tr><th scope="col">Ruler</th><th scope="col">Title</th><th scope="col">Reign</th><th scope="col">Length</th><th scope="col">Age at accession</th><th scope="col">How it ended</th></tr></thead><tbody>${RULERS.slice().sort(SORTS.chrono).map(r=>`<tr><td><span class="tflag">${flagSvg(r.id,21,14)}<button data-go="${r.id}">${r.n}</button></span></td><td>${r.t}</td><td class="num">${r.s[0]}–${r.e[0]}</td><td class="num">${lenText(r)}</td><td class="num">${r.approx?"c. ":""}${r.age}</td><td>${r.end}</td></tr>`).join("")}</tbody>`;
+}
+
+function refreshAll(){renderStats();draw();renderCard()}
+
+document.addEventListener("click",e=>{
+  const go=e.target.closest("[data-go]");if(go){select(go.dataset.go,true);return}
+  const rb=e.target.closest("[data-realm]");
+  if(rb){const g=rb.dataset.realm;if(g==="all")ORDER.forEach(x=>state.realms.add(x));else state.realms.has(g)?state.realms.delete(g):state.realms.add(g);renderRealms();refreshAll();const again=document.querySelector(`[data-realm="${g==="all"?ORDER[0]:g}"]`);if(again)again.focus();return}
+  const eb=e.target.closest("[data-era]");if(eb){setEra(eb.dataset.era);const again=document.querySelector(`[data-era="${eb.dataset.era}"]`);if(again)again.focus();return}
+});
+chartEl.addEventListener("click",e=>{const row=e.target.closest(".row");if(row)select(row.dataset.id,true)});
+chartEl.addEventListener("keydown",e=>{
+  const row=e.target.closest(".row");if(!row)return;
+  if(e.key==="Enter"||e.key===" "){e.preventDefault();select(row.dataset.id,false)}
+  else if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();const rs=[...chartEl.querySelectorAll(".row")],n=rs[rs.indexOf(row)+(e.key==="ArrowDown"?1:-1)];if(n)n.focus()}
+});
+$("#sort").addEventListener("change",e=>{state.sort=e.target.value;draw();renderCard()});
+
+let lastW=0;
+new ResizeObserver(()=>{const w=Math.floor(chartEl.clientWidth);if(w!==lastW){lastW=w;draw()}}).observe(chartEl);
+
+renderRealms();renderEras();renderTable();refreshAll();
+</script>
+</body>
+</html>
