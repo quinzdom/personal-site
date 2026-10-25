@@ -7,8 +7,49 @@
     "rec-native-realm",
     "rec-autobiography-corpse"
   ],
-  "usedMovies": [],
+  "usedMovies": [
+    "rec-syndromes",
+    "rec-satantango",
+    "rec-sansho"
+  ],
   "archive": [
+    {
+      "date": "2026-10-25",
+      "books": [
+        {
+          "title": "The Unnamable",
+          "author": "Samuel Beckett",
+          "coverPath": "images/covers/rec-unnamable.jpg"
+        },
+        {
+          "title": "The Rings of Saturn",
+          "author": "W.G. Sebald",
+          "coverPath": "images/covers/rec-rings-of-saturn.jpg"
+        },
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Syndromes and a Century",
+          "author": "Apichatpong Weerasethakul, 2006",
+          "coverPath": "images/covers/rec-syndromes.jpg"
+        },
+        {
+          "title": "Satantango",
+          "author": "Béla Tarr, 1994",
+          "coverPath": "images/covers/rec-satantango.jpg"
+        },
+        {
+          "title": "Sansho the Bailiff",
+          "author": "Kenji Mizoguchi, 1954",
+          "coverPath": "images/covers/rec-sansho.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-10-18",
       "books": [
