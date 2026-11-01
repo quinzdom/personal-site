@@ -10,9 +10,49 @@
   "usedMovies": [
     "rec-syndromes",
     "rec-satantango",
-    "rec-sansho"
+    "rec-sansho",
+    "rec-vengeance",
+    "rec-conformist",
+    "rec-cleo"
   ],
   "archive": [
+    {
+      "date": "2026-11-01",
+      "books": [
+        {
+          "title": "Demons",
+          "author": "Fyodor Dostoevsky",
+          "coverPath": "images/covers/rec-demons.jpg"
+        },
+        {
+          "title": "Native Realm",
+          "author": "Czesław Miłosz",
+          "coverPath": "images/covers/rec-native-realm.jpg"
+        },
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Vengeance Is Mine",
+          "author": "Shohei Imamura, 1979",
+          "coverPath": null
+        },
+        {
+          "title": "The Conformist",
+          "author": "Bernardo Bertolucci, 1970",
+          "coverPath": "images/covers/rec-conformist.jpg"
+        },
+        {
+          "title": "Cleo from 5 to 7",
+          "author": "Agnès Varda, 1962",
+          "coverPath": "images/covers/rec-cleo.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-10-25",
       "books": [
