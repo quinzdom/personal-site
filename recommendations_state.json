@@ -7,15 +7,45 @@
     "rec-native-realm",
     "rec-autobiography-corpse"
   ],
-  "usedMovies": [
-    "rec-syndromes",
-    "rec-satantango",
-    "rec-sansho",
-    "rec-vengeance",
-    "rec-conformist",
-    "rec-cleo"
-  ],
+  "usedMovies": [],
   "archive": [
+    {
+      "date": "2026-11-08",
+      "books": [
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        },
+        {
+          "title": "The Man Without Qualities",
+          "author": "Robert Musil",
+          "coverPath": "images/covers/rec-man-without-qualities.jpg"
+        },
+        {
+          "title": "The Rings of Saturn",
+          "author": "W.G. Sebald",
+          "coverPath": "images/covers/rec-rings-of-saturn.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Yi Yi",
+          "author": "Edward Yang, 2000",
+          "coverPath": "images/covers/rec-yi-yi.jpg"
+        },
+        {
+          "title": "Taste of Cherry",
+          "author": "Abbas Kiarostami, 1997",
+          "coverPath": "images/covers/rec-taste-of-cherry.jpg"
+        },
+        {
+          "title": "Céline and Julie Go Boating",
+          "author": "Jacques Rivette, 1974",
+          "coverPath": "images/covers/rec-celine-julie.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-11-01",
       "books": [
