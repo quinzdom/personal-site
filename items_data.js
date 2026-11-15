@@ -1125,5 +1125,6 @@ const items = [
 {title:"谷川俊太郎質問箱",author:"谷川 俊太郎",type:"book",date_read:"2026-07-02",rating:0,cover:"images/covers/bm-463830.jpg",id:"bm-463830",ya:false},
 {title:"俺か、俺以外か。 ローランドという生き方",author:"ROLAND",type:"book",date_read:"2026-07-24",rating:0,cover:"images/covers/bm-13539227.jpg",id:"bm-13539227",ya:false},
 {title:"大工日記",author:"中村季節",type:"book",date_read:"2026-08-27",rating:0,cover:"images/covers/bm-23057665.jpg",id:"bm-23057665",ya:false},
-{title:"自分の中に毒を持て―あなたは“常識人間\"を捨てられるか (青春文庫)",author:"岡本 太郎",type:"book",date_read:"2026-08-25",rating:0,cover:"images/covers/bm-570626.jpg",id:"bm-570626",ya:false}
+{title:"自分の中に毒を持て―あなたは“常識人間\"を捨てられるか (青春文庫)",author:"岡本 太郎",type:"book",date_read:"2026-08-25",rating:0,cover:"images/covers/bm-570626.jpg",id:"bm-570626",ya:false},
+{title:"TUGUMI(つぐみ)",author:"吉本 ばなな",type:"book",date_read:"2026-11-09",rating:0,cover:"images/covers/bm-573587.jpg",id:"bm-573587",ya:false}
 ];
