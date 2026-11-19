@@ -134,6 +134,19 @@ node scripts/build-listening-data.mjs ~/Downloads/my_spotify_data
 
 Point it at the unzipped folder that holds the `Streaming_History_Audio_*.json` files. It rewrites `listening_data.js`; bump the `?v=` cache key on that script tag in `listening.html`, then commit both files to publish.
 
+## Add new Goodreads reads
+
+Goodreads no longer serves shelf RSS feeds and its shelves need a signed-in session, so new reads come from a library export: go to `https://www.goodreads.com/review/import`, click "Export Library", save the CSV over `data-source/goodreads/goodreads_library_export.csv`, then:
+
+```bash
+node scripts/import-goodreads-export.mjs
+git add items_data.js index.html index-grouped-by-month.html images/covers/ data-source/goodreads/goodreads_library_export.csv
+git commit -m "Update Goodreads reading data"
+git push origin main
+```
+
+It adds books on the `read` shelf that are not on the site yet (matched by Goodreads ID, then by title and author), using Date Read (or Date Added when no read date was set), your star rating, and the cover from the book's Goodreads page, and bumps the `items_data.js` cache keys. Books already on the site keep their dates. Add `--dry-run` to preview, or pass a CSV path to use a different export.
+
 ## Update Goodreads book dates
 
 ```bash
