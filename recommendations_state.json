@@ -1,18 +1,51 @@
 {
-  "usedBooks": [
-    "rec-unnamable",
-    "rec-rings-of-saturn",
-    "rec-demons",
-    "rec-man-without-qualities",
-    "rec-native-realm",
-    "rec-autobiography-corpse"
-  ],
+  "usedBooks": [],
   "usedMovies": [
     "rec-taste-of-cherry",
     "rec-satantango",
-    "rec-cleo"
+    "rec-cleo",
+    "rec-syndromes",
+    "rec-conformist",
+    "rec-vengeance"
   ],
   "archive": [
+    {
+      "date": "2026-11-22",
+      "books": [
+        {
+          "title": "Autobiography of a Corpse",
+          "author": "Sigizmund Krzhizhanovsky",
+          "coverPath": "images/covers/rec-autobiography-corpse.jpg"
+        },
+        {
+          "title": "The Rings of Saturn",
+          "author": "W.G. Sebald",
+          "coverPath": "images/covers/rec-rings-of-saturn.jpg"
+        },
+        {
+          "title": "Spring Snow",
+          "author": "Yukio Mishima",
+          "coverPath": "images/covers/rec-spring-snow.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Syndromes and a Century",
+          "author": "Apichatpong Weerasethakul, 2006",
+          "coverPath": "images/covers/rec-syndromes.jpg"
+        },
+        {
+          "title": "The Conformist",
+          "author": "Bernardo Bertolucci, 1970",
+          "coverPath": "images/covers/rec-conformist.jpg"
+        },
+        {
+          "title": "Vengeance Is Mine",
+          "author": "Shohei Imamura, 1979",
+          "coverPath": null
+        }
+      ]
+    },
     {
       "date": "2026-11-15",
       "books": [
