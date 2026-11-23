@@ -7,21 +7,24 @@
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
   <link rel="stylesheet" href="styles/page-chrome.css">
   <style>
-    main { max-width: 1200px; margin: 0 auto; padding: 8px 24px 64px; }
-    .grid { columns: 3 300px; column-gap: 14px; }
-    figure { break-inside: avoid; margin: 0 0 18px; cursor: zoom-in; }
-    figure img { display: block; width: 100%; height: auto; background: #1b2026; }
-    figcaption, .lightbox p {
-      color: #5f6f7e; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; padding-top: 7px;
+    html { overflow: hidden; scrollbar-gutter: auto; }
+    body { height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+    header { flex: none; width: 100%; }
+    .viewer { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; padding: 0 24px 16px; }
+    .frame { position: relative; flex: 1; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; }
+    .frame img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; transition: opacity 0.18s ease; }
+    .frame img.fading { opacity: 0.15; }
+    .hit { position: absolute; top: 0; bottom: 0; width: 50%; border: 0; background: transparent; -webkit-tap-highlight-color: transparent; }
+    .hit.prev { left: 0; cursor: w-resize; }
+    .hit.next { right: 0; cursor: e-resize; }
+    .bar {
+      flex: none; display: flex; align-items: center; gap: 14px; padding-top: 12px;
+      color: #7f92a4; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
     }
-    figure:hover figcaption { color: #a6b5c3; }
-    .lightbox {
-      position: fixed; inset: 0; z-index: 10; display: none; flex-direction: column; align-items: center;
-      justify-content: center; gap: 6px; background: rgba(12, 14, 17, 0.97); cursor: zoom-out;
-    }
-    .lightbox.open { display: flex; }
-    .lightbox img { max-width: 94vw; max-height: 88vh; object-fit: contain; }
-    @media (max-width: 640px) { main { padding: 4px 16px 48px; } }
+    .bar button { background: none; border: 0; color: #687888; font-size: 0.95rem; line-height: 1; padding: 4px 10px; cursor: pointer; }
+    .bar button:hover { color: #f1f4f7; }
+    .count { color: #42505d; }
+    @media (max-width: 640px) { .viewer { padding: 0 8px 12px; } }
   </style>
 </head>
 <body>
@@ -31,7 +34,7 @@
         <h1>Ricoh</h1>
       </div>
       <div class="header-subline">
-        <p>A few favourites from the Ricoh GR III, 2025–2026.</p>
+        <p>Favourites from the Ricoh GR III, Tokyo to Europe, 2025–2026.</p>
         <div class="header-links">
           <a href="index.html" class="nav-link">Home</a>
         </div>
@@ -39,54 +42,250 @@
     </div>
   </header>
 
-  <main>
-    <div class="grid">
-      <figure data-i="0"><img src="images/ricoh/r0005711-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Shinjuku Gyoen · Jun 2026</figcaption></figure>
-      <figure data-i="1"><img src="images/ricoh/r0005702-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Cherry blossoms · Mar 2026</figcaption></figure>
-      <figure data-i="2"><img src="images/ricoh/r0005692-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Niseko · Mar 2026</figcaption></figure>
-      <figure data-i="3"><img src="images/ricoh/r0005654-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Feb 2026</figcaption></figure>
-      <figure data-i="4"><img src="images/ricoh/r0005633-sm.jpg" width="667" height="1000" loading="lazy" alt=""><figcaption>Plum blossoms · Feb 2026</figcaption></figure>
-      <figure data-i="5"><img src="images/ricoh/r0005583-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Snow · Feb 2026</figcaption></figure>
-      <figure data-i="6"><img src="images/ricoh/r0005570-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Snow · Feb 2026</figcaption></figure>
-      <figure data-i="7"><img src="images/ricoh/r0002886-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Autumn leaves · Nov 2025</figcaption></figure>
-      <figure data-i="8"><img src="images/ricoh/r0002074-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Forest trail · Aug 2025</figcaption></figure>
-      <figure data-i="9"><img src="images/ricoh/r0002033-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Night streets · Jul 2025</figcaption></figure>
-      <figure data-i="10"><img src="images/ricoh/r0002015-sm.jpg" width="667" height="1000" loading="lazy" alt=""><figcaption>Jul 2025</figcaption></figure>
-      <figure data-i="11"><img src="images/ricoh/r0002007-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Jul 2025</figcaption></figure>
-      <figure data-i="12"><img src="images/ricoh/r0001751-sm.jpg" width="667" height="1000" loading="lazy" alt=""><figcaption>Shinjuku · Jul 2025</figcaption></figure>
-      <figure data-i="13"><img src="images/ricoh/r0001394-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Jul 2025</figcaption></figure>
-      <figure data-i="14"><img src="images/ricoh/r0001313-sm.jpg" width="667" height="1000" loading="lazy" alt=""><figcaption>Jul 2025</figcaption></figure>
-      <figure data-i="15"><img src="images/ricoh/r0001271-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Jul 2025</figcaption></figure>
-      <figure data-i="16"><img src="images/ricoh/r0001259-sm.jpg" width="667" height="1000" loading="lazy" alt=""><figcaption>Jul 2025</figcaption></figure>
-      <figure data-i="17"><img src="images/ricoh/r0000127-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Kabukichō · Jul 2025</figcaption></figure>
+  <main class="viewer">
+    <div class="frame">
+      <img id="photo" src="images/ricoh/r0000127.jpg" srcset="images/ricoh/r0000127-sm.jpg 1000w, images/ricoh/r0000127.jpg 2000w" sizes="100vw" alt="">
+      <button class="hit prev" data-step="-1" aria-label="Previous photo"></button>
+      <button class="hit next" data-step="1" aria-label="Next photo"></button>
+    </div>
+    <div class="bar">
+      <button data-step="-1" aria-label="Previous photo">&larr;</button>
+      <span id="caption">Kabukichō · Jul 2025</span>
+      <span class="count" id="count">1 / 35</span>
+      <button data-step="1" aria-label="Next photo">&rarr;</button>
     </div>
   </main>
 
-  <div class="lightbox" aria-hidden="true"><img alt=""><p></p></div>
-
   <script>
-    const photos = [{"src": "images/ricoh/r0005711.jpg", "caption": "Shinjuku Gyoen · Jun 2026"}, {"src": "images/ricoh/r0005702.jpg", "caption": "Cherry blossoms · Mar 2026"}, {"src": "images/ricoh/r0005692.jpg", "caption": "Niseko · Mar 2026"}, {"src": "images/ricoh/r0005654.jpg", "caption": "Feb 2026"}, {"src": "images/ricoh/r0005633.jpg", "caption": "Plum blossoms · Feb 2026"}, {"src": "images/ricoh/r0005583.jpg", "caption": "Snow · Feb 2026"}, {"src": "images/ricoh/r0005570.jpg", "caption": "Snow · Feb 2026"}, {"src": "images/ricoh/r0002886.jpg", "caption": "Autumn leaves · Nov 2025"}, {"src": "images/ricoh/r0002074.jpg", "caption": "Forest trail · Aug 2025"}, {"src": "images/ricoh/r0002033.jpg", "caption": "Night streets · Jul 2025"}, {"src": "images/ricoh/r0002015.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0002007.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0001751.jpg", "caption": "Shinjuku · Jul 2025"}, {"src": "images/ricoh/r0001394.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0001313.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0001271.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0001259.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0000127.jpg", "caption": "Kabukichō · Jul 2025"}];
-    const box = document.querySelector('.lightbox');
-    const boxImg = box.querySelector('img');
-    const boxCaption = box.querySelector('p');
-    let current = -1;
+    const photos = [
+{
+"src": "images/ricoh/r0000127.jpg",
+"sm": "images/ricoh/r0000127-sm.jpg",
+"caption": "Kabukichō · Jul 2025"
+},
+{
+"src": "images/ricoh/r0001259.jpg",
+"sm": "images/ricoh/r0001259-sm.jpg",
+"caption": "Jul 2025"
+},
+{
+"src": "images/ricoh/r0001271.jpg",
+"sm": "images/ricoh/r0001271-sm.jpg",
+"caption": "Jul 2025"
+},
+{
+"src": "images/ricoh/r0001313.jpg",
+"sm": "images/ricoh/r0001313-sm.jpg",
+"caption": "Jul 2025"
+},
+{
+"src": "images/ricoh/r0001394.jpg",
+"sm": "images/ricoh/r0001394-sm.jpg",
+"caption": "Jul 2025"
+},
+{
+"src": "images/ricoh/r0001751.jpg",
+"sm": "images/ricoh/r0001751-sm.jpg",
+"caption": "Shinjuku · Jul 2025"
+},
+{
+"src": "images/ricoh/r0002007.jpg",
+"sm": "images/ricoh/r0002007-sm.jpg",
+"caption": "Jul 2025"
+},
+{
+"src": "images/ricoh/r0002015.jpg",
+"sm": "images/ricoh/r0002015-sm.jpg",
+"caption": "Jul 2025"
+},
+{
+"src": "images/ricoh/r0002033.jpg",
+"sm": "images/ricoh/r0002033-sm.jpg",
+"caption": "Night streets · Jul 2025"
+},
+{
+"src": "images/ricoh/r0002074.jpg",
+"sm": "images/ricoh/r0002074-sm.jpg",
+"caption": "Forest trail · Aug 2025"
+},
+{
+"src": "images/ricoh/r0002886.jpg",
+"sm": "images/ricoh/r0002886-sm.jpg",
+"caption": "Autumn leaves · Nov 2025"
+},
+{
+"src": "images/ricoh/r0003720.jpg",
+"sm": "images/ricoh/r0003720-sm.jpg",
+"caption": "Istanbul · Dec 2025"
+},
+{
+"src": "images/ricoh/r0003736.jpg",
+"sm": "images/ricoh/r0003736-sm.jpg",
+"caption": "Istanbul · Dec 2025"
+},
+{
+"src": "images/ricoh/r0003818.jpg",
+"sm": "images/ricoh/r0003818-sm.jpg",
+"caption": "Istanbul · Dec 2025"
+},
+{
+"src": "images/ricoh/r0003949.jpg",
+"sm": "images/ricoh/r0003949-sm.jpg",
+"caption": "Athens · Dec 2025"
+},
+{
+"src": "images/ricoh/r0004118.jpg",
+"sm": "images/ricoh/r0004118-sm.jpg",
+"caption": "Athens · Dec 2025"
+},
+{
+"src": "images/ricoh/r0004142.jpg",
+"sm": "images/ricoh/r0004142-sm.jpg",
+"caption": "Athens · Dec 2025"
+},
+{
+"src": "images/ricoh/r0004193.jpg",
+"sm": "images/ricoh/r0004193-sm.jpg",
+"caption": "Athens · Dec 2025"
+},
+{
+"src": "images/ricoh/r0004419.jpg",
+"sm": "images/ricoh/r0004419-sm.jpg",
+"caption": "Bucharest · Dec 2025"
+},
+{
+"src": "images/ricoh/r0004426.jpg",
+"sm": "images/ricoh/r0004426-sm.jpg",
+"caption": "Bucharest · Dec 2025"
+},
+{
+"src": "images/ricoh/r0004680.jpg",
+"sm": "images/ricoh/r0004680-sm.jpg",
+"caption": "Basel & Alsace · Jan 2026"
+},
+{
+"src": "images/ricoh/r0004759.jpg",
+"sm": "images/ricoh/r0004759-sm.jpg",
+"caption": "Basel & Alsace · Jan 2026"
+},
+{
+"src": "images/ricoh/r0004914.jpg",
+"sm": "images/ricoh/r0004914-sm.jpg",
+"caption": "Paris · Jan 2026"
+},
+{
+"src": "images/ricoh/r0004984.jpg",
+"sm": "images/ricoh/r0004984-sm.jpg",
+"caption": "Paris · Jan 2026"
+},
+{
+"src": "images/ricoh/r0005066.jpg",
+"sm": "images/ricoh/r0005066-sm.jpg",
+"caption": "Paris · Jan 2026"
+},
+{
+"src": "images/ricoh/r0005118.jpg",
+"sm": "images/ricoh/r0005118-sm.jpg",
+"caption": "Paris · Jan 2026"
+},
+{
+"src": "images/ricoh/r0005151.jpg",
+"sm": "images/ricoh/r0005151-sm.jpg",
+"caption": "Paris · Jan 2026"
+},
+{
+"src": "images/ricoh/r0005175.jpg",
+"sm": "images/ricoh/r0005175-sm.jpg",
+"caption": "Paris · Jan 2026"
+},
+{
+"src": "images/ricoh/r0005570.jpg",
+"sm": "images/ricoh/r0005570-sm.jpg",
+"caption": "Snow · Feb 2026"
+},
+{
+"src": "images/ricoh/r0005583.jpg",
+"sm": "images/ricoh/r0005583-sm.jpg",
+"caption": "Snow · Feb 2026"
+},
+{
+"src": "images/ricoh/r0005633.jpg",
+"sm": "images/ricoh/r0005633-sm.jpg",
+"caption": "Plum blossoms · Feb 2026"
+},
+{
+"src": "images/ricoh/r0005654.jpg",
+"sm": "images/ricoh/r0005654-sm.jpg",
+"caption": "Feb 2026"
+},
+{
+"src": "images/ricoh/r0005692.jpg",
+"sm": "images/ricoh/r0005692-sm.jpg",
+"caption": "Niseko · Mar 2026"
+},
+{
+"src": "images/ricoh/r0005702.jpg",
+"sm": "images/ricoh/r0005702-sm.jpg",
+"caption": "Cherry blossoms · Mar 2026"
+},
+{
+"src": "images/ricoh/r0005711.jpg",
+"sm": "images/ricoh/r0005711-sm.jpg",
+"caption": "Shinjuku Gyoen · Jun 2026"
+}
+];
+    const img = document.getElementById('photo');
+    const caption = document.getElementById('caption');
+    const count = document.getElementById('count');
+    const srcset = p => `${p.sm} 1000w, ${p.src} 2000w`;
+    let current = 0;
+
+    function load(p) {
+      const im = new Image();
+      im.sizes = '100vw';
+      im.srcset = srcset(p);
+      im.src = p.src;
+      return im;
+    }
 
     function show(i) {
       current = (i + photos.length) % photos.length;
-      boxImg.src = photos[current].src;
-      boxCaption.textContent = photos[current].caption;
-      box.classList.add('open');
+      const want = current;
+      const p = photos[want];
+      caption.textContent = p.caption;
+      count.textContent = `${want + 1} / ${photos.length}`;
+      history.replaceState(null, '', '#' + (want + 1));
+      img.classList.add('fading');
+      const next = load(p);
+      const swap = () => {
+        if (want !== current) return;  // a later click already moved on
+        img.srcset = srcset(p);
+        img.src = p.src;
+        img.classList.remove('fading');
+      };
+      next.decode().then(swap, swap);
+      load(photos[(want + 1) % photos.length]);
+      load(photos[(want - 1 + photos.length) % photos.length]);
     }
-    function close() { box.classList.remove('open'); current = -1; }
 
-    document.querySelectorAll('figure').forEach(f => f.addEventListener('click', () => show(+f.dataset.i)));
-    box.addEventListener('click', close);
+    document.querySelectorAll('[data-step]').forEach(b =>
+      b.addEventListener('click', () => show(current + Number(b.dataset.step))));
     document.addEventListener('keydown', e => {
-      if (current < 0) return;
-      if (e.key === 'Escape') close();
       if (e.key === 'ArrowRight') show(current + 1);
       if (e.key === 'ArrowLeft') show(current - 1);
     });
+    let touchX = null;
+    const frame = document.querySelector('.frame');
+    frame.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+    frame.addEventListener('touchend', e => {
+      if (touchX === null) return;
+      const dx = e.changedTouches[0].clientX - touchX;
+      touchX = null;
+      if (Math.abs(dx) > 40) show(current + (dx < 0 ? 1 : -1));
+    });
+
+    const start = parseInt(location.hash.slice(1), 10);
+    show(start >= 1 && start <= photos.length ? start - 1 : 0);
   </script>
 </body>
 </html>
