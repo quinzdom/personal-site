@@ -90,7 +90,15 @@ Then generated into `tv_data.js` with:
 node scripts/build-tv-data.mjs
 ```
 
-## Deploy to GitHub Pages
+## Deploy (Cloudflare Workers)
+
+dcdnt.xyz is served by the Cloudflare Worker `personal-site`. Cloudflare Workers Builds is connected to this repo and runs `npx wrangler deploy` on every push to `main`, publishing the repo root as static assets per `wrangler.jsonc`. `.assetsignore` keeps dotfiles (`.git`, `.github`, `.claude`) and the config itself out of the upload. The `dcdnt.xyz/*` route is managed in the Cloudflare dashboard, so `wrangler.jsonc` has no `routes` and deploys leave it alone.
+
+Check a deploy in the Cloudflare dashboard under Workers & Pages → personal-site → Deployments, or confirm the new `items_data.js?v=` key on the live page.
+
+## Deploy to GitHub Pages (legacy)
+
+The GitHub Pages workflow below still runs on every push, but quinzdom.github.io only redirects to dcdnt.xyz, so it no longer controls what the live site shows.
 
 This repo includes a GitHub Actions workflow at `.github/workflows/deploy-pages.yml`.
 

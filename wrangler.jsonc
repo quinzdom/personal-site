@@ -1,0 +1,13 @@
+{
+  // dcdnt.xyz is served by the Cloudflare Worker "personal-site". Workers Builds
+  // runs `npx wrangler deploy` on every push to main using this file.
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "personal-site",
+  "compatibility_date": "2026-11-23",
+  // The dcdnt.xyz/* route is managed in the Cloudflare dashboard. With no "routes"
+  // key here, deploys leave it untouched. workers_dev matches the dashboard (on).
+  "workers_dev": true,
+  "assets": {
+    "directory": "."
+  }
+}
