@@ -1,14 +1,48 @@
 {
-  "usedBooks": [],
-  "usedMovies": [
-    "rec-taste-of-cherry",
-    "rec-satantango",
-    "rec-cleo",
-    "rec-syndromes",
-    "rec-conformist",
-    "rec-vengeance"
+  "usedBooks": [
+    "rec-rings-of-saturn",
+    "rec-man-without-qualities",
+    "rec-native-realm"
   ],
+  "usedMovies": [],
   "archive": [
+    {
+      "date": "2026-11-23",
+      "books": [
+        {
+          "title": "The Rings of Saturn",
+          "author": "W.G. Sebald",
+          "coverPath": "images/covers/rec-rings-of-saturn.jpg"
+        },
+        {
+          "title": "The Man Without Qualities",
+          "author": "Robert Musil",
+          "coverPath": "images/covers/rec-man-without-qualities.jpg"
+        },
+        {
+          "title": "Native Realm",
+          "author": "Czesław Miłosz",
+          "coverPath": "images/covers/rec-native-realm.jpg"
+        }
+      ],
+      "movies": [
+        {
+          "title": "Céline and Julie Go Boating",
+          "author": "Jacques Rivette, 1974",
+          "coverPath": "images/covers/rec-celine-julie.jpg"
+        },
+        {
+          "title": "Yi Yi",
+          "author": "Edward Yang, 2000",
+          "coverPath": "images/covers/rec-yi-yi.jpg"
+        },
+        {
+          "title": "Sansho the Bailiff",
+          "author": "Kenji Mizoguchi, 1954",
+          "coverPath": "images/covers/rec-sansho.jpg"
+        }
+      ]
+    },
     {
       "date": "2026-11-22",
       "books": [
