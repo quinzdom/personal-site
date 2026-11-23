@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ricoh</title>
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <link rel="stylesheet" href="styles/page-chrome.css">
+  <style>
+    main { max-width: 1200px; margin: 0 auto; padding: 8px 24px 64px; }
+    .grid { columns: 3 300px; column-gap: 14px; }
+    figure { break-inside: avoid; margin: 0 0 18px; cursor: zoom-in; }
+    figure img { display: block; width: 100%; height: auto; background: #1b2026; }
+    figcaption, .lightbox p {
+      color: #5f6f7e; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; padding-top: 7px;
+    }
+    figure:hover figcaption { color: #a6b5c3; }
+    .lightbox {
+      position: fixed; inset: 0; z-index: 10; display: none; flex-direction: column; align-items: center;
+      justify-content: center; gap: 6px; background: rgba(12, 14, 17, 0.97); cursor: zoom-out;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 94vw; max-height: 88vh; object-fit: contain; }
+    @media (max-width: 640px) { main { padding: 4px 16px 48px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-copy">
+      <div class="header-main">
+        <h1>Ricoh</h1>
+      </div>
+      <div class="header-subline">
+        <p>A few favourites from the Ricoh GR III, 2025–2026.</p>
+        <div class="header-links">
+          <a href="index.html" class="nav-link">Home</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <figure data-i="0"><img src="images/ricoh/r0005711-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Shinjuku Gyoen · Jun 2026</figcaption></figure>
+      <figure data-i="1"><img src="images/ricoh/r0005702-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Cherry blossoms · Mar 2026</figcaption></figure>
+      <figure data-i="2"><img src="images/ricoh/r0005692-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Niseko · Mar 2026</figcaption></figure>
+      <figure data-i="3"><img src="images/ricoh/r0005654-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Feb 2026</figcaption></figure>
+      <figure data-i="4"><img src="images/ricoh/r0005633-sm.jpg" width="667" height="1000" loading="lazy" alt=""><figcaption>Plum blossoms · Feb 2026</figcaption></figure>
+      <figure data-i="5"><img src="images/ricoh/r0005583-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Snow · Feb 2026</figcaption></figure>
+      <figure data-i="6"><img src="images/ricoh/r0005570-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Snow · Feb 2026</figcaption></figure>
+      <figure data-i="7"><img src="images/ricoh/r0002886-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Autumn leaves · Nov 2025</figcaption></figure>
+      <figure data-i="8"><img src="images/ricoh/r0002074-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Forest trail · Aug 2025</figcaption></figure>
+      <figure data-i="9"><img src="images/ricoh/r0002033-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Night streets · Jul 2025</figcaption></figure>
+      <figure data-i="10"><img src="images/ricoh/r0002015-sm.jpg" width="667" height="1000" loading="lazy" alt=""><figcaption>Jul 2025</figcaption></figure>
+      <figure data-i="11"><img src="images/ricoh/r0002007-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Jul 2025</figcaption></figure>
+      <figure data-i="12"><img src="images/ricoh/r0001751-sm.jpg" width="667" height="1000" loading="lazy" alt=""><figcaption>Shinjuku · Jul 2025</figcaption></figure>
+      <figure data-i="13"><img src="images/ricoh/r0001394-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Jul 2025</figcaption></figure>
+      <figure data-i="14"><img src="images/ricoh/r0001313-sm.jpg" width="667" height="1000" loading="lazy" alt=""><figcaption>Jul 2025</figcaption></figure>
+      <figure data-i="15"><img src="images/ricoh/r0001271-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Jul 2025</figcaption></figure>
+      <figure data-i="16"><img src="images/ricoh/r0001259-sm.jpg" width="667" height="1000" loading="lazy" alt=""><figcaption>Jul 2025</figcaption></figure>
+      <figure data-i="17"><img src="images/ricoh/r0000127-sm.jpg" width="1000" height="667" loading="lazy" alt=""><figcaption>Kabukichō · Jul 2025</figcaption></figure>
+    </div>
+  </main>
+
+  <div class="lightbox" aria-hidden="true"><img alt=""><p></p></div>
+
+  <script>
+    const photos = [{"src": "images/ricoh/r0005711.jpg", "caption": "Shinjuku Gyoen · Jun 2026"}, {"src": "images/ricoh/r0005702.jpg", "caption": "Cherry blossoms · Mar 2026"}, {"src": "images/ricoh/r0005692.jpg", "caption": "Niseko · Mar 2026"}, {"src": "images/ricoh/r0005654.jpg", "caption": "Feb 2026"}, {"src": "images/ricoh/r0005633.jpg", "caption": "Plum blossoms · Feb 2026"}, {"src": "images/ricoh/r0005583.jpg", "caption": "Snow · Feb 2026"}, {"src": "images/ricoh/r0005570.jpg", "caption": "Snow · Feb 2026"}, {"src": "images/ricoh/r0002886.jpg", "caption": "Autumn leaves · Nov 2025"}, {"src": "images/ricoh/r0002074.jpg", "caption": "Forest trail · Aug 2025"}, {"src": "images/ricoh/r0002033.jpg", "caption": "Night streets · Jul 2025"}, {"src": "images/ricoh/r0002015.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0002007.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0001751.jpg", "caption": "Shinjuku · Jul 2025"}, {"src": "images/ricoh/r0001394.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0001313.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0001271.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0001259.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0000127.jpg", "caption": "Kabukichō · Jul 2025"}];
+    const box = document.querySelector('.lightbox');
+    const boxImg = box.querySelector('img');
+    const boxCaption = box.querySelector('p');
+    let current = -1;
+
+    function show(i) {
+      current = (i + photos.length) % photos.length;
+      boxImg.src = photos[current].src;
+      boxCaption.textContent = photos[current].caption;
+      box.classList.add('open');
+    }
+    function close() { box.classList.remove('open'); current = -1; }
+
+    document.querySelectorAll('figure').forEach(f => f.addEventListener('click', () => show(+f.dataset.i)));
+    box.addEventListener('click', close);
+    document.addEventListener('keydown', e => {
+      if (current < 0) return;
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowRight') show(current + 1);
+      if (e.key === 'ArrowLeft') show(current - 1);
+    });
+  </script>
+</body>
+</html>
