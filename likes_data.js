@@ -10,6 +10,7 @@ const likedMovieIds = new Set([
   "lb-https://boxd.it/1iLA",
   "lb-https://boxd.it/1pDe",
   "lb-https://boxd.it/1sBA",
+  "lb-https://boxd.it/1vLe",
   "lb-https://boxd.it/1xBg",
   "lb-https://boxd.it/1yCu",
   "lb-https://boxd.it/1zYm",
