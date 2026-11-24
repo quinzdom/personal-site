@@ -35,9 +35,9 @@
     .bar .full .exit, :root.immersive .bar .full .enter { display: none; }
     :root.immersive .bar .full .exit { display: inline; }
     :root.immersive, :root.immersive body { background: #000; }
-    :root.immersive header, :root.immersive .thumbs { display: none; }
+    :root.immersive header, :root.immersive .thumbs, :root.immersive .bar { display: none; }
     :root.immersive .viewer { padding: 0; }
-    :root.immersive .bar { padding: 8px 0 10px; }
+    :root.immersive.idle, :root.immersive.idle * { cursor: none !important; }
     @media (max-width: 640px) {
       .viewer { padding: 0 8px; }
       .thumbs { padding: 8px 8px 12px; }
@@ -393,6 +393,13 @@
       thumbButtons[current]?.scrollIntoView({ block: 'nearest', inline: 'center' });
     }
     fullButton.addEventListener('click', () => setImmersive(!root.classList.contains('immersive')));
+    // In full screen nothing but the photo shows; the cursor hides too once the mouse rests.
+    let idleTimer;
+    document.addEventListener('mousemove', () => {
+      root.classList.remove('idle');
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => root.classList.add('idle'), 1500);
+    });
     const leftFullscreen = () => { if (!fsElement() && root.classList.contains('immersive')) setImmersive(false); };
     document.addEventListener('fullscreenchange', leftFullscreen);
     document.addEventListener('webkitfullscreenchange', leftFullscreen);
@@ -404,14 +411,16 @@
       if (e.key === 'f' || e.key === 'F') setImmersive(!root.classList.contains('immersive'));
       if (e.key === 'Escape' && root.classList.contains('immersive')) setImmersive(false);
     });
-    let touchX = null;
+    let touchX = null, touchY = null;
     const frame = document.querySelector('.frame');
-    frame.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+    frame.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }, { passive: true });
     frame.addEventListener('touchend', e => {
       if (touchX === null) return;
       const dx = e.changedTouches[0].clientX - touchX;
-      touchX = null;
-      if (Math.abs(dx) > 40) show(current + (dx < 0 ? 1 : -1));
+      const dy = e.changedTouches[0].clientY - touchY;
+      touchX = touchY = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) show(current + (dx < 0 ? 1 : -1));
+      else if (dy > 80 && root.classList.contains('immersive')) setImmersive(false);  // swipe down leaves full screen
     });
 
     const start = parseInt(location.hash.slice(1), 10);
