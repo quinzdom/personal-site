@@ -37,6 +37,8 @@ That serves the whole site on `http://localhost:8000` and enables the AI-powered
 - `goals_data.js`: generated goal definitions and completed days
 - `daylog-k7m2.html`: private daily log page
 - `daylog_data.js`: generated daily log data used by the private log page
+- `pictures.html`, `pictures.json`, `images/ricoh/`: private photo page (unlisted, `noindex`). It's built by `photo-page/build.py` in `~/Documents/Code/RICOH GR`, and it draws itself from `pictures.json`
+- `worker/index.js`: the Worker script. It handles only `/api/*`, which is the photo page's admin mode (`/pictures#admin`). Everything else is served straight from the static assets
 - `images/covers/`: local cover images
 - `data-source/`: raw source exports kept in the repo for reproducible rebuilds
 - `anki-addon/`: template for the local Anki exporter add-on used by the daylog sync
@@ -92,7 +94,11 @@ node scripts/build-tv-data.mjs
 
 ## Deploy (Cloudflare Workers)
 
-dcdnt.xyz is served by the Cloudflare Worker `personal-site`. Cloudflare Workers Builds is connected to this repo and runs `npx wrangler deploy` on every push to `main`, publishing the repo root as static assets per `wrangler.jsonc`. `.assetsignore` keeps dotfiles (`.git`, `.github`, `.claude`) and the config itself out of the upload. The `dcdnt.xyz/*` route is managed in the Cloudflare dashboard, so `wrangler.jsonc` has no `routes` and deploys leave it alone.
+dcdnt.xyz is served by the Cloudflare Worker `personal-site`. Cloudflare Workers Builds is connected to this repo and runs `npx wrangler deploy` on every push to `main`, publishing the repo root as static assets per `wrangler.jsonc`. `.assetsignore` keeps dotfiles (`.git`, `.github`, `.claude`), the config itself and `worker/` out of the upload. `worker/index.js` runs only for `/api/*` (`run_worker_first`). It needs two secrets, set under Workers & Pages → personal-site → Settings → Variables and Secrets:
+- `ADMIN_PASSWORD`: the photo page's admin password.
+- `GITHUB_TOKEN`: a fine-grained token for this repo with Contents read/write. Admin mode saves by committing `pictures.json`, and that commit redeploys the site.
+
+Until both are set, the API refuses with a message and the rest of the site is unaffected. To try admin mode locally, put test values in `.dev.vars` (gitignored) and run `npx wrangler dev`. The `dcdnt.xyz/*` route is managed in the Cloudflare dashboard, so `wrangler.jsonc` has no `routes` and deploys leave it alone.
 
 Check a deploy in the Cloudflare dashboard under Workers & Pages → personal-site → Deployments, or confirm the new `items_data.js?v=` key on the live page.
 

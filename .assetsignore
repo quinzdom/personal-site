@@ -1,3 +1,4 @@
 # Keep the deploy identical to the GitHub Pages site: publish everything except dotfiles and the deploy config.
 .*
 wrangler.jsonc
+worker

@@ -6,6 +6,7 @@
   <title>pictures</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
   <meta name="theme-color" content="#000000">
+  <link rel="preload" href="pictures.json" as="fetch" crossorigin>
   <style>
     /* Founders Grotesk (Klim) is licensed to the owner; no font file lives in this public repo. */
     @font-face { font-family: 'Founders Grotesk'; font-weight: 300; font-display: swap;
@@ -18,7 +19,7 @@
            url('https://list.dcdnt.xyz/fonts/founders-grotesk-bold.woff2') format('woff2'); }
     :root {
       color-scheme: dark;
-      --bg: #000; --ink: #f2efe9; --muted: #8f8a82; --dim: #6b675f; --ph: #0d0d0d;
+      --bg: #000; --ink: #f2efe9; --muted: #8f8a82; --dim: #6b675f; --ph: #0d0d0d; --line: #2a2826;
       --pink: #ff2d87;  /* hot pink, this page's one colour: the wordmark, hovers and the current photo */
       --side: 30px;  /* the margin all round the page, phones included */
       --g: 5px;  /* between photos, side by side and row to row */
@@ -32,13 +33,15 @@
     }
     body.viewing { overflow: hidden; }
     a { color: inherit; text-decoration: none; }
+    [hidden] { display: none !important; }
     .sr { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; font: inherit; }
-    a:focus-visible, button:focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
+    a:focus-visible, button:focus-visible, input:focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
 
     /* The wordmark and Home sit inside the top margin: a band as tall as the side margins, with their
        capitals centred in it (10px above them, about 10px below), so the photos start --side from the top. */
     .hd { max-width: 2000px; margin: 0 auto; height: var(--side); display: flex; align-items: baseline; justify-content: space-between; gap: 24px; padding: 10px var(--side) 0; line-height: 1; }
     .mark { color: var(--pink); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .hd nav { display: flex; gap: 18px; }
     .hd nav a { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
     .hd nav a:hover { color: var(--pink); }
 
@@ -51,6 +54,7 @@
     .ph img { display: block; width: 100%; height: auto; aspect-ratio: var(--r); object-fit: cover; transition: opacity 0.35s ease; }
     .ph.ld img { opacity: 0; }
     .ph:hover img { opacity: 0.82; }
+    .note { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
     @media (max-width: 768px) {
       .row { flex-wrap: wrap; row-gap: var(--g); }
       .row.loose { width: auto; }
@@ -86,29 +90,88 @@
       .bar { gap: 6px; font-size: 14px; }
       .thumbs img { height: 42px; }
     }
+
+    /* Admin mode: underlines, no boxes; hot pink only for the one action that matters (Save). */
+    .text-btn { background: none; border: 0; padding: 4px 0; color: var(--muted); font: inherit; font-weight: 400; font-size: 0.95rem; cursor: pointer; }
+    .text-btn:hover { color: var(--ink); }
+    .text-btn.primary { color: var(--pink); }
+    .text-btn:disabled { opacity: 0.4; cursor: default; }
+    .field { width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; color: var(--ink); font: inherit; font-weight: 400; padding: 4px 0; }
+    .field:focus { outline: none; border-bottom-color: var(--ink); }
+    .login { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.92); padding: var(--side); }
+    .login form { width: min(320px, 100%); display: grid; gap: 14px; }
+    .login label { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
+    .login .actions { display: flex; gap: 22px; }
+    .msg { min-height: 1.4em; margin: 0; color: var(--pink); font-weight: 400; font-size: 0.95rem; }
+    .editor { max-width: 2000px; margin: 0 auto; padding: 0 var(--side) var(--side); }
+    .ed-bar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 22px; padding: 12px 0; background: var(--bg); border-bottom: 1px solid var(--line); }
+    .ed-title { font-weight: 400; }
+    .ed-count, .ed-hint { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
+    .ed-status { flex: 1; min-width: 12ch; color: var(--muted); font-weight: 400; font-size: 0.95rem; }
+    .ed-status.error { color: var(--pink); }
+    .ed-hint { margin: 14px 0 18px; max-width: 70ch; }
+    .ed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 22px 14px; }
+    .ed-grid.small { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+    .card { position: relative; cursor: grab; }
+    .card.dragging { opacity: 0.3; }
+    .card.before::before, .card.after::after { content: ''; position: absolute; top: 0; bottom: 0; width: 2px; background: var(--pink); }
+    .card.before::before { left: -8px; }
+    .card.after::after { right: -8px; }
+    .card img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: contain; background: var(--ph); pointer-events: none; }
+    .card .num { position: absolute; top: 6px; left: 6px; padding: 0 5px; background: rgba(0, 0, 0, 0.7); color: var(--ink); font-size: 0.75rem; font-weight: 400; }
+    .card .when { display: block; margin-top: 2px; color: var(--dim); font-size: 0.8rem; font-weight: 400; }
+    .card .tools { display: flex; gap: 14px; margin-top: 4px; }
+    .card .tools .text-btn { font-size: 1rem; padding: 0 2px; }
+    .card .tools .remove:hover { color: var(--pink); }
+    .gone { padding: 0; border: 0; background: none; cursor: pointer; opacity: 0.5; }
+    .gone:hover { opacity: 1; }
+    .gone img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; background: var(--ph); }
+    .ed-removed h2 { margin: 44px 0 0; font-weight: 400; font-size: 0.95rem; }
+    .toast { position: fixed; left: 50%; bottom: 24px; z-index: 30; transform: translateX(-50%); max-width: calc(100% - 2 * var(--side)); padding: 10px 16px; background: var(--ink); color: var(--bg); font-weight: 400; font-size: 0.95rem; }
     @media (prefers-reduced-motion: reduce) { .ph img, .frame img, .thumbs button { transition: none; } }
   </style>
 </head>
 <body>
   <header class="hd">
     <a class="mark" href="pictures">Pictures</a>
-    <nav><a href="index.html">Home</a></nav>
+    <nav><a id="edit-link" href="#admin" hidden>Edit</a><a href="index.html">Home</a></nav>
   </header>
 
-  <main class="wrap">
+  <main class="wrap" id="wrap">
     <h1 class="sr">Pictures</h1>
-    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#1" data-i="0"><img src="images/ricoh/r0000127-sm.jpg" srcset="images/ricoh/r0000127-sm.jpg 1000w, images/ricoh/r0000127.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Kabukichō · Jul 2025" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#2" data-i="1"><img src="images/ricoh/r0001394-sm.jpg" srcset="images/ricoh/r0001394-sm.jpg 1000w, images/ricoh/r0001394.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Jul 2025" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#3" data-i="2"><img src="images/ricoh/r0002015-sm.jpg" srcset="images/ricoh/r0002015-sm.jpg 1000w, images/ricoh/r0002015.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Jul 2025" decoding="async"></a></figure></div>
-    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#4" data-i="3"><img src="images/ricoh/r0002033-sm.jpg" srcset="images/ricoh/r0002033-sm.jpg 1000w, images/ricoh/r0002033.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Night streets · Jul 2025" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#5" data-i="4"><img src="images/ricoh/r0003720-sm.jpg" srcset="images/ricoh/r0003720-sm.jpg 1000w, images/ricoh/r0003720.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Istanbul · Dec 2025" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#6" data-i="5"><img src="images/ricoh/r0003736-sm.jpg" srcset="images/ricoh/r0003736-sm.jpg 1000w, images/ricoh/r0003736.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Istanbul · Dec 2025" decoding="async"></a></figure></div>
-    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#7" data-i="6"><img src="images/ricoh/r0003818-sm.jpg" srcset="images/ricoh/r0003818-sm.jpg 1000w, images/ricoh/r0003818.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Istanbul · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#8" data-i="7"><img src="images/ricoh/r0003949-sm.jpg" srcset="images/ricoh/r0003949-sm.jpg 1000w, images/ricoh/r0003949.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Athens · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#9" data-i="8"><img src="images/ricoh/r0004118-sm.jpg" srcset="images/ricoh/r0004118-sm.jpg 1000w, images/ricoh/r0004118.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Athens · Dec 2025" loading="lazy" decoding="async"></a></figure></div>
-    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#10" data-i="9"><img src="images/ricoh/r0004142-sm.jpg" srcset="images/ricoh/r0004142-sm.jpg 1000w, images/ricoh/r0004142.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Athens · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#11" data-i="10"><img src="images/ricoh/r0004193-sm.jpg" srcset="images/ricoh/r0004193-sm.jpg 1000w, images/ricoh/r0004193.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Athens · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#12" data-i="11"><img src="images/ricoh/r0004369-sm.jpg" srcset="images/ricoh/r0004369-sm.jpg 1000w, images/ricoh/r0004369.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure></div>
-    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#13" data-i="12"><img src="images/ricoh/r0004370-sm.jpg" srcset="images/ricoh/r0004370-sm.jpg 1000w, images/ricoh/r0004370.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#14" data-i="13"><img src="images/ricoh/r0004409-sm.jpg" srcset="images/ricoh/r0004409-sm.jpg 1000w, images/ricoh/r0004409.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#15" data-i="14"><img src="images/ricoh/r0004412-sm.jpg" srcset="images/ricoh/r0004412-sm.jpg 1000w, images/ricoh/r0004412.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure></div>
-    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#16" data-i="15"><img src="images/ricoh/r0004417-sm.jpg" srcset="images/ricoh/r0004417-sm.jpg 1000w, images/ricoh/r0004417.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#17" data-i="16"><img src="images/ricoh/r0004419-sm.jpg" srcset="images/ricoh/r0004419-sm.jpg 1000w, images/ricoh/r0004419.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#18" data-i="17"><img src="images/ricoh/r0004421-sm.jpg" srcset="images/ricoh/r0004421-sm.jpg 1000w, images/ricoh/r0004421.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure></div>
-    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#19" data-i="18"><img src="images/ricoh/r0004426-sm.jpg" srcset="images/ricoh/r0004426-sm.jpg 1000w, images/ricoh/r0004426.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#20" data-i="19"><img src="images/ricoh/r0004680-sm.jpg" srcset="images/ricoh/r0004680-sm.jpg 1000w, images/ricoh/r0004680.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Basel &amp; Alsace · Jan 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#21" data-i="20"><img src="images/ricoh/r0004759-sm.jpg" srcset="images/ricoh/r0004759-sm.jpg 1000w, images/ricoh/r0004759.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Basel &amp; Alsace · Jan 2026" loading="lazy" decoding="async"></a></figure></div>
-    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#22" data-i="21"><img src="images/ricoh/r0004914-sm.jpg" srcset="images/ricoh/r0004914-sm.jpg 1000w, images/ricoh/r0004914.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Paris · Jan 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#23" data-i="22"><img src="images/ricoh/r0004984-sm.jpg" srcset="images/ricoh/r0004984-sm.jpg 1000w, images/ricoh/r0004984.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Paris · Jan 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#24" data-i="23"><img src="images/ricoh/r0005066-sm.jpg" srcset="images/ricoh/r0005066-sm.jpg 1000w, images/ricoh/r0005066.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Paris · Jan 2026" loading="lazy" decoding="async"></a></figure></div>
-    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#25" data-i="24"><img src="images/ricoh/r0005118-sm.jpg" srcset="images/ricoh/r0005118-sm.jpg 1000w, images/ricoh/r0005118.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Paris · Jan 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#26" data-i="25"><img src="images/ricoh/r0005151-sm.jpg" srcset="images/ricoh/r0005151-sm.jpg 1000w, images/ricoh/r0005151.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Paris · Jan 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#27" data-i="26"><img src="images/ricoh/r0005175-sm.jpg" srcset="images/ricoh/r0005175-sm.jpg 1000w, images/ricoh/r0005175.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Paris · Jan 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#28" data-i="27"><img src="images/ricoh/r0005570-sm.jpg" srcset="images/ricoh/r0005570-sm.jpg 1000w, images/ricoh/r0005570.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Snow · Feb 2026" loading="lazy" decoding="async"></a></figure></div>
-    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#29" data-i="28"><img src="images/ricoh/r0005583-sm.jpg" srcset="images/ricoh/r0005583-sm.jpg 1000w, images/ricoh/r0005583.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Snow · Feb 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#30" data-i="29"><img src="images/ricoh/r0005633-sm.jpg" srcset="images/ricoh/r0005633-sm.jpg 1000w, images/ricoh/r0005633.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Plum blossoms · Feb 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#31" data-i="30"><img src="images/ricoh/r0005654-sm.jpg" srcset="images/ricoh/r0005654-sm.jpg 1000w, images/ricoh/r0005654.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Feb 2026" loading="lazy" decoding="async"></a></figure></div>
-    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#32" data-i="31"><img src="images/ricoh/r0005692-sm.jpg" srcset="images/ricoh/r0005692-sm.jpg 1000w, images/ricoh/r0005692.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Niseko · Mar 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#33" data-i="32"><img src="images/ricoh/r0005702-sm.jpg" srcset="images/ricoh/r0005702-sm.jpg 1000w, images/ricoh/r0005702.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Cherry blossoms · Mar 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#34" data-i="33"><img src="images/ricoh/r0005711-sm.jpg" srcset="images/ricoh/r0005711-sm.jpg 1000w, images/ricoh/r0005711.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Shinjuku Gyoen · Jun 2026" loading="lazy" decoding="async"></a></figure></div>
+    <div id="grid"></div>
+    <noscript><p class="note">This page needs JavaScript to show the photos.</p></noscript>
   </main>
+
+  <section class="editor" id="editor" aria-label="Arrange the photos" hidden>
+    <div class="ed-bar">
+      <span class="ed-title">Editing</span>
+      <span class="ed-count" id="ed-count"></span>
+      <span class="ed-status" id="ed-status" role="status"></span>
+      <button class="text-btn primary" id="ed-save" type="button">Save</button>
+      <button class="text-btn" id="ed-cancel" type="button">Cancel</button>
+      <button class="text-btn" id="ed-logout" type="button">Log out</button>
+    </div>
+    <p class="ed-hint">Drag photos to reorder them, or use the arrows. Type a caption under a photo; the month is added for you. × takes a photo off the page. New photos still come from the Photo Manager on the Mac. Saving updates the live page in about a minute.</p>
+    <div class="ed-grid" id="ed-grid"></div>
+    <div class="ed-removed" id="ed-removed-wrap" hidden>
+      <h2>Taken off the page</h2>
+      <p class="ed-hint">Click one to put it back at the end.</p>
+      <div class="ed-grid small" id="ed-removed"></div>
+    </div>
+  </section>
+
+  <div class="login" id="login" hidden>
+    <form id="login-form" autocomplete="on">
+      <label for="pw">Admin password</label>
+      <input class="field" id="pw" name="password" type="password" autocomplete="current-password" required>
+      <div class="actions">
+        <button class="text-btn primary" type="submit">Enter</button>
+        <button class="text-btn" type="button" id="login-cancel">Cancel</button>
+      </div>
+      <p class="msg" id="login-msg" role="alert"></p>
+    </form>
+  </div>
 
   <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Photo">
     <div class="frame">
@@ -130,73 +193,102 @@
       </button>
     </div>
     <nav class="thumbs" aria-label="All photos">
-      <div class="thumbs-row">
-        <button data-i="0" aria-label="Kabukichō · Jul 2025"><img src="images/ricoh/r0000127-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="1" aria-label="Jul 2025"><img src="images/ricoh/r0001394-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="2" aria-label="Jul 2025"><img src="images/ricoh/r0002015-th.jpg" width="107" height="160" alt="" loading="lazy"></button>
-        <button data-i="3" aria-label="Night streets · Jul 2025"><img src="images/ricoh/r0002033-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="4" aria-label="Istanbul · Dec 2025"><img src="images/ricoh/r0003720-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="5" aria-label="Istanbul · Dec 2025"><img src="images/ricoh/r0003736-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="6" aria-label="Istanbul · Dec 2025"><img src="images/ricoh/r0003818-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="7" aria-label="Athens · Dec 2025"><img src="images/ricoh/r0003949-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="8" aria-label="Athens · Dec 2025"><img src="images/ricoh/r0004118-th.jpg" width="107" height="160" alt="" loading="lazy"></button>
-        <button data-i="9" aria-label="Athens · Dec 2025"><img src="images/ricoh/r0004142-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="10" aria-label="Athens · Dec 2025"><img src="images/ricoh/r0004193-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="11" aria-label="Bucharest · Dec 2025"><img src="images/ricoh/r0004369-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="12" aria-label="Bucharest · Dec 2025"><img src="images/ricoh/r0004370-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="13" aria-label="Bucharest · Dec 2025"><img src="images/ricoh/r0004409-th.jpg" width="107" height="160" alt="" loading="lazy"></button>
-        <button data-i="14" aria-label="Bucharest · Dec 2025"><img src="images/ricoh/r0004412-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="15" aria-label="Bucharest · Dec 2025"><img src="images/ricoh/r0004417-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="16" aria-label="Bucharest · Dec 2025"><img src="images/ricoh/r0004419-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="17" aria-label="Bucharest · Dec 2025"><img src="images/ricoh/r0004421-th.jpg" width="107" height="160" alt="" loading="lazy"></button>
-        <button data-i="18" aria-label="Bucharest · Dec 2025"><img src="images/ricoh/r0004426-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="19" aria-label="Basel &amp; Alsace · Jan 2026"><img src="images/ricoh/r0004680-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="20" aria-label="Basel &amp; Alsace · Jan 2026"><img src="images/ricoh/r0004759-th.jpg" width="107" height="160" alt="" loading="lazy"></button>
-        <button data-i="21" aria-label="Paris · Jan 2026"><img src="images/ricoh/r0004914-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="22" aria-label="Paris · Jan 2026"><img src="images/ricoh/r0004984-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="23" aria-label="Paris · Jan 2026"><img src="images/ricoh/r0005066-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="24" aria-label="Paris · Jan 2026"><img src="images/ricoh/r0005118-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="25" aria-label="Paris · Jan 2026"><img src="images/ricoh/r0005151-th.jpg" width="107" height="160" alt="" loading="lazy"></button>
-        <button data-i="26" aria-label="Paris · Jan 2026"><img src="images/ricoh/r0005175-th.jpg" width="107" height="160" alt="" loading="lazy"></button>
-        <button data-i="27" aria-label="Snow · Feb 2026"><img src="images/ricoh/r0005570-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="28" aria-label="Snow · Feb 2026"><img src="images/ricoh/r0005583-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="29" aria-label="Plum blossoms · Feb 2026"><img src="images/ricoh/r0005633-th.jpg" width="107" height="160" alt="" loading="lazy"></button>
-        <button data-i="30" aria-label="Feb 2026"><img src="images/ricoh/r0005654-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="31" aria-label="Niseko · Mar 2026"><img src="images/ricoh/r0005692-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="32" aria-label="Cherry blossoms · Mar 2026"><img src="images/ricoh/r0005702-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-        <button data-i="33" aria-label="Shinjuku Gyoen · Jun 2026"><img src="images/ricoh/r0005711-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-      </div>
+      <div class="thumbs-row" id="thumbs"></div>
     </nav>
   </div>
 
   <script>
-    const photos = [{"src": "images/ricoh/r0000127.jpg", "sm": "images/ricoh/r0000127-sm.jpg", "caption": "Kabukichō · Jul 2025"}, {"src": "images/ricoh/r0001394.jpg", "sm": "images/ricoh/r0001394-sm.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0002015.jpg", "sm": "images/ricoh/r0002015-sm.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0002033.jpg", "sm": "images/ricoh/r0002033-sm.jpg", "caption": "Night streets · Jul 2025"}, {"src": "images/ricoh/r0003720.jpg", "sm": "images/ricoh/r0003720-sm.jpg", "caption": "Istanbul · Dec 2025"}, {"src": "images/ricoh/r0003736.jpg", "sm": "images/ricoh/r0003736-sm.jpg", "caption": "Istanbul · Dec 2025"}, {"src": "images/ricoh/r0003818.jpg", "sm": "images/ricoh/r0003818-sm.jpg", "caption": "Istanbul · Dec 2025"}, {"src": "images/ricoh/r0003949.jpg", "sm": "images/ricoh/r0003949-sm.jpg", "caption": "Athens · Dec 2025"}, {"src": "images/ricoh/r0004118.jpg", "sm": "images/ricoh/r0004118-sm.jpg", "caption": "Athens · Dec 2025"}, {"src": "images/ricoh/r0004142.jpg", "sm": "images/ricoh/r0004142-sm.jpg", "caption": "Athens · Dec 2025"}, {"src": "images/ricoh/r0004193.jpg", "sm": "images/ricoh/r0004193-sm.jpg", "caption": "Athens · Dec 2025"}, {"src": "images/ricoh/r0004369.jpg", "sm": "images/ricoh/r0004369-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004370.jpg", "sm": "images/ricoh/r0004370-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004409.jpg", "sm": "images/ricoh/r0004409-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004412.jpg", "sm": "images/ricoh/r0004412-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004417.jpg", "sm": "images/ricoh/r0004417-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004419.jpg", "sm": "images/ricoh/r0004419-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004421.jpg", "sm": "images/ricoh/r0004421-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004426.jpg", "sm": "images/ricoh/r0004426-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004680.jpg", "sm": "images/ricoh/r0004680-sm.jpg", "caption": "Basel & Alsace · Jan 2026"}, {"src": "images/ricoh/r0004759.jpg", "sm": "images/ricoh/r0004759-sm.jpg", "caption": "Basel & Alsace · Jan 2026"}, {"src": "images/ricoh/r0004914.jpg", "sm": "images/ricoh/r0004914-sm.jpg", "caption": "Paris · Jan 2026"}, {"src": "images/ricoh/r0004984.jpg", "sm": "images/ricoh/r0004984-sm.jpg", "caption": "Paris · Jan 2026"}, {"src": "images/ricoh/r0005066.jpg", "sm": "images/ricoh/r0005066-sm.jpg", "caption": "Paris · Jan 2026"}, {"src": "images/ricoh/r0005118.jpg", "sm": "images/ricoh/r0005118-sm.jpg", "caption": "Paris · Jan 2026"}, {"src": "images/ricoh/r0005151.jpg", "sm": "images/ricoh/r0005151-sm.jpg", "caption": "Paris · Jan 2026"}, {"src": "images/ricoh/r0005175.jpg", "sm": "images/ricoh/r0005175-sm.jpg", "caption": "Paris · Jan 2026"}, {"src": "images/ricoh/r0005570.jpg", "sm": "images/ricoh/r0005570-sm.jpg", "caption": "Snow · Feb 2026"}, {"src": "images/ricoh/r0005583.jpg", "sm": "images/ricoh/r0005583-sm.jpg", "caption": "Snow · Feb 2026"}, {"src": "images/ricoh/r0005633.jpg", "sm": "images/ricoh/r0005633-sm.jpg", "caption": "Plum blossoms · Feb 2026"}, {"src": "images/ricoh/r0005654.jpg", "sm": "images/ricoh/r0005654-sm.jpg", "caption": "Feb 2026"}, {"src": "images/ricoh/r0005692.jpg", "sm": "images/ricoh/r0005692-sm.jpg", "caption": "Niseko · Mar 2026"}, {"src": "images/ricoh/r0005702.jpg", "sm": "images/ricoh/r0005702-sm.jpg", "caption": "Cherry blossoms · Mar 2026"}, {"src": "images/ricoh/r0005711.jpg", "sm": "images/ricoh/r0005711-sm.jpg", "caption": "Shinjuku Gyoen · Jun 2026"}];
+    const ROW_TARGET = 4.4;  // summed width/height ratios per grid row: about three landscape photos
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const $ = id => document.getElementById(id);
     const root = document.documentElement;
-    const viewer = document.getElementById('viewer');
-    const img = document.getElementById('photo');
-    const caption = document.getElementById('caption');
-    const count = document.getElementById('count');
-    const tiles = [...document.querySelectorAll('.ph')];
-    const thumbButtons = [...viewer.querySelectorAll('.thumbs button')];
-    const srcset = p => `${p.sm} 1000w, ${p.src} 2000w`;
-    const isOpen = () => viewer.classList.contains('open');
+    const grid = $('grid'), viewer = $('viewer'), img = $('photo'), caption = $('caption'), count = $('count');
+    const thumbsRow = $('thumbs');
+    let photos = [];       // pictures.json's photos, in page order
+    let tiles = [];
+    let thumbButtons = [];
     let current = -1;
-    let pushed = false;  // true when the viewer was opened from the grid, so Back returns to it
+    let pushed = false;    // true when the viewer was opened from the grid, so Back returns to it
 
-    // Grid photos fade in once loaded.
-    tiles.forEach(a => {
-      const im = a.querySelector('img');
-      const done = () => a.classList.remove('ld');
-      if (im.complete && im.naturalWidth) done();
-      else { im.addEventListener('load', done); im.addEventListener('error', done); }
-      a.addEventListener('click', () => { pushed = true; });
-    });
+    const file = (p, size) => `images/ricoh/${p.id}${size}.jpg`;
+    const srcset = p => `${file(p, '-sm')} 1000w, ${file(p, '')} 2000w`;
+    const ratio = p => p.w / p.h;
+    const month = p => { const [y, m] = (p.month || '').split('-'); return m ? `${MONTHS[Number(m) - 1]} ${y}` : ''; };
+    const captionOf = p => [p.label, month(p)].filter(Boolean).join(' · ');
 
+    // ---- the grid: justified rows; a row closes when the next photo would take its summed
+    // ratio further from ROW_TARGET, and a short last row isn't stretched.
+    function renderGrid() {
+      const rows = [];
+      let row = [], total = 0;
+      photos.forEach((p, i) => {
+        if (row.length && Math.abs(total - ROW_TARGET) < Math.abs(total + ratio(p) - ROW_TARGET)) {
+          rows.push([row, total]);
+          row = [];
+          total = 0;
+        }
+        row.push(i);
+        total += ratio(p);
+      });
+      if (row.length) rows.push([row, total]);
+      grid.replaceChildren(...rows.map(([members, total], n) => {
+        const div = document.createElement('div');
+        div.className = 'row';
+        if (n === rows.length - 1 && total < ROW_TARGET * 0.75) {
+          div.classList.add('loose');
+          div.style.setProperty('--fill', `${(total / ROW_TARGET * 100).toFixed(2)}%`);
+        }
+        for (const i of members) {
+          const p = photos[i];
+          const fig = document.createElement('figure');
+          fig.className = 'work';
+          fig.style.setProperty('--r', ratio(p).toFixed(4));
+          const a = document.createElement('a');
+          a.className = 'ph ld';
+          a.href = `#${i + 1}`;
+          a.addEventListener('click', () => { pushed = true; });
+          const im = document.createElement('img');
+          if (n > 1) im.loading = 'lazy';  // the first two rows load right away
+          im.decoding = 'async';
+          im.width = p.w;
+          im.height = p.h;
+          im.alt = captionOf(p);
+          im.sizes = '(max-width: 768px) 100vw, 34vw';
+          im.srcset = srcset(p);
+          im.src = file(p, '-sm');
+          const done = () => a.classList.remove('ld');  // fade in once loaded
+          im.addEventListener('load', done);
+          im.addEventListener('error', done);
+          a.append(im);
+          fig.append(a);
+          div.append(fig);
+        }
+        return div;
+      }));
+      tiles = [...grid.querySelectorAll('.ph')];
+      thumbButtons = photos.map((p, i) => {
+        const b = document.createElement('button');
+        b.setAttribute('aria-label', captionOf(p));
+        const t = document.createElement('img');
+        t.loading = 'lazy';
+        t.alt = '';
+        t.width = p.tw;
+        t.height = p.th;
+        t.src = file(p, '-th');
+        b.append(t);
+        b.addEventListener('click', () => show(i));
+        return b;
+      });
+      thumbsRow.replaceChildren(...thumbButtons);
+      current = -1;
+    }
+
+    // ---- the viewer
     function load(p) {
       const im = new Image();
       im.sizes = '100vw';
       im.srcset = srcset(p);
-      im.src = p.src;
+      im.src = file(p, '');
       return im;
     }
 
@@ -205,18 +297,18 @@
       current = (i + photos.length) % photos.length;
       const want = current;
       const p = photos[want];
-      caption.textContent = p.caption;
+      caption.textContent = captionOf(p);
       count.textContent = `${want + 1} / ${photos.length}`;
       history.replaceState(history.state, '', '#' + (want + 1));
-      if (previous >= 0) thumbButtons[previous].removeAttribute('aria-current');
+      if (previous >= 0) thumbButtons[previous]?.removeAttribute('aria-current');
       thumbButtons[want].setAttribute('aria-current', 'true');
       thumbButtons[want].scrollIntoView({ block: 'nearest', inline: 'center', behavior: smooth ? 'smooth' : 'auto' });
       img.classList.add('fading');
       const next = load(p);
       const swap = () => {
-        if (want !== current) return;  // a later click already moved on
+        if (want !== current || photos[want] !== p) return;  // a later click already moved on
         img.srcset = srcset(p);
-        img.src = p.src;
+        img.src = file(p, '');
         img.classList.remove('fading');
       };
       next.decode().then(swap, swap);
@@ -224,6 +316,7 @@
       load(photos[(want - 1 + photos.length) % photos.length]);
     }
 
+    const isOpen = () => viewer.classList.contains('open');
     function openViewer(i) {
       if (!isOpen()) {
         viewer.classList.add('open');
@@ -246,13 +339,15 @@
     }
 
     function sync() {
+      if (location.hash === '#admin') { closeViewer(); enterAdmin(); return; }
+      if (editing()) leaveEditor();
       const n = parseInt(location.hash.slice(1), 10);
       if (n >= 1 && n <= photos.length) openViewer(n - 1); else closeViewer();
     }
 
     // Full screen shows nothing but the photo: the browser's real full screen where it exists,
     // plus a CSS mode that hides everything else (the only option on iPhone Safari).
-    const fullButton = document.getElementById('full');
+    const fullButton = $('full');
     const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
     function setImmersive(on) {
       root.classList.toggle('immersive', on);
@@ -279,8 +374,7 @@
 
     viewer.querySelectorAll('[data-step]').forEach(b =>
       b.addEventListener('click', () => show(current + Number(b.dataset.step))));
-    thumbButtons.forEach(b => b.addEventListener('click', () => show(Number(b.dataset.i))));
-    document.getElementById('close').addEventListener('click', leave);
+    $('close').addEventListener('click', leave);
     document.addEventListener('keydown', e => {
       if (!isOpen() || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === 'ArrowRight') show(current + 1);
@@ -300,8 +394,282 @@
       else if (dy > 80) root.classList.contains('immersive') ? setImmersive(false) : leave();  // swipe down
     });
 
-    window.addEventListener('hashchange', sync);
-    sync();
+    // ---- admin mode (dcdnt.xyz/pictures#admin). The Worker checks the password and keeps an
+    // HttpOnly session cookie; this page only remembers that it may show the Edit link.
+    const ADMIN_HINT = 'pictures-admin';
+    const hint = {
+      get() { try { return localStorage.getItem(ADMIN_HINT) === '1'; } catch { return false; } },
+      set(on) { try { on ? localStorage.setItem(ADMIN_HINT, '1') : localStorage.removeItem(ADMIN_HINT); } catch {} },
+    };
+    const ed = { sha: null, items: [], removed: [], dirty: false, busy: false, dragFrom: null, scroll: 0 };
+    const editing = () => !$('editor').hidden;
+
+    async function api(path, options = {}) {
+      let res;
+      try {
+        res = await fetch(`/api/admin/${path}`, {
+          credentials: 'same-origin',
+          ...options,
+          headers: options.body ? { 'Content-Type': 'application/json' } : {},
+        });
+      } catch {
+        throw new Error('Couldn’t reach the server. Check your connection.');
+      }
+      const data = await res.json().catch(() => null);
+      if (!data) throw Object.assign(new Error('Admin mode only works on dcdnt.xyz.'), { status: res.status });
+      if (!res.ok) throw Object.assign(new Error(data.error || `Error ${res.status}`), { status: res.status });
+      return data;
+    }
+
+    async function enterAdmin() {
+      if (editing()) return;
+      try {
+        const me = await api('me');
+        if (me.admin) openEditor(); else showLogin();
+      } catch (err) {
+        showLogin(err.message);
+      }
+    }
+
+    function showLogin(message = '') {
+      $('login').hidden = false;
+      $('login-msg').textContent = message;
+      $('pw').value = '';
+      $('pw').focus();
+    }
+    function hideLogin() {
+      $('login').hidden = true;
+      if (location.hash === '#admin' && !editing()) history.replaceState(null, '', location.pathname + location.search);
+    }
+    $('login-cancel').addEventListener('click', hideLogin);
+    $('login').addEventListener('keydown', e => { if (e.key === 'Escape') hideLogin(); });
+    $('login-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const button = e.submitter || $('login-form').querySelector('[type=submit]');
+      button.disabled = true;
+      $('login-msg').textContent = '';
+      try {
+        await api('login', { method: 'POST', body: JSON.stringify({ password: $('pw').value }) });
+        hint.set(true);
+        $('edit-link').hidden = false;
+        $('login').hidden = true;
+        // Signed out mid-edit (the session ran out): keep the unsaved changes on screen.
+        if (editing() && ed.dirty) status('Signed in again. Press Save.'); else openEditor();
+      } catch (err) {
+        $('login-msg').textContent = err.message;
+        $('pw').select();
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    function status(text, error = false) {
+      $('ed-status').textContent = text;
+      $('ed-status').classList.toggle('error', error);
+    }
+
+    async function openEditor() {
+      if (location.hash !== '#admin') history.replaceState(null, '', '#admin');
+      ed.scroll = window.scrollY;
+      $('wrap').hidden = true;
+      $('editor').hidden = false;
+      window.scrollTo(0, 0);
+      ed.items = [];
+      ed.removed = [];
+      ed.dirty = false;
+      renderEditor();
+      status('Loading the latest version…');
+      try {
+        const res = await api('pictures');
+        ed.sha = res.sha;
+        ed.items = res.data.photos.map(p => ({ ...p }));
+        renderEditor();
+        status('');
+      } catch (err) {
+        if (err.status === 401) { hint.set(false); leaveEditor(); showLogin(err.message); return; }
+        status(err.message, true);
+      }
+    }
+
+    function leaveEditor() {
+      $('editor').hidden = true;
+      $('wrap').hidden = false;
+      window.scrollTo(0, ed.scroll);
+      ed.dirty = false;
+      if (location.hash === '#admin') history.replaceState(null, '', location.pathname + location.search);
+    }
+
+    function markDirty() {
+      ed.dirty = true;
+      $('ed-save').disabled = ed.busy;
+      status('Unsaved changes.');
+      $('ed-count').textContent = `${ed.items.length} photo${ed.items.length === 1 ? '' : 's'}`;
+    }
+
+    function move(from, to) {
+      if (to < 0 || to >= ed.items.length || from === to) return;
+      const [p] = ed.items.splice(from, 1);
+      ed.items.splice(to, 0, p);
+      markDirty();
+      renderEditor();
+    }
+
+    function renderEditor() {
+      $('ed-save').disabled = !ed.dirty || ed.busy;  // nothing to save yet: no empty commits
+      $('ed-count').textContent = `${ed.items.length} photo${ed.items.length === 1 ? '' : 's'}`;
+      $('ed-grid').replaceChildren(...ed.items.map((p, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.draggable = true;
+        const im = document.createElement('img');
+        im.loading = 'lazy';
+        im.alt = '';
+        im.src = file(p, '-th');
+        const num = document.createElement('span');
+        num.className = 'num';
+        num.textContent = i + 1;
+        const input = document.createElement('input');
+        input.className = 'field';
+        input.placeholder = 'Caption';
+        input.setAttribute('aria-label', `Caption for photo ${i + 1}`);
+        input.value = p.label || '';
+        input.maxLength = 120;
+        input.addEventListener('input', () => { p.label = input.value; markDirty(); });
+        // Typing in the caption shouldn't start a drag of the whole card.
+        input.addEventListener('pointerdown', () => { card.draggable = false; });
+        input.addEventListener('blur', () => { card.draggable = true; });
+        const when = document.createElement('span');
+        when.className = 'when';
+        when.textContent = month(p);
+        const tools = document.createElement('div');
+        tools.className = 'tools';
+        const button = (label, title, cls, action) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = `text-btn ${cls}`;
+          b.textContent = label;
+          b.title = title;
+          b.setAttribute('aria-label', title);
+          b.addEventListener('click', action);
+          return b;
+        };
+        tools.append(
+          button('←', 'Move earlier', '', () => move(i, i - 1)),
+          button('→', 'Move later', '', () => move(i, i + 1)),
+          button('×', 'Take off the page', 'remove', () => {
+            ed.removed.push(...ed.items.splice(i, 1));
+            markDirty();
+            renderEditor();
+          }));
+        card.append(im, num, input, when, tools);
+        card.addEventListener('dragstart', e => {
+          ed.dragFrom = i;
+          card.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', String(i));
+        });
+        card.addEventListener('dragend', () => { ed.dragFrom = null; renderEditor(); });
+        card.addEventListener('dragover', e => {
+          if (ed.dragFrom === null) return;
+          e.preventDefault();
+          const after = e.offsetX > card.clientWidth / 2;
+          card.classList.toggle('after', after);
+          card.classList.toggle('before', !after);
+        });
+        card.addEventListener('dragleave', () => card.classList.remove('before', 'after'));
+        card.addEventListener('drop', e => {
+          e.preventDefault();
+          if (ed.dragFrom === null) return;
+          let to = i + (card.classList.contains('after') ? 1 : 0);
+          if (ed.dragFrom < to) to -= 1;
+          move(ed.dragFrom, to);
+        });
+        return card;
+      }));
+      $('ed-removed-wrap').hidden = !ed.removed.length;
+      $('ed-removed').replaceChildren(...ed.removed.map((p, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'gone';
+        b.title = `Put back: ${captionOf(p)}`;
+        const im = document.createElement('img');
+        im.alt = captionOf(p);
+        im.src = file(p, '-th');
+        b.append(im);
+        b.addEventListener('click', () => {
+          ed.items.push(...ed.removed.splice(i, 1));
+          markDirty();
+          renderEditor();
+        });
+        return b;
+      }));
+    }
+
+    $('ed-save').addEventListener('click', async () => {
+      if (ed.busy || !ed.sha) return;
+      ed.busy = true;
+      $('ed-save').disabled = true;
+      status('Saving…');
+      try {
+        const res = await api('pictures', {
+          method: 'PUT',
+          body: JSON.stringify({ base: ed.sha, photos: ed.items.map(({ id, label }) => ({ id, label })) }),
+        });
+        ed.sha = res.sha;
+        ed.dirty = false;
+        photos = res.data.photos;
+        renderGrid();
+        leaveEditor();
+        toast('Saved. The live page updates in about a minute.');
+      } catch (err) {
+        status(err.message, true);
+        if (err.status === 401) { hint.set(false); showLogin(err.message); }
+      } finally {
+        ed.busy = false;
+        $('ed-save').disabled = !ed.dirty;
+      }
+    });
+    $('ed-cancel').addEventListener('click', () => {
+      if (ed.dirty && !confirm('Discard your changes?')) return;
+      leaveEditor();
+    });
+    $('ed-logout').addEventListener('click', async () => {
+      if (ed.dirty && !confirm('Discard your changes and log out?')) return;
+      try { await api('logout', { method: 'POST' }); } catch {}
+      hint.set(false);
+      $('edit-link').hidden = true;
+      leaveEditor();
+    });
+    window.addEventListener('beforeunload', e => { if (editing() && ed.dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+    function toast(text) {
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.setAttribute('role', 'status');
+      t.textContent = text;
+      document.body.append(t);
+      setTimeout(() => t.remove(), 5000);
+    }
+
+    // ---- start: draw the grid from pictures.json, which admin saves keep up to date.
+    $('edit-link').hidden = !hint.get();
+    window.addEventListener('hashchange', () => {
+      if (editing() && location.hash !== '#admin' && ed.dirty && !confirm('Discard your changes?')) {
+        history.replaceState(null, '', '#admin');
+        return;
+      }
+      sync();
+    });
+    fetch('pictures.json', { cache: 'no-cache' })
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(data => { photos = data.photos || []; renderGrid(); sync(); })
+      .catch(() => {
+        const p = document.createElement('p');
+        p.className = 'note';
+        p.textContent = 'The photos couldn’t be loaded. Try reloading the page.';
+        grid.replaceChildren(p);
+        if (location.hash === '#admin') enterAdmin();
+      });
   </script>
 </body>
 </html>

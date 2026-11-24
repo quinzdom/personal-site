@@ -7,7 +7,18 @@
   // The dcdnt.xyz/* route is managed in the Cloudflare dashboard. With no "routes"
   // key here, deploys leave it untouched. workers_dev matches the dashboard (on).
   "workers_dev": true,
+  // worker/index.js runs only for /api/* (the photo page's admin mode); every other path is
+  // served straight from the static files, as before.
+  "main": "worker/index.js",
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  // Where admin mode commits pictures.json. Secrets (ADMIN_PASSWORD, GITHUB_TOKEN) are set in
+  // the Cloudflare dashboard, never here.
+  "vars": {
+    "GITHUB_REPO": "quinzdom/personal-site",
+    "GITHUB_BRANCH": "main"
   }
 }
