@@ -77,6 +77,10 @@
     .hit { position: absolute; top: 0; bottom: 0; width: 50%; border: 0; background: transparent; -webkit-tap-highlight-color: transparent; }
     .hit.prev { left: 0; cursor: w-resize; }
     .hit.next { right: 0; cursor: e-resize; }
+    /* No focus outlines on the viewer itself or its two half-photo click areas: the browser
+       drew them as a blue frame round the screen and a white line down the middle. Keys still
+       work (arrows, F, Esc), and the bar's buttons keep their outline. */
+    .viewer:focus, .viewer:focus-visible, .hit:focus, .hit:focus-visible { outline: none; }
     .bar { flex: none; display: flex; align-items: center; justify-content: center; gap: 14px; padding: 14px var(--side) 0; color: var(--muted); font-size: 15px; }
     .bar button { display: inline-flex; align-items: center; background: none; border: 0; color: var(--muted); font: inherit; font-weight: 400; padding: 6px 10px; cursor: pointer; }
     .bar button:hover { color: var(--pink); }
@@ -206,8 +210,8 @@
   <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Photo" tabindex="-1">
     <div class="frame">
       <img id="photo" alt="" sizes="100vw">
-      <button class="hit prev" data-step="-1" aria-label="Previous photo"></button>
-      <button class="hit next" data-step="1" aria-label="Next photo"></button>
+      <button class="hit prev" data-step="-1" aria-label="Previous photo" tabindex="-1"></button>
+      <button class="hit next" data-step="1" aria-label="Next photo" tabindex="-1"></button>
       <button class="fs-close" id="fs-close" aria-label="Back to all photos">
         <svg viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14"/></svg>
       </button>
