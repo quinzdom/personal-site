@@ -5,81 +5,131 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>pictures</title>
   <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
-  <link rel="stylesheet" href="styles/page-chrome.css">
+  <meta name="theme-color" content="#000000">
   <style>
-    html { overflow: hidden; scrollbar-gutter: auto; }
-    body { height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
-    header { flex: none; width: 100%; }
-    .viewer { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; padding: 0 24px; }
-    .frame { position: relative; flex: 1; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; }
+    /* Founders Grotesk (Klim) is licensed to the owner; no font file lives in this public repo. */
+    @font-face { font-family: 'Founders Grotesk'; font-weight: 300; font-display: swap;
+      src: local('Founders Grotesk Light'), local('FoundersGrotesk-Light'); }
+    @font-face { font-family: 'Founders Grotesk'; font-weight: 400; font-display: swap;
+      src: local('Founders Grotesk Regular'), local('FoundersGrotesk-Regular'),
+           url('https://list.dcdnt.xyz/fonts/founders-grotesk-regular.woff2') format('woff2'); }
+    @font-face { font-family: 'Founders Grotesk'; font-weight: 700; font-display: swap;
+      src: local('Founders Grotesk Bold'), local('FoundersGrotesk-Bold'),
+           url('https://list.dcdnt.xyz/fonts/founders-grotesk-bold.woff2') format('woff2'); }
+    :root {
+      color-scheme: dark;
+      --bg: #000; --ink: #f2efe9; --muted: #8f8a82; --dim: #6b675f; --red: #f04438; --ph: #0d0d0d;
+      --side: 20px;  /* the margin all round the page, phones included */
+      --g: 15px;  /* between photos, side by side and row to row */
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font-family: 'Founders Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-weight: 300; font-size: 17px; line-height: 1.4; -webkit-font-smoothing: antialiased;
+    }
+    body.viewing { overflow: hidden; }
+    a { color: inherit; text-decoration: none; }
+    .sr { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; font: inherit; }
+    a:focus-visible, button:focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
+
+    .hd { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; padding: var(--side) var(--side) 0; }
+    .mark { color: var(--red); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .hd nav a { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
+    .hd nav a:hover { color: var(--ink); }
+
+    .wrap { max-width: 2000px; margin: 0 auto; padding: var(--side); }
+    .row { display: flex; gap: var(--g); margin: 0 0 var(--g); }
+    .row:last-child { margin-bottom: 0; }
+    .row.loose { width: var(--fill); }
+    .work { flex: var(--r) 1 0%; min-width: 0; margin: 0; }
+    .ph { display: block; background: var(--ph); cursor: zoom-in; }
+    .ph img { display: block; width: 100%; height: auto; aspect-ratio: var(--r); object-fit: cover; transition: opacity 0.35s ease; }
+    .ph.ld img { opacity: 0; }
+    .ph:hover img { opacity: 0.82; }
+    @media (max-width: 768px) {
+      .row { flex-wrap: wrap; row-gap: var(--g); }
+      .row.loose { width: auto; }
+      .work { flex: var(--r) 1 calc(var(--r) * 150px); max-width: calc(var(--r) * 62vh); }
+    }
+
+    .viewer { position: fixed; inset: 0; z-index: 10; display: none; flex-direction: column; background: var(--bg); }
+    .viewer.open { display: flex; }
+    .frame { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 24px var(--side) 0; }
     .frame img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; transition: opacity 0.18s ease; }
     .frame img.fading { opacity: 0.15; }
     .hit { position: absolute; top: 0; bottom: 0; width: 50%; border: 0; background: transparent; -webkit-tap-highlight-color: transparent; }
     .hit.prev { left: 0; cursor: w-resize; }
     .hit.next { right: 0; cursor: e-resize; }
-    .bar {
-      flex: none; display: flex; align-items: center; gap: 14px; padding-top: 10px;
-      color: #7f92a4; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
-    }
-    .bar button { background: none; border: 0; color: #687888; font-size: 0.95rem; line-height: 1; padding: 4px 10px; cursor: pointer; }
-    .bar button:hover { color: #f1f4f7; }
-    .count { color: #42505d; }
-    .thumbs { flex: none; width: 100%; overflow-x: auto; padding: 10px 24px 14px; scrollbar-width: thin; scrollbar-color: #2b333b transparent; }
+    .bar { flex: none; display: flex; align-items: center; justify-content: center; gap: 14px; padding: 14px var(--side) 0; color: var(--muted); font-size: 15px; }
+    .bar button { display: inline-flex; align-items: center; background: none; border: 0; color: var(--muted); font: inherit; font-weight: 400; padding: 6px 10px; cursor: pointer; }
+    .bar button:hover { color: var(--ink); }
+    .bar svg { display: block; width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.4; }
+    .count { color: var(--dim); font-variant-numeric: tabular-nums; }
+    .full .exit, :root.immersive .full .enter { display: none; }
+    :root.immersive .full .exit { display: block; }
+    .thumbs { flex: none; overflow-x: auto; padding: 12px var(--side) 18px; scrollbar-width: thin; scrollbar-color: #222 transparent; }
     .thumbs-row { display: flex; gap: 6px; width: max-content; margin: 0 auto; }
-    .thumbs button { flex: none; padding: 0; border: 0; background: #1b2026; cursor: pointer; opacity: 0.4; transition: opacity 0.15s ease; }
-    .thumbs button:hover, .thumbs button:focus-visible { opacity: 0.85; }
-    .thumbs button[aria-current="true"] { opacity: 1; outline: 1px solid #a6b5c3; outline-offset: 2px; }
-    .thumbs img { display: block; height: 56px; width: auto; }
-    .bar .full { display: inline-flex; align-items: center; padding: 4px 6px; }
-    .bar .full svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; }
-    .bar .full .exit, :root.immersive .bar .full .enter { display: none; }
-    :root.immersive .bar .full .exit { display: inline; }
-    :root.immersive, :root.immersive body { background: #000; }
-    :root.immersive header, :root.immersive .thumbs, :root.immersive .bar { display: none; }
-    :root.immersive .viewer { padding: 0; }
+    .thumbs button { flex: none; padding: 0 0 5px; border: 0; background: none; cursor: pointer; opacity: 0.38; transition: opacity 0.15s ease; box-shadow: inset 0 -1px 0 transparent; }
+    .thumbs button:hover, .thumbs button:focus-visible { opacity: 0.8; }
+    .thumbs button[aria-current="true"] { opacity: 1; box-shadow: inset 0 -1px 0 var(--ink); }
+    .thumbs img { display: block; height: 52px; width: auto; background: var(--ph); }
+    :root.immersive .bar, :root.immersive .thumbs { display: none; }
+    :root.immersive .frame { padding: 0; }
     :root.immersive.idle, :root.immersive.idle * { cursor: none !important; }
     @media (max-width: 640px) {
-      .viewer { padding: 0 8px; }
-      .thumbs { padding: 8px 8px 12px; }
-      .thumbs img { height: 44px; }
+      .frame { padding: 12px 8px 0; }
+      .bar { gap: 6px; font-size: 14px; }
+      .thumbs img { height: 42px; }
     }
+    @media (prefers-reduced-motion: reduce) { .ph img, .frame img, .thumbs button { transition: none; } }
   </style>
 </head>
 <body>
-  <header>
-    <div class="header-copy">
-      <div class="header-main">
-        <h1>Pictures</h1>
-      </div>
-      <div class="header-subline">
-        <p>Favourites from the Ricoh GR III, Tokyo to Europe, 2025–2026.</p>
-        <div class="header-links">
-          <a href="index.html" class="nav-link">Home</a>
-        </div>
-      </div>
-    </div>
+  <header class="hd">
+    <a class="mark" href="pictures">Pictures</a>
+    <nav><a href="index.html">Home</a></nav>
   </header>
 
-  <main class="viewer">
+  <main class="wrap">
+    <h1 class="sr">Pictures</h1>
+    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#1" data-i="0"><img src="images/ricoh/r0000127-sm.jpg" srcset="images/ricoh/r0000127-sm.jpg 1000w, images/ricoh/r0000127.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Kabukichō · Jul 2025" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#2" data-i="1"><img src="images/ricoh/r0001259-sm.jpg" srcset="images/ricoh/r0001259-sm.jpg 1000w, images/ricoh/r0001259.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Jul 2025" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#3" data-i="2"><img src="images/ricoh/r0001271-sm.jpg" srcset="images/ricoh/r0001271-sm.jpg 1000w, images/ricoh/r0001271.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Jul 2025" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#4" data-i="3"><img src="images/ricoh/r0001313-sm.jpg" srcset="images/ricoh/r0001313-sm.jpg 1000w, images/ricoh/r0001313.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Jul 2025" decoding="async"></a></figure></div>
+    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#5" data-i="4"><img src="images/ricoh/r0001394-sm.jpg" srcset="images/ricoh/r0001394-sm.jpg 1000w, images/ricoh/r0001394.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Jul 2025" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#6" data-i="5"><img src="images/ricoh/r0001751-sm.jpg" srcset="images/ricoh/r0001751-sm.jpg 1000w, images/ricoh/r0001751.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Shinjuku · Jul 2025" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#7" data-i="6"><img src="images/ricoh/r0002007-sm.jpg" srcset="images/ricoh/r0002007-sm.jpg 1000w, images/ricoh/r0002007.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Jul 2025" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#8" data-i="7"><img src="images/ricoh/r0002015-sm.jpg" srcset="images/ricoh/r0002015-sm.jpg 1000w, images/ricoh/r0002015.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Jul 2025" decoding="async"></a></figure></div>
+    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#9" data-i="8"><img src="images/ricoh/r0002033-sm.jpg" srcset="images/ricoh/r0002033-sm.jpg 1000w, images/ricoh/r0002033.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Night streets · Jul 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#10" data-i="9"><img src="images/ricoh/r0002074-sm.jpg" srcset="images/ricoh/r0002074-sm.jpg 1000w, images/ricoh/r0002074.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Forest trail · Aug 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#11" data-i="10"><img src="images/ricoh/r0002886-sm.jpg" srcset="images/ricoh/r0002886-sm.jpg 1000w, images/ricoh/r0002886.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Autumn leaves · Nov 2025" loading="lazy" decoding="async"></a></figure></div>
+    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#12" data-i="11"><img src="images/ricoh/r0003720-sm.jpg" srcset="images/ricoh/r0003720-sm.jpg 1000w, images/ricoh/r0003720.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Istanbul · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#13" data-i="12"><img src="images/ricoh/r0003736-sm.jpg" srcset="images/ricoh/r0003736-sm.jpg 1000w, images/ricoh/r0003736.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Istanbul · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#14" data-i="13"><img src="images/ricoh/r0003818-sm.jpg" srcset="images/ricoh/r0003818-sm.jpg 1000w, images/ricoh/r0003818.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Istanbul · Dec 2025" loading="lazy" decoding="async"></a></figure></div>
+    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#15" data-i="14"><img src="images/ricoh/r0003949-sm.jpg" srcset="images/ricoh/r0003949-sm.jpg 1000w, images/ricoh/r0003949.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Athens · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#16" data-i="15"><img src="images/ricoh/r0004118-sm.jpg" srcset="images/ricoh/r0004118-sm.jpg 1000w, images/ricoh/r0004118.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Athens · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#17" data-i="16"><img src="images/ricoh/r0004142-sm.jpg" srcset="images/ricoh/r0004142-sm.jpg 1000w, images/ricoh/r0004142.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Athens · Dec 2025" loading="lazy" decoding="async"></a></figure></div>
+    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#18" data-i="17"><img src="images/ricoh/r0004193-sm.jpg" srcset="images/ricoh/r0004193-sm.jpg 1000w, images/ricoh/r0004193.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Athens · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#19" data-i="18"><img src="images/ricoh/r0004369-sm.jpg" srcset="images/ricoh/r0004369-sm.jpg 1000w, images/ricoh/r0004369.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#20" data-i="19"><img src="images/ricoh/r0004370-sm.jpg" srcset="images/ricoh/r0004370-sm.jpg 1000w, images/ricoh/r0004370.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure></div>
+    <div class="row"><figure class="work" style="--r: 0.667"><a class="ph ld" href="#21" data-i="20"><img src="images/ricoh/r0004409-sm.jpg" srcset="images/ricoh/r0004409-sm.jpg 1000w, images/ricoh/r0004409.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#22" data-i="21"><img src="images/ricoh/r0004412-sm.jpg" srcset="images/ricoh/r0004412-sm.jpg 1000w, images/ricoh/r0004412.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#23" data-i="22"><img src="images/ricoh/r0004417-sm.jpg" srcset="images/ricoh/r0004417-sm.jpg 1000w, images/ricoh/r0004417.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure></div>
+    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#24" data-i="23"><img src="images/ricoh/r0004419-sm.jpg" srcset="images/ricoh/r0004419-sm.jpg 1000w, images/ricoh/r0004419.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#25" data-i="24"><img src="images/ricoh/r0004421-sm.jpg" srcset="images/ricoh/r0004421-sm.jpg 1000w, images/ricoh/r0004421.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#26" data-i="25"><img src="images/ricoh/r0004426-sm.jpg" srcset="images/ricoh/r0004426-sm.jpg 1000w, images/ricoh/r0004426.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Bucharest · Dec 2025" loading="lazy" decoding="async"></a></figure></div>
+    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#27" data-i="26"><img src="images/ricoh/r0004680-sm.jpg" srcset="images/ricoh/r0004680-sm.jpg 1000w, images/ricoh/r0004680.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Basel &amp; Alsace · Jan 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#28" data-i="27"><img src="images/ricoh/r0004759-sm.jpg" srcset="images/ricoh/r0004759-sm.jpg 1000w, images/ricoh/r0004759.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Basel &amp; Alsace · Jan 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#29" data-i="28"><img src="images/ricoh/r0004914-sm.jpg" srcset="images/ricoh/r0004914-sm.jpg 1000w, images/ricoh/r0004914.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Paris · Jan 2026" loading="lazy" decoding="async"></a></figure></div>
+    <div class="row"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#30" data-i="29"><img src="images/ricoh/r0004984-sm.jpg" srcset="images/ricoh/r0004984-sm.jpg 1000w, images/ricoh/r0004984.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Paris · Jan 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#31" data-i="30"><img src="images/ricoh/r0005066-sm.jpg" srcset="images/ricoh/r0005066-sm.jpg 1000w, images/ricoh/r0005066.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Paris · Jan 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#32" data-i="31"><img src="images/ricoh/r0005118-sm.jpg" srcset="images/ricoh/r0005118-sm.jpg 1000w, images/ricoh/r0005118.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Paris · Jan 2026" loading="lazy" decoding="async"></a></figure></div>
+    <div class="row"><figure class="work" style="--r: 0.667"><a class="ph ld" href="#33" data-i="32"><img src="images/ricoh/r0005151-sm.jpg" srcset="images/ricoh/r0005151-sm.jpg 1000w, images/ricoh/r0005151.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Paris · Jan 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 0.667"><a class="ph ld" href="#34" data-i="33"><img src="images/ricoh/r0005175-sm.jpg" srcset="images/ricoh/r0005175-sm.jpg 1000w, images/ricoh/r0005175.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Paris · Jan 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#35" data-i="34"><img src="images/ricoh/r0005570-sm.jpg" srcset="images/ricoh/r0005570-sm.jpg 1000w, images/ricoh/r0005570.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Snow · Feb 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#36" data-i="35"><img src="images/ricoh/r0005583-sm.jpg" srcset="images/ricoh/r0005583-sm.jpg 1000w, images/ricoh/r0005583.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Snow · Feb 2026" loading="lazy" decoding="async"></a></figure></div>
+    <div class="row"><figure class="work" style="--r: 0.667"><a class="ph ld" href="#37" data-i="36"><img src="images/ricoh/r0005633-sm.jpg" srcset="images/ricoh/r0005633-sm.jpg 1000w, images/ricoh/r0005633.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="667" height="1000" alt="Plum blossoms · Feb 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#38" data-i="37"><img src="images/ricoh/r0005654-sm.jpg" srcset="images/ricoh/r0005654-sm.jpg 1000w, images/ricoh/r0005654.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Feb 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#39" data-i="38"><img src="images/ricoh/r0005692-sm.jpg" srcset="images/ricoh/r0005692-sm.jpg 1000w, images/ricoh/r0005692.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Niseko · Mar 2026" loading="lazy" decoding="async"></a></figure></div>
+    <div class="row loose" style="--fill: 68.15%"><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#40" data-i="39"><img src="images/ricoh/r0005702-sm.jpg" srcset="images/ricoh/r0005702-sm.jpg 1000w, images/ricoh/r0005702.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Cherry blossoms · Mar 2026" loading="lazy" decoding="async"></a></figure><figure class="work" style="--r: 1.4993"><a class="ph ld" href="#41" data-i="40"><img src="images/ricoh/r0005711-sm.jpg" srcset="images/ricoh/r0005711-sm.jpg 1000w, images/ricoh/r0005711.jpg 2000w" sizes="(max-width: 768px) 100vw, 34vw" width="1000" height="667" alt="Shinjuku Gyoen · Jun 2026" loading="lazy" decoding="async"></a></figure></div>
+  </main>
+
+  <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Photo">
     <div class="frame">
-      <img id="photo" src="images/ricoh/r0000127.jpg" srcset="images/ricoh/r0000127-sm.jpg 1000w, images/ricoh/r0000127.jpg 2000w" sizes="100vw" alt="">
+      <img id="photo" alt="" sizes="100vw">
       <button class="hit prev" data-step="-1" aria-label="Previous photo"></button>
       <button class="hit next" data-step="1" aria-label="Next photo"></button>
     </div>
     <div class="bar">
       <button data-step="-1" aria-label="Previous photo">&larr;</button>
-      <span id="caption">Kabukichō · Jul 2025</span>
-      <span class="count" id="count">1 / 41</span>
+      <span id="caption"></span>
+      <span class="count" id="count"></span>
       <button data-step="1" aria-label="Next photo">&rarr;</button>
       <button class="full" id="full" aria-label="Full screen (F)" title="Full screen (F)">
         <svg class="enter" viewBox="0 0 16 16"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"/></svg>
         <svg class="exit" viewBox="0 0 16 16"><path d="M5.5 1v4.5H1M15 5.5h-4.5V1M10.5 15v-4.5H15M1 10.5h4.5V15"/></svg>
       </button>
+      <button id="close" aria-label="Back to all photos (Esc)" title="Back to all photos (Esc)">
+        <svg viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14"/></svg>
+      </button>
     </div>
-  </main>
-
-  <nav class="thumbs" aria-label="All photos">
-    <div class="thumbs-row">
+    <nav class="thumbs" aria-label="All photos">
+      <div class="thumbs-row">
         <button data-i="0" aria-label="Kabukichō · Jul 2025"><img src="images/ricoh/r0000127-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
         <button data-i="1" aria-label="Jul 2025"><img src="images/ricoh/r0001259-th.jpg" width="107" height="160" alt="" loading="lazy"></button>
         <button data-i="2" aria-label="Jul 2025"><img src="images/ricoh/r0001271-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
@@ -121,223 +171,32 @@
         <button data-i="38" aria-label="Niseko · Mar 2026"><img src="images/ricoh/r0005692-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
         <button data-i="39" aria-label="Cherry blossoms · Mar 2026"><img src="images/ricoh/r0005702-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
         <button data-i="40" aria-label="Shinjuku Gyoen · Jun 2026"><img src="images/ricoh/r0005711-th.jpg" width="240" height="160" alt="" loading="lazy"></button>
-    </div>
-  </nav>
+      </div>
+    </nav>
+  </div>
 
   <script>
-    const photos = [
-{
-"src": "images/ricoh/r0000127.jpg",
-"sm": "images/ricoh/r0000127-sm.jpg",
-"caption": "Kabukichō · Jul 2025"
-},
-{
-"src": "images/ricoh/r0001259.jpg",
-"sm": "images/ricoh/r0001259-sm.jpg",
-"caption": "Jul 2025"
-},
-{
-"src": "images/ricoh/r0001271.jpg",
-"sm": "images/ricoh/r0001271-sm.jpg",
-"caption": "Jul 2025"
-},
-{
-"src": "images/ricoh/r0001313.jpg",
-"sm": "images/ricoh/r0001313-sm.jpg",
-"caption": "Jul 2025"
-},
-{
-"src": "images/ricoh/r0001394.jpg",
-"sm": "images/ricoh/r0001394-sm.jpg",
-"caption": "Jul 2025"
-},
-{
-"src": "images/ricoh/r0001751.jpg",
-"sm": "images/ricoh/r0001751-sm.jpg",
-"caption": "Shinjuku · Jul 2025"
-},
-{
-"src": "images/ricoh/r0002007.jpg",
-"sm": "images/ricoh/r0002007-sm.jpg",
-"caption": "Jul 2025"
-},
-{
-"src": "images/ricoh/r0002015.jpg",
-"sm": "images/ricoh/r0002015-sm.jpg",
-"caption": "Jul 2025"
-},
-{
-"src": "images/ricoh/r0002033.jpg",
-"sm": "images/ricoh/r0002033-sm.jpg",
-"caption": "Night streets · Jul 2025"
-},
-{
-"src": "images/ricoh/r0002074.jpg",
-"sm": "images/ricoh/r0002074-sm.jpg",
-"caption": "Forest trail · Aug 2025"
-},
-{
-"src": "images/ricoh/r0002886.jpg",
-"sm": "images/ricoh/r0002886-sm.jpg",
-"caption": "Autumn leaves · Nov 2025"
-},
-{
-"src": "images/ricoh/r0003720.jpg",
-"sm": "images/ricoh/r0003720-sm.jpg",
-"caption": "Istanbul · Dec 2025"
-},
-{
-"src": "images/ricoh/r0003736.jpg",
-"sm": "images/ricoh/r0003736-sm.jpg",
-"caption": "Istanbul · Dec 2025"
-},
-{
-"src": "images/ricoh/r0003818.jpg",
-"sm": "images/ricoh/r0003818-sm.jpg",
-"caption": "Istanbul · Dec 2025"
-},
-{
-"src": "images/ricoh/r0003949.jpg",
-"sm": "images/ricoh/r0003949-sm.jpg",
-"caption": "Athens · Dec 2025"
-},
-{
-"src": "images/ricoh/r0004118.jpg",
-"sm": "images/ricoh/r0004118-sm.jpg",
-"caption": "Athens · Dec 2025"
-},
-{
-"src": "images/ricoh/r0004142.jpg",
-"sm": "images/ricoh/r0004142-sm.jpg",
-"caption": "Athens · Dec 2025"
-},
-{
-"src": "images/ricoh/r0004193.jpg",
-"sm": "images/ricoh/r0004193-sm.jpg",
-"caption": "Athens · Dec 2025"
-},
-{
-"src": "images/ricoh/r0004369.jpg",
-"sm": "images/ricoh/r0004369-sm.jpg",
-"caption": "Bucharest · Dec 2025"
-},
-{
-"src": "images/ricoh/r0004370.jpg",
-"sm": "images/ricoh/r0004370-sm.jpg",
-"caption": "Bucharest · Dec 2025"
-},
-{
-"src": "images/ricoh/r0004409.jpg",
-"sm": "images/ricoh/r0004409-sm.jpg",
-"caption": "Bucharest · Dec 2025"
-},
-{
-"src": "images/ricoh/r0004412.jpg",
-"sm": "images/ricoh/r0004412-sm.jpg",
-"caption": "Bucharest · Dec 2025"
-},
-{
-"src": "images/ricoh/r0004417.jpg",
-"sm": "images/ricoh/r0004417-sm.jpg",
-"caption": "Bucharest · Dec 2025"
-},
-{
-"src": "images/ricoh/r0004419.jpg",
-"sm": "images/ricoh/r0004419-sm.jpg",
-"caption": "Bucharest · Dec 2025"
-},
-{
-"src": "images/ricoh/r0004421.jpg",
-"sm": "images/ricoh/r0004421-sm.jpg",
-"caption": "Bucharest · Dec 2025"
-},
-{
-"src": "images/ricoh/r0004426.jpg",
-"sm": "images/ricoh/r0004426-sm.jpg",
-"caption": "Bucharest · Dec 2025"
-},
-{
-"src": "images/ricoh/r0004680.jpg",
-"sm": "images/ricoh/r0004680-sm.jpg",
-"caption": "Basel & Alsace · Jan 2026"
-},
-{
-"src": "images/ricoh/r0004759.jpg",
-"sm": "images/ricoh/r0004759-sm.jpg",
-"caption": "Basel & Alsace · Jan 2026"
-},
-{
-"src": "images/ricoh/r0004914.jpg",
-"sm": "images/ricoh/r0004914-sm.jpg",
-"caption": "Paris · Jan 2026"
-},
-{
-"src": "images/ricoh/r0004984.jpg",
-"sm": "images/ricoh/r0004984-sm.jpg",
-"caption": "Paris · Jan 2026"
-},
-{
-"src": "images/ricoh/r0005066.jpg",
-"sm": "images/ricoh/r0005066-sm.jpg",
-"caption": "Paris · Jan 2026"
-},
-{
-"src": "images/ricoh/r0005118.jpg",
-"sm": "images/ricoh/r0005118-sm.jpg",
-"caption": "Paris · Jan 2026"
-},
-{
-"src": "images/ricoh/r0005151.jpg",
-"sm": "images/ricoh/r0005151-sm.jpg",
-"caption": "Paris · Jan 2026"
-},
-{
-"src": "images/ricoh/r0005175.jpg",
-"sm": "images/ricoh/r0005175-sm.jpg",
-"caption": "Paris · Jan 2026"
-},
-{
-"src": "images/ricoh/r0005570.jpg",
-"sm": "images/ricoh/r0005570-sm.jpg",
-"caption": "Snow · Feb 2026"
-},
-{
-"src": "images/ricoh/r0005583.jpg",
-"sm": "images/ricoh/r0005583-sm.jpg",
-"caption": "Snow · Feb 2026"
-},
-{
-"src": "images/ricoh/r0005633.jpg",
-"sm": "images/ricoh/r0005633-sm.jpg",
-"caption": "Plum blossoms · Feb 2026"
-},
-{
-"src": "images/ricoh/r0005654.jpg",
-"sm": "images/ricoh/r0005654-sm.jpg",
-"caption": "Feb 2026"
-},
-{
-"src": "images/ricoh/r0005692.jpg",
-"sm": "images/ricoh/r0005692-sm.jpg",
-"caption": "Niseko · Mar 2026"
-},
-{
-"src": "images/ricoh/r0005702.jpg",
-"sm": "images/ricoh/r0005702-sm.jpg",
-"caption": "Cherry blossoms · Mar 2026"
-},
-{
-"src": "images/ricoh/r0005711.jpg",
-"sm": "images/ricoh/r0005711-sm.jpg",
-"caption": "Shinjuku Gyoen · Jun 2026"
-}
-];
+    const photos = [{"src": "images/ricoh/r0000127.jpg", "sm": "images/ricoh/r0000127-sm.jpg", "caption": "Kabukichō · Jul 2025"}, {"src": "images/ricoh/r0001259.jpg", "sm": "images/ricoh/r0001259-sm.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0001271.jpg", "sm": "images/ricoh/r0001271-sm.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0001313.jpg", "sm": "images/ricoh/r0001313-sm.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0001394.jpg", "sm": "images/ricoh/r0001394-sm.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0001751.jpg", "sm": "images/ricoh/r0001751-sm.jpg", "caption": "Shinjuku · Jul 2025"}, {"src": "images/ricoh/r0002007.jpg", "sm": "images/ricoh/r0002007-sm.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0002015.jpg", "sm": "images/ricoh/r0002015-sm.jpg", "caption": "Jul 2025"}, {"src": "images/ricoh/r0002033.jpg", "sm": "images/ricoh/r0002033-sm.jpg", "caption": "Night streets · Jul 2025"}, {"src": "images/ricoh/r0002074.jpg", "sm": "images/ricoh/r0002074-sm.jpg", "caption": "Forest trail · Aug 2025"}, {"src": "images/ricoh/r0002886.jpg", "sm": "images/ricoh/r0002886-sm.jpg", "caption": "Autumn leaves · Nov 2025"}, {"src": "images/ricoh/r0003720.jpg", "sm": "images/ricoh/r0003720-sm.jpg", "caption": "Istanbul · Dec 2025"}, {"src": "images/ricoh/r0003736.jpg", "sm": "images/ricoh/r0003736-sm.jpg", "caption": "Istanbul · Dec 2025"}, {"src": "images/ricoh/r0003818.jpg", "sm": "images/ricoh/r0003818-sm.jpg", "caption": "Istanbul · Dec 2025"}, {"src": "images/ricoh/r0003949.jpg", "sm": "images/ricoh/r0003949-sm.jpg", "caption": "Athens · Dec 2025"}, {"src": "images/ricoh/r0004118.jpg", "sm": "images/ricoh/r0004118-sm.jpg", "caption": "Athens · Dec 2025"}, {"src": "images/ricoh/r0004142.jpg", "sm": "images/ricoh/r0004142-sm.jpg", "caption": "Athens · Dec 2025"}, {"src": "images/ricoh/r0004193.jpg", "sm": "images/ricoh/r0004193-sm.jpg", "caption": "Athens · Dec 2025"}, {"src": "images/ricoh/r0004369.jpg", "sm": "images/ricoh/r0004369-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004370.jpg", "sm": "images/ricoh/r0004370-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004409.jpg", "sm": "images/ricoh/r0004409-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004412.jpg", "sm": "images/ricoh/r0004412-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004417.jpg", "sm": "images/ricoh/r0004417-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004419.jpg", "sm": "images/ricoh/r0004419-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004421.jpg", "sm": "images/ricoh/r0004421-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004426.jpg", "sm": "images/ricoh/r0004426-sm.jpg", "caption": "Bucharest · Dec 2025"}, {"src": "images/ricoh/r0004680.jpg", "sm": "images/ricoh/r0004680-sm.jpg", "caption": "Basel & Alsace · Jan 2026"}, {"src": "images/ricoh/r0004759.jpg", "sm": "images/ricoh/r0004759-sm.jpg", "caption": "Basel & Alsace · Jan 2026"}, {"src": "images/ricoh/r0004914.jpg", "sm": "images/ricoh/r0004914-sm.jpg", "caption": "Paris · Jan 2026"}, {"src": "images/ricoh/r0004984.jpg", "sm": "images/ricoh/r0004984-sm.jpg", "caption": "Paris · Jan 2026"}, {"src": "images/ricoh/r0005066.jpg", "sm": "images/ricoh/r0005066-sm.jpg", "caption": "Paris · Jan 2026"}, {"src": "images/ricoh/r0005118.jpg", "sm": "images/ricoh/r0005118-sm.jpg", "caption": "Paris · Jan 2026"}, {"src": "images/ricoh/r0005151.jpg", "sm": "images/ricoh/r0005151-sm.jpg", "caption": "Paris · Jan 2026"}, {"src": "images/ricoh/r0005175.jpg", "sm": "images/ricoh/r0005175-sm.jpg", "caption": "Paris · Jan 2026"}, {"src": "images/ricoh/r0005570.jpg", "sm": "images/ricoh/r0005570-sm.jpg", "caption": "Snow · Feb 2026"}, {"src": "images/ricoh/r0005583.jpg", "sm": "images/ricoh/r0005583-sm.jpg", "caption": "Snow · Feb 2026"}, {"src": "images/ricoh/r0005633.jpg", "sm": "images/ricoh/r0005633-sm.jpg", "caption": "Plum blossoms · Feb 2026"}, {"src": "images/ricoh/r0005654.jpg", "sm": "images/ricoh/r0005654-sm.jpg", "caption": "Feb 2026"}, {"src": "images/ricoh/r0005692.jpg", "sm": "images/ricoh/r0005692-sm.jpg", "caption": "Niseko · Mar 2026"}, {"src": "images/ricoh/r0005702.jpg", "sm": "images/ricoh/r0005702-sm.jpg", "caption": "Cherry blossoms · Mar 2026"}, {"src": "images/ricoh/r0005711.jpg", "sm": "images/ricoh/r0005711-sm.jpg", "caption": "Shinjuku Gyoen · Jun 2026"}];
+    const root = document.documentElement;
+    const viewer = document.getElementById('viewer');
     const img = document.getElementById('photo');
     const caption = document.getElementById('caption');
     const count = document.getElementById('count');
-    const thumbButtons = [...document.querySelectorAll('.thumbs button')];
+    const tiles = [...document.querySelectorAll('.ph')];
+    const thumbButtons = [...viewer.querySelectorAll('.thumbs button')];
     const srcset = p => `${p.sm} 1000w, ${p.src} 2000w`;
+    const isOpen = () => viewer.classList.contains('open');
     let current = -1;
+    let pushed = false;  // true when the viewer was opened from the grid, so Back returns to it
+
+    // Grid photos fade in once loaded.
+    tiles.forEach(a => {
+      const im = a.querySelector('img');
+      const done = () => a.classList.remove('ld');
+      if (im.complete && im.naturalWidth) done();
+      else { im.addEventListener('load', done); im.addEventListener('error', done); }
+      a.addEventListener('click', () => { pushed = true; });
+    });
 
     function load(p) {
       const im = new Image();
@@ -354,7 +213,7 @@
       const p = photos[want];
       caption.textContent = p.caption;
       count.textContent = `${want + 1} / ${photos.length}`;
-      history.replaceState(null, '', '#' + (want + 1));
+      history.replaceState(history.state, '', '#' + (want + 1));
       if (previous >= 0) thumbButtons[previous].removeAttribute('aria-current');
       thumbButtons[want].setAttribute('aria-current', 'true');
       thumbButtons[want].scrollIntoView({ block: 'nearest', inline: 'center', behavior: smooth ? 'smooth' : 'auto' });
@@ -371,12 +230,34 @@
       load(photos[(want - 1 + photos.length) % photos.length]);
     }
 
-    document.querySelectorAll('[data-step]').forEach(b =>
-      b.addEventListener('click', () => show(current + Number(b.dataset.step))));
-    thumbButtons.forEach(b => b.addEventListener('click', () => show(Number(b.dataset.i))));
-    // Full screen: the browser's real full screen where it exists, plus a CSS mode that
-    // hides everything but the photo (the only option on iPhone Safari).
-    const root = document.documentElement;
+    function openViewer(i) {
+      if (!isOpen()) {
+        viewer.classList.add('open');
+        document.body.classList.add('viewing');
+      }
+      show(i, false);
+    }
+
+    function closeViewer() {
+      if (!isOpen()) return;
+      if (root.classList.contains('immersive')) setImmersive(false);
+      viewer.classList.remove('open');
+      document.body.classList.remove('viewing');
+      tiles[current]?.scrollIntoView({ block: 'center' });
+    }
+
+    function leave() {
+      if (pushed) { pushed = false; history.back(); }  // the hashchange closes the viewer
+      else { history.replaceState(null, '', location.pathname + location.search); closeViewer(); }
+    }
+
+    function sync() {
+      const n = parseInt(location.hash.slice(1), 10);
+      if (n >= 1 && n <= photos.length) openViewer(n - 1); else closeViewer();
+    }
+
+    // Full screen shows nothing but the photo: the browser's real full screen where it exists,
+    // plus a CSS mode that hides everything else (the only option on iPhone Safari).
     const fullButton = document.getElementById('full');
     const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
     function setImmersive(on) {
@@ -390,29 +271,31 @@
         const exit = document.exitFullscreen || document.webkitExitFullscreen;
         Promise.resolve(exit.call(document)).catch(() => {});
       }
-      thumbButtons[current]?.scrollIntoView({ block: 'nearest', inline: 'center' });
     }
     fullButton.addEventListener('click', () => setImmersive(!root.classList.contains('immersive')));
-    // In full screen nothing but the photo shows; the cursor hides too once the mouse rests.
+    const leftFullscreen = () => { if (!fsElement() && root.classList.contains('immersive')) setImmersive(false); };
+    document.addEventListener('fullscreenchange', leftFullscreen);
+    document.addEventListener('webkitfullscreenchange', leftFullscreen);
     let idleTimer;
     document.addEventListener('mousemove', () => {
       root.classList.remove('idle');
       clearTimeout(idleTimer);
       idleTimer = setTimeout(() => root.classList.add('idle'), 1500);
     });
-    const leftFullscreen = () => { if (!fsElement() && root.classList.contains('immersive')) setImmersive(false); };
-    document.addEventListener('fullscreenchange', leftFullscreen);
-    document.addEventListener('webkitfullscreenchange', leftFullscreen);
 
+    viewer.querySelectorAll('[data-step]').forEach(b =>
+      b.addEventListener('click', () => show(current + Number(b.dataset.step))));
+    thumbButtons.forEach(b => b.addEventListener('click', () => show(Number(b.dataset.i))));
+    document.getElementById('close').addEventListener('click', leave);
     document.addEventListener('keydown', e => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (!isOpen() || e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.key === 'ArrowRight') show(current + 1);
-      if (e.key === 'ArrowLeft') show(current - 1);
-      if (e.key === 'f' || e.key === 'F') setImmersive(!root.classList.contains('immersive'));
-      if (e.key === 'Escape' && root.classList.contains('immersive')) setImmersive(false);
+      else if (e.key === 'ArrowLeft') show(current - 1);
+      else if (e.key === 'f' || e.key === 'F') setImmersive(!root.classList.contains('immersive'));
+      else if (e.key === 'Escape') root.classList.contains('immersive') ? setImmersive(false) : leave();
     });
     let touchX = null, touchY = null;
-    const frame = document.querySelector('.frame');
+    const frame = viewer.querySelector('.frame');
     frame.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }, { passive: true });
     frame.addEventListener('touchend', e => {
       if (touchX === null) return;
@@ -420,11 +303,11 @@
       const dy = e.changedTouches[0].clientY - touchY;
       touchX = touchY = null;
       if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) show(current + (dx < 0 ? 1 : -1));
-      else if (dy > 80 && root.classList.contains('immersive')) setImmersive(false);  // swipe down leaves full screen
+      else if (dy > 80) root.classList.contains('immersive') ? setImmersive(false) : leave();  // swipe down
     });
 
-    const start = parseInt(location.hash.slice(1), 10);
-    show(start >= 1 && start <= photos.length ? start - 1 : 0, false);
+    window.addEventListener('hashchange', sync);
+    sync();
   </script>
 </body>
 </html>
