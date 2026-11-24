@@ -93,6 +93,10 @@
     :root.immersive .bar, :root.immersive .thumbs { display: none; }
     :root.immersive .frame { padding: 0; }
     :root.immersive.idle, :root.immersive.idle * { cursor: none !important; }
+    /* Phones without real full screen get a small way out, since the bar is hidden. */
+    .fs-close { display: none; position: absolute; top: 10px; right: 10px; z-index: 3; width: 40px; height: 40px; padding: 12px; border: 0; background: rgba(0, 0, 0, 0.4); border-radius: 50%; }
+    .fs-close svg { width: 16px; height: 16px; stroke: #fff; stroke-width: 1.5; fill: none; }
+    :root.immersive.no-fs .fs-close { display: block; }
     @media (max-width: 640px) {
       .frame { padding: 12px 8px 0; }
       .bar { gap: 6px; font-size: 14px; }
@@ -135,13 +139,13 @@
     .gone:hover { opacity: 1; }
     .gone img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; background: var(--ph); }
     .ed-removed h2 { margin: 44px 0 0; font-weight: 400; font-size: 0.95rem; }
-    /* Admin full screen: one photo at a time on black, with a note that fades after each action. */
-    .ed-full { position: fixed; inset: 0; z-index: 25; display: flex; align-items: center; justify-content: center; background: #000; }
-    .ed-full[hidden] { display: none; }
-    .ed-full img { max-width: 100%; max-height: 100%; object-fit: contain; }
-    .ed-flash { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); padding: 8px 14px; border-radius: 8px; background: rgba(0, 0, 0, 0.6); color: #fff; font-weight: 400; font-size: 15px; white-space: nowrap; opacity: 0; transition: opacity 0.4s; pointer-events: none; }
-    .ed-flash.on { opacity: 1; transition: none; }
-    :root.idle .ed-full, :root.idle .ed-full * { cursor: none !important; }
+    /* Admin: a photo clicked in the editor opens big, with what can be done about it underneath. */
+    .ed-big { position: fixed; inset: 0; z-index: 25; display: flex; flex-direction: column; background: rgba(0, 0, 0, 0.95); }
+    .ed-big[hidden] { display: none; }
+    .ed-big .pic { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 18px var(--side) 0; }
+    .ed-big img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .ed-big .acts { flex: none; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 8px 22px; padding: 14px var(--side) 18px; }
+    .ed-big .acts .what { color: var(--muted); }
     .toast { position: fixed; left: 50%; bottom: 24px; z-index: 30; transform: translateX(-50%); max-width: calc(100% - 2 * var(--side)); padding: 10px 16px; background: var(--ink); color: var(--bg); font-weight: 400; font-size: 0.95rem; }
     @media (prefers-reduced-motion: reduce) { .ph img, .frame img, .thumbs button { transition: none; } }
   </style>
@@ -163,12 +167,11 @@
       <span class="ed-title">Editing</span>
       <span class="ed-count" id="ed-count"></span>
       <span class="ed-status" id="ed-status" role="status"></span>
-      <button class="text-btn" id="ed-full-btn" type="button" title="One photo at a time, full screen (F)">Full screen</button>
       <button class="text-btn primary" id="ed-save" type="button">Save</button>
       <button class="text-btn" id="ed-cancel" type="button">Cancel</button>
       <button class="text-btn" id="ed-logout" type="button">Log out</button>
     </div>
-    <p class="ed-hint">Drag photos to reorder them, or use the arrows. Full screen (F, or double-click a photo) shows one at a time: ← → to look through, Shift+← → to move, X to take one off. Type a caption under a photo; the month is added for you. × takes a photo off the page. New photos still come from the Photo Manager on the Mac. Saving updates the live page in about a minute.</p>
+    <p class="ed-hint">Click a photo to see it big. Drag photos to reorder them, or use the arrows. Type a caption under a photo; the month is added for you. × takes a photo off the page. New photos still come from the Photo Manager on the Mac. Saving updates the live page in about a minute.</p>
     <div class="ed-grid" id="ed-grid"></div>
     <div class="ed-removed" id="ed-removed-wrap" hidden>
       <h2>Taken off the page</h2>
@@ -189,16 +192,25 @@
     </form>
   </div>
 
-  <div class="ed-full" id="ed-full" role="dialog" aria-label="Arrange, one photo at a time" hidden>
-    <img id="ed-full-img" alt="">
-    <div class="ed-flash" id="ed-flash" role="status"></div>
+  <div class="ed-big" id="ed-big" role="dialog" aria-modal="true" aria-label="Photo" hidden>
+    <div class="pic"><img id="ed-big-img" alt=""></div>
+    <div class="acts">
+      <button class="text-btn" id="ed-big-prev" type="button" aria-label="Previous photo">&larr;</button>
+      <span class="what" id="ed-big-what"></span>
+      <button class="text-btn" id="ed-big-next" type="button" aria-label="Next photo">&rarr;</button>
+      <button class="text-btn remove" id="ed-big-remove" type="button">Take off the page</button>
+      <button class="text-btn" id="ed-big-close" type="button">Close</button>
+    </div>
   </div>
 
-  <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Photo">
+  <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Photo" tabindex="-1">
     <div class="frame">
       <img id="photo" alt="" sizes="100vw">
       <button class="hit prev" data-step="-1" aria-label="Previous photo"></button>
       <button class="hit next" data-step="1" aria-label="Next photo"></button>
+      <button class="fs-close" id="fs-close" aria-label="Back to all photos">
+        <svg viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14"/></svg>
+      </button>
     </div>
     <div class="bar">
       <button data-step="-1" aria-label="Previous photo">&larr;</button>
@@ -268,7 +280,12 @@
           a.className = 'ph ld';
           a.href = `#${i + 1}`;
           // Straight to full screen: requested here, while the click still counts as one.
-          a.addEventListener('click', () => { pushed = true; directFull = true; setImmersive(true); });
+          a.addEventListener('click', e => {
+            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            pushed = true;
+            directFull = true;
+            setImmersive(true);
+          });
           const im = document.createElement('img');
           if (n > 1) im.loading = 'lazy';  // the first two rows load right away
           im.decoding = 'async';
@@ -343,6 +360,7 @@
       if (!isOpen()) {
         viewer.classList.add('open');
         document.body.classList.add('viewing');
+        viewer.focus({ preventScroll: true });
       }
       show(i, false);
     }
@@ -354,6 +372,7 @@
       viewer.classList.remove('open');
       document.body.classList.remove('viewing');
       tiles[current]?.scrollIntoView({ block: 'center' });
+      tiles[current]?.focus({ preventScroll: true });
     }
 
     function leave() {
@@ -371,11 +390,13 @@
     // Full screen shows nothing but the photo: the browser's real full screen where it exists,
     // plus a CSS mode that hides everything else (the only option on iPhone Safari).
     const fullButton = $('full');
+    if (!root.requestFullscreen && !root.webkitRequestFullscreen) root.classList.add('no-fs');
+    $('fs-close').addEventListener('click', e => { e.stopPropagation(); leave(); });
     const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
     // A photo clicked in the grid opens straight into full screen, and leaving full screen then
     // goes back to the grid. (F from there shows the viewer with its thumbnails instead.)
     let directFull = false;
-    const exitFull = () => (directFull ? leave() : setImmersive(false));
+    const exitFull = () => (directFull && isOpen() ? leave() : setImmersive(false));
     function setImmersive(on) {
       root.classList.toggle('immersive', on);
       fullButton.setAttribute('aria-label', on ? 'Exit full screen (Esc)' : 'Full screen (F)');
@@ -524,7 +545,7 @@
     }
 
     function leaveEditor() {
-      closeEdFull();
+      closeBig();
       $('editor').hidden = true;
       $('wrap').hidden = false;
       window.scrollTo(0, ed.scroll);
@@ -558,8 +579,7 @@
         im.loading = 'lazy';
         im.alt = '';
         im.src = file(p, '-th');
-        im.title = 'Double-click for full screen';
-        im.addEventListener('dblclick', () => openEdFull(i));
+
         const num = document.createElement('span');
         num.className = 'num';
         num.textContent = i + 1;
@@ -597,6 +617,8 @@
             renderEditor();
           }));
         card.append(im, num, input, when, tools);
+        card.title = 'Click to see it big';
+        card.addEventListener('click', e => { if (!e.target.closest('input, button')) openBig(i); });
         card.addEventListener('dragstart', e => {
           ed.dragFrom = i;
           card.classList.add('dragging');
@@ -677,112 +699,59 @@
     });
     window.addEventListener('beforeunload', e => { if (editing() && ed.dirty) { e.preventDefault(); e.returnValue = ''; } });
 
-    // ---- admin full screen: one photo at a time, nothing but the photo. ← → step through,
-    // Shift+← → move the photo, X or Delete takes it off the page (Z puts it back), and
-    // Esc or F goes back to the grid. Nothing is saved until Save, as in the grid.
-    const edFull = $('ed-full'), edFullImg = $('ed-full-img'), edFlash = $('ed-flash');
-    const full = { i: 0, undo: [] };
-    const edFullOpen = () => !edFull.hidden;
-    let flashTimer;
-    function flash(text) {
-      edFlash.textContent = text;
-      edFlash.classList.add('on');
-      clearTimeout(flashTimer);
-      flashTimer = setTimeout(() => edFlash.classList.remove('on'), 900);
+    // ---- admin: a photo clicked in the editor opens big, to decide about it. ← → (buttons or
+    // keys) look at the others; Esc, Close or a click beside the photo goes back to the grid.
+    const big = $('ed-big'), bigImg = $('ed-big-img');
+    let bigAt = 0;
+    const bigOpen = () => !big.hidden;
+    function showBig() {
+      const p = ed.items[bigAt];
+      if (!p) { closeBig(); return; }
+      bigImg.removeAttribute('srcset');
+      bigImg.src = file(p, '-th');  // already loaded for the grid, so it shows at once
+      bigImg.alt = captionOf(p);
+      const full = load(p);
+      const swap = () => { if (ed.items[bigAt] === p && bigOpen()) { bigImg.srcset = srcset(p); bigImg.sizes = '100vw'; bigImg.src = file(p, ''); } };
+      full.decode().then(swap, swap);
+      $('ed-big-what').textContent = [`${bigAt + 1} / ${ed.items.length}`, captionOf(p)].filter(Boolean).join('  ·  ');
+      for (const d of [1, -1]) { const q = ed.items[bigAt + d]; if (q) load(q); }
     }
-    function showEdFull() {
-      const p = ed.items[full.i];
-      if (!p) { closeEdFull(); return; }
-      edFullImg.srcset = srcset(p);
-      edFullImg.sizes = '100vw';
-      edFullImg.src = file(p, '');
-      edFullImg.alt = captionOf(p);
-      for (const d of [1, -1]) { const q = ed.items[full.i + d]; if (q) load(q); }
+    function openBig(i) {
+      if (!editing() || !ed.items[i]) return;
+      bigAt = i;
+      big.hidden = false;
+      showBig();
+      $('ed-big-close').focus();
     }
-    function openEdFull(i = full.i) {
-      if (!editing() || !ed.items.length) return;
-      full.i = Math.min(Math.max(i, 0), ed.items.length - 1);
-      full.undo = [];
-      edFull.hidden = false;
-      edFlash.classList.remove('on');
-      const request = edFull.requestFullscreen || edFull.webkitRequestFullscreen;
-      if (request && !fsElement()) Promise.resolve(request.call(edFull)).catch(() => {});
-      showEdFull();
+    function closeBig() {
+      if (!bigOpen()) return;
+      big.hidden = true;
+      $('ed-grid').children[bigAt]?.scrollIntoView({ block: 'center' });
     }
-    function closeEdFull() {
-      if (!edFullOpen()) return;
-      edFull.hidden = true;
-      if (fsElement() === edFull) {
-        const exit = document.exitFullscreen || document.webkitExitFullscreen;
-        Promise.resolve(exit.call(document)).catch(() => {});
-      }
-      $('ed-grid').children[full.i]?.scrollIntoView({ block: 'center' });
-    }
-    function edFullStep(d) {
+    function stepBig(d) {
       const n = ed.items.length;
       if (!n) return;
-      full.i = (full.i + d + n) % n;
-      showEdFull();
+      bigAt = (bigAt + d + n) % n;
+      showBig();
     }
-    $('ed-full-btn').addEventListener('click', () => openEdFull());
-    // The browser's own Esc (or a swipe) ends full screen: the view closes with it.
-    const leftEdFull = () => { if (edFullOpen() && fsElement() !== edFull) closeEdFull(); };
-    document.addEventListener('fullscreenchange', leftEdFull);
-    document.addEventListener('webkitfullscreenchange', leftEdFull);
-    edFull.addEventListener('click', e => edFullStep(e.clientX < window.innerWidth / 2 ? -1 : 1));
-    let edTouchX = null, edTouchY = null;
-    edFull.addEventListener('touchstart', e => { edTouchX = e.touches[0].clientX; edTouchY = e.touches[0].clientY; }, { passive: true });
-    edFull.addEventListener('touchend', e => {
-      if (edTouchX === null) return;
-      const dx = e.changedTouches[0].clientX - edTouchX, dy = e.changedTouches[0].clientY - edTouchY;
-      edTouchX = edTouchY = null;
-      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) edFullStep(dx < 0 ? 1 : -1);
-      else if (dy > 80) closeEdFull();
+    $('ed-big-prev').addEventListener('click', () => stepBig(-1));
+    $('ed-big-next').addEventListener('click', () => stepBig(1));
+    $('ed-big-close').addEventListener('click', closeBig);
+    $('ed-big-remove').addEventListener('click', () => {
+      ed.removed.push(...ed.items.splice(bigAt, 1));
+      markDirty();
+      renderEditor();
+      if (!ed.items.length) { closeBig(); return; }
+      bigAt = Math.min(bigAt, ed.items.length - 1);
+      showBig();
     });
+    // A click on the dark area around the photo closes it, like Esc.
+    big.addEventListener('click', e => { if (e.target === big || e.target.classList.contains('pic')) closeBig(); });
     document.addEventListener('keydown', e => {
-      if (!editing() || e.metaKey || e.ctrlKey || e.altKey) return;
-      if (!edFullOpen()) {
-        // F in the grid opens full screen, unless a caption is being typed.
-        const typing = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
-        if ((e.key === 'f' || e.key === 'F') && !typing && $('login').hidden) { e.preventDefault(); openEdFull(); }
-        return;
-      }
-      const n = ed.items.length;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-        e.preventDefault();
-        const d = e.key === 'ArrowRight' ? 1 : -1;
-        if (!e.shiftKey) { edFullStep(d); return; }
-        const to = full.i + d;
-        if (to < 0 || to >= n) return;
-        move(full.i, to);
-        full.i = to;
-        flash(`Moved to ${to + 1} of ${n}`);
-      } else if (e.key === 'x' || e.key === 'X' || e.key === 'Delete' || e.key === 'Backspace') {
-        e.preventDefault();
-        const [p] = ed.items.splice(full.i, 1);
-        ed.removed.push(p);
-        full.undo.push({ p, at: full.i });
-        markDirty();
-        renderEditor();
-        if (!ed.items.length) { closeEdFull(); return; }
-        full.i = Math.min(full.i, ed.items.length - 1);
-        showEdFull();
-        flash('Taken off the page · Z puts it back');
-      } else if (e.key === 'z' || e.key === 'Z') {
-        const last = full.undo.pop();
-        const k = last ? ed.removed.indexOf(last.p) : -1;
-        if (k < 0) return;  // already put back from the grid
-        ed.removed.splice(k, 1);
-        full.i = Math.min(last.at, ed.items.length);
-        ed.items.splice(full.i, 0, last.p);
-        markDirty();
-        renderEditor();
-        showEdFull();
-        flash('Put back');
-      } else if (e.key === 'Escape' || e.key === 'f' || e.key === 'F') {
-        e.preventDefault();
-        closeEdFull();
-      }
+      if (!bigOpen() || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === 'Escape') { e.preventDefault(); closeBig(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); stepBig(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); stepBig(-1); }
     });
 
     function toast(text) {
