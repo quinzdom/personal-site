@@ -1,6 +1,9 @@
 // dcdnt.xyz Worker. Static files are served straight from the assets; wrangler.jsonc sends only
 // these here first:
-//   /          the photos (pictures.html): the photo page is the home page
+//   /          the photos (pictures.html): the photo page is the home page. It and /everything
+//              are served without any photo taken off in admin mode since the last build (in their
+//              search data, plain gallery and link preview)
+//   /?filter=…, /index.html, /index, /tracker/: the tracker's old addresses, redirected to /tracker
 //   /tracker   the tracker, "consume" (index.html, which keeps its name because the weekly
 //              Bookmeter Action and its scripts update it)
 //   /pictures  the photo page's old address: redirects to / (a #admin or #photo stays on)
@@ -8,14 +11,15 @@
 //   /api/*     below
 //
 // Clicks on the photos (counted in the PictureClicks Durable Object, never the owner's):
-//   POST /api/click  {id}  -> counts a click on photo id: once per visitor, photo and day; not
+//   POST /api/click  {id}  -> counts a click on photo id: once per network address (an IPv6 /64),
+//                             photo and day; not
 //                             while signed in to admin mode (the page itself never sends them
 //                             from a browser that has ever signed in)
 //   GET  /api/top          -> {top: [id, ...]}: the most-clicked photos, most first (the page
 //                             doesn't use it now: it shows the photos newest first)
 //   GET  /api/admin/clicks -> {clicks: [{id, n, last}], total}: every count, signed in only
-// No IP address is stored: a visitor is a hash of the day, the IP and the browser, keyed with a
-// secret, kept for two days to stop repeat counting, then deleted.
+// No IP address is stored: a visitor is a hash of the day and the address, keyed with a secret,
+// kept for the day to stop repeat counting, then deleted.
 //
 // /api/admin/* is the photo page's admin mode (dcdnt.xyz/#admin):
 //   POST /api/admin/login     {password}            -> signs in with a 30-day HttpOnly cookie
@@ -40,13 +44,18 @@ const TOP = 6; // how many of the most-clicked photos go at the top of the page
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname === '/') return asset(request, env, '/pictures');
+    // Links to the tracker from before it moved: its views in the query (?filter=movie&view=grid),
+    // its own file, and the address with a slash.
+    if (url.pathname === '/' && TRACKER_PARAMS.some(k => url.searchParams.has(k))) return moved(url, '/tracker');
+    if (['/index.html', '/index', '/tracker/'].includes(url.pathname)) return moved(url, '/tracker');
+    if (url.pathname === '/') return photoPage(request, env, '/pictures');
+    if (url.pathname === '/everything') return photoPage(request, env, '/everything');
     if (url.pathname === '/tracker') return asset(request, env, '/');
-    if (url.pathname === '/pictures') return Response.redirect(new URL('/' + url.search, url).toString(), 301);
+    if (url.pathname === '/pictures') return moved(url, '/');
     if (url.pathname === '/sitemap.xml') return sitemap(env, url);
     if (url.pathname === '/api/click' || url.pathname === '/api/top') {
       try {
-        return url.pathname === '/api/top' ? await top(env) : await click(request, env, url);
+        return url.pathname === '/api/top' ? await top(env, url) : await click(request, env, url);
       } catch (err) {
         console.error('clicks error', err && err.stack || err);
         return url.pathname === '/api/top' ? json({ top: [] }) : new Response(null, { status: 204 });
@@ -86,17 +95,21 @@ async function admin(request, env, url) {
       return json({ error: 'Wrong password.' }, 401);
     }
     const token = await signToken(env, Math.floor(Date.now() / 1000) + MAX_AGE);
-    return json({ ok: true }, 200, { 'Set-Cookie': cookie(token, MAX_AGE) });
+    const res = json({ ok: true });
+    res.headers.append('Set-Cookie', cookie(token, MAX_AGE));
+    res.headers.append('Set-Cookie', OLD_COOKIE_GONE);
+    return res;
   }
   if (route === 'logout' && method === 'POST') {
     const res = json({ ok: true });
     res.headers.append('Set-Cookie', cookie('', 0));
-    res.headers.append('Set-Cookie', `${COOKIE}=; Path=/api/admin; Max-Age=0; HttpOnly; Secure; SameSite=Strict`); // the old path
+    res.headers.append('Set-Cookie', OLD_COOKIE_GONE);
     return res;
   }
   if (route === 'clicks' && method === 'GET') {
     if (!(await signedIn(request, env))) return json({ error: 'Your admin session ended. Sign in again.' }, 401);
-    const clicks = await counter(env).all();
+    const ids = await photoIds(env, url.origin);
+    const clicks = (await counter(env).all()).filter(c => ids.has(c.id)); // only photos still on the page
     return json({ clicks, total: clicks.reduce((sum, c) => sum + c.n, 0) });
   }
   if (route === 'pictures') {
@@ -199,13 +212,16 @@ function cleanLabel(label) {
 // The cookie is "<expiry>.<HMAC of expiry>", keyed by the password itself, so changing the
 // password signs every browser out.
 
+// Any one valid cookie will do: a browser can send two (an old one from before the password
+// changed, at another path).
 async function signedIn(request, env) {
-  const match = (request.headers.get('Cookie') || '').match(new RegExp(`(?:^|;\\s*)${COOKIE}=([^;]+)`));
-  if (!match) return false;
-  const [exp, mac] = match[1].split('.');
-  if (!exp || !mac || !(Number(exp) > Date.now() / 1000)) return false;
-  const expected = await signToken(env, exp);
-  return sameSecret(match[1], expected);
+  const values = [...(request.headers.get('Cookie') || '').matchAll(new RegExp(`(?:^|;\\s*)${COOKIE}=([^;]+)`, 'g'))];
+  for (const [, value] of values) {
+    const [exp, mac] = value.split('.');
+    if (!exp || !mac || !(Number(exp) > Date.now() / 1000)) continue;
+    if (await sameSecret(value, await signToken(env, exp))) return true;
+  }
+  return false;
 }
 
 async function signToken(env, exp) {
@@ -221,6 +237,9 @@ async function signToken(env, exp) {
 function cookie(value, maxAge) {
   return `${COOKIE}=${value}; Path=/api; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Strict`;
 }
+// Cookies set before the click counter had Path=/api/admin. They're cleared on every sign-in and
+// sign-out.
+const OLD_COOKIE_GONE = `${COOKIE}=; Path=/api/admin; Max-Age=0; HttpOnly; Secure; SameSite=Strict`;
 
 // Compares two strings in constant time (hashing first makes the lengths equal).
 async function sameSecret(a, b) {
@@ -233,6 +252,55 @@ async function sha256(text) {
 }
 
 // ---- pages ------------------------------------------------------------------------------------
+
+const TRACKER_PARAMS = ['filter', 'view', 'layout', 'language', 'favorites', 'q'];
+const moved = (url, path) => Response.redirect(new URL(path + url.search, url).toString(), 301);
+
+// The photo pages as built on the Mac list every photo in their search data, plain gallery and
+// link preview. A photo taken off in admin mode since (pictures.json is newer) is left out of
+// them here, so search engines don't keep finding it.
+async function photoPage(request, env, path) {
+  const res = await asset(request, env, path);
+  if (request.method !== 'GET' || !res.ok || !(res.headers.get('Content-Type') || '').includes('text/html')) return res;
+  const photos = await photoList(env, new URL(request.url).origin);
+  if (!photos.length) return res;
+  const ids = new Set(photos.map(p => p.id));
+  const idOf = u => (String(u).match(/images\/ricoh\/([a-z0-9_-]+)\.jpg/) || [])[1];
+  const count = text => text.replace(/^\d+ photographs/, `${photos.length} photographs`);
+  let previewGone = false;
+  return new HTMLRewriter()
+    .on('figure[data-id]', { element(el) { if (!ids.has(el.getAttribute('data-id'))) el.remove(); } })
+    .on('noscript', new WholeText(text => text.replace(/<figure data-id="([a-z0-9_-]+)">[\s\S]*?<\/figure>/g, (f, id) => (ids.has(id) ? f : ''))))
+    .on('script[type="application/ld+json"]', new WholeText(text => {
+      const data = JSON.parse(text);
+      for (const node of data['@graph'] || []) {
+        if (Array.isArray(node.image)) node.image = node.image.filter(im => ids.has(idOf(im.contentUrl)));
+        if (typeof node.description === 'string') node.description = count(node.description);
+      }
+      return JSON.stringify(data).replace(/</g, '\\u003c');
+    }))
+    .on('meta[name="description"], meta[property="og:description"]', { element(el) { el.setAttribute('content', count(el.getAttribute('content') || '')); } })
+    .on('meta[property="og:image"]', { element(el) {
+      if (ids.has(idOf(el.getAttribute('content')))) return;
+      previewGone = true;
+      el.setAttribute('content', `${SITE}/images/ricoh/${photos[0].id}.jpg`);
+    } })
+    .on('meta[property^="og:image:"]', { element(el) { if (previewGone) el.remove(); } })
+    .transform(res);
+}
+
+// Hands a text handler the element's whole text at once (HTMLRewriter gives it in chunks).
+class WholeText {
+  constructor(fix) { this.fix = fix; this.buf = ''; }
+  text(t) {
+    this.buf += t.text;
+    if (!t.lastInTextNode) return t.remove();
+    let out = this.buf;
+    try { out = this.fix(this.buf); } catch (err) { console.error('rewrite', err); }
+    t.replace(out, { html: true });
+    this.buf = '';
+  }
+}
 
 // Serves the asset at `path` for this request (GET or HEAD), as if it had been asked for.
 function asset(request, env, path) {
@@ -263,14 +331,26 @@ async function sitemap(env, url) {
 
 const counter = env => env.CLICKS.get(env.CLICKS.idFromName('pictures'));
 
-let known = { at: 0, ids: new Set() }; // the photos on the page, read from pictures.json each minute
-async function photoIds(env, origin) {
+let known = { at: 0, photos: [], ids: new Set() }; // the photos on the page, from pictures.json each minute
+async function photoList(env, origin) {
   if (Date.now() - known.at > 60_000) {
     const res = await env.ASSETS.fetch(new Request(`${origin}/pictures.json`));
-    const data = res.ok ? await res.json() : { photos: [] };
-    known = { at: Date.now(), ids: new Set((data.photos || []).map(p => p.id)) };
+    const photos = res.ok ? (await res.json()).photos || [] : [];
+    known = { at: Date.now(), photos, ids: new Set(photos.map(p => p.id)) };
   }
+  return known.photos;
+}
+async function photoIds(env, origin) {
+  await photoList(env, origin);
   return known.ids;
+}
+
+// The first half (/64) of an IPv6 address: one home or phone, however its second half changes.
+function ipv6Prefix(ip) {
+  const [head, tail = ''] = ip.toLowerCase().split('::');
+  const a = head ? head.split(':') : [], b = tail ? tail.split(':') : [];
+  const groups = ip.includes('::') ? [...a, ...Array(Math.max(0, 8 - a.length - b.length)).fill('0'), ...b] : a;
+  return groups.slice(0, 4).map(g => g.replace(/^0+(?=.)/, '')).join(':');
 }
 
 async function click(request, env, url) {
@@ -285,7 +365,10 @@ async function click(request, env, url) {
   if (env.ADMIN_PASSWORD && (await signedIn(request, env))) return done; // the owner's clicks don't count
   const day = Math.floor(Date.now() / 86_400_000);
   const ip = request.headers.get('CF-Connecting-IP') || '';
-  const visitor = base64url(new Uint8Array(await sha256(`clicks:${env.ADMIN_PASSWORD || ''}:${day}:${ip}:${ua}`))).slice(0, 22);
+  // A visitor is their network address, not what their browser says it is (any script can change
+  // that), so one address counts at most once per photo per day.
+  const where = ip.includes(':') ? ipv6Prefix(ip) : ip;
+  const visitor = base64url(new Uint8Array(await sha256(`clicks:${env.ADMIN_PASSWORD || ''}:${day}:${where}`))).slice(0, 22);
   await counter(env).click(id, visitor, day);
   return done;
 }
@@ -293,8 +376,11 @@ async function click(request, env, url) {
 // Kept here for 30 seconds, so a busy page doesn't ask the counter on every visit; browsers
 // don't keep it (a list they kept from before the first clicks would hide them).
 let topCache = { at: 0, ids: [] };
-async function top(env) {
-  if (Date.now() - topCache.at > 30_000) topCache = { at: Date.now(), ids: await counter(env).top(TOP) };
+async function top(env, url) {
+  if (Date.now() - topCache.at > 30_000) {
+    const ids = await photoIds(env, url.origin); // only photos still on the page
+    topCache = { at: Date.now(), ids: (await counter(env).top(TOP + 100)).filter(id => ids.has(id)).slice(0, TOP) };
+  }
   return json({ top: topCache.ids });
 }
 
@@ -305,11 +391,18 @@ export class PictureClicks extends DurableObject {
     this.sql = ctx.storage.sql;
     this.sql.exec(`CREATE TABLE IF NOT EXISTS clicks (id TEXT PRIMARY KEY, n INTEGER NOT NULL DEFAULT 0, last INTEGER NOT NULL)`);
     this.sql.exec(`CREATE TABLE IF NOT EXISTS seen (key TEXT PRIMARY KEY, day INTEGER NOT NULL)`);
+    this.sql.exec(`CREATE INDEX IF NOT EXISTS seen_day ON seen(day)`);
+    this.day = null;
   }
 
   // Counts a click unless this visitor already clicked this photo today. True if it counted.
+  // Only today's visitors are kept (yesterday's can't match: the day is in the key), and they're
+  // cleared once a day, by an index, so a click reads a couple of rows, not the whole table.
   click(id, visitor, day) {
-    this.sql.exec('DELETE FROM seen WHERE day < ?', day - 1);
+    if (this.day !== day) {
+      this.sql.exec('DELETE FROM seen WHERE day < ?', day);
+      this.day = day;
+    }
     const key = `${day}:${visitor}:${id}`;
     if (this.sql.exec('SELECT 1 FROM seen WHERE key = ?', key).toArray().length) return false;
     this.sql.exec('INSERT INTO seen (key, day) VALUES (?, ?)', key, day);

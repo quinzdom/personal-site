@@ -368,6 +368,14 @@ async function generateHtml(books, movies, bookCovers, movieCovers, archive) {
   <meta property="og:description" content="Books to read next, picked from what I&#x27;ve read and liked.">
   <meta property="og:url" content="https://dcdnt.xyz/recommendations">
   <meta name="twitter:card" content="summary">
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8XQHBWBCK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-G8XQHBWBCK');
+  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
