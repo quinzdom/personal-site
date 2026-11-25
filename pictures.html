@@ -54,19 +54,22 @@
     .hd nav a:hover { color: var(--pink); }
 
     .wrap { max-width: 2000px; margin: 0 auto; padding: 0 var(--side) var(--side); }
-    .row { display: flex; gap: var(--g); margin: 0 0 var(--g); }
-    .row:last-child { margin-bottom: 0; }
-    .row.loose { width: var(--fill); }
-    .work { flex: var(--r) 1 0%; min-width: 0; margin: 0; }
+    /* Mondrian-like blocks (laid out by layoutGrid): columns of photos side by side, each
+       photo as wide as --w says, its height from its own shape, so nothing is cropped. */
+    .block { display: flex; gap: var(--g); margin: 0 0 var(--g); }
+    .block:last-child { margin-bottom: 0; }
+    .col { display: flex; flex-direction: column; gap: var(--g); }
+    .work { width: var(--w, 100%); margin: 0; }
     .ph { display: block; background: var(--ph); cursor: zoom-in; }
     .ph img { display: block; width: 100%; height: auto; aspect-ratio: var(--r); object-fit: cover; transition: opacity 0.35s ease; }
     .ph.ld img { opacity: 0; }
     .ph:hover img { opacity: 0.82; }
     .note { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
     @media (max-width: 768px) {
-      .row { flex-wrap: wrap; row-gap: var(--g); }
-      .row.loose { width: auto; }
-      .work { flex: var(--r) 1 calc(var(--r) * 150px); max-width: calc(var(--r) * 62vh); }
+      /* Phones: one photo per line. */
+      .block, .col { display: block; }
+      .work { width: auto; margin: 0 0 var(--g); }
+      .block:last-child .col:last-child .work:last-child { margin-bottom: 0; }
     }
 
     .viewer { position: fixed; inset: 0; z-index: 10; display: none; flex-direction: column; background: var(--bg); }
@@ -235,7 +238,6 @@
   </div>
 
   <script>
-    const ROW_TARGET = 3.0;  // summed width/height ratios per grid row: two landscape photos (about two per row)
     const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const $ = id => document.getElementById(id);
     const root = document.documentElement;
@@ -253,61 +255,104 @@
     const month = p => { const [y, m] = (p.month || '').split('-'); return m ? `${MONTHS[Number(m) - 1]} ${y}` : ''; };
     const captionOf = p => [p.label, month(p)].filter(Boolean).join(' · ');
 
-    // ---- the grid: justified rows; a row closes when the next photo would take its summed
-    // ratio further from ROW_TARGET, and a short last row isn't stretched.
+    // ---- the grid: Mondrian-like blocks. A big photo with two small ones stacked beside it
+    // (left, then right), with plain pairs in between: three sizes, about two photos across
+    // anywhere, and no cropping. layoutGrid works out each block's size so every photo keeps
+    // its own shape exactly, gaps included. Phones get one photo per line.
+    const PATTERN = ['big-left', 'pair', 'big-right', 'pair'];
+    const portrait = i => ratio(photos[i]) < 1;
+
+    // Blocks of columns of photo indexes, in page order (left to right, top to bottom).
+    function planBlocks() {
+      const blocks = [];
+      for (let i = 0, n = 0; i < photos.length; n++) {
+        let kind = PATTERN[n % PATTERN.length];
+        const big = kind === 'big-left' ? i : i + 2;
+        // A portrait as the big one would make a very tall block: it goes in a pair instead.
+        if (kind !== 'pair' && (photos.length - i < 3 || portrait(big))) kind = 'pair';
+        if (kind === 'big-left') { blocks.push([[i], [i + 1, i + 2]]); i += 3; }
+        else if (kind === 'big-right') { blocks.push([[i, i + 1], [i + 2]]); i += 3; }
+        else if (photos.length - i >= 2) { blocks.push([[i], [i + 1]]); i += 2; }
+        else { blocks.push([[i]]); i += 1; }  // a lone last photo: shown the size of one of a pair
+      }
+      return blocks;
+    }
+
+    // Sizes every block to the grid's width. A block of columns j, each holding k_j photos whose
+    // 1/ratio add up to S_j, at height H: column j is (H - (k_j - 1)g) / S_j wide, and the
+    // widths plus the gaps fill the row, which gives H.
+    function layoutGrid() {
+      const W = grid.clientWidth;
+      if (!W) return;
+      const g = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--g')) || 5;
+      const narrow = matchMedia('(max-width: 768px)').matches;
+      for (const block of grid.children) {
+        const cols = [...block.children].map(c => [...c.children]);
+        const S = cols.map(fs => fs.reduce((s, f) => s + 1 / Number(f.dataset.r), 0));
+        const k = cols.map(fs => fs.length);
+        let widths;
+        if (cols.length === 1 && k[0] === 1) {
+          widths = [(W - g) / 2];
+        } else {
+          const C2 = S.reduce((s, x) => s + 1 / x, 0);
+          const C1 = -(cols.length - 1) * g + g * k.reduce((s, kj, j) => s + (kj - 1) / S[j], 0);
+          const H = (W + C1) / C2;
+          widths = S.map((Sj, j) => (H - (k[j] - 1) * g) / Sj);
+        }
+        cols.forEach((fs, j) => fs.forEach(f => {
+          f.style.setProperty('--w', `${widths[j].toFixed(2)}px`);
+          f.querySelector('img').sizes = narrow ? '100vw' : `${Math.ceil(widths[j])}px`;
+        }));
+      }
+    }
+    let laidOut = 0;
+    new ResizeObserver(() => { cancelAnimationFrame(laidOut); laidOut = requestAnimationFrame(layoutGrid); }).observe(grid);
+
     function renderGrid() {
-      const rows = [];
-      let row = [], total = 0;
-      photos.forEach((p, i) => {
-        if (row.length && Math.abs(total - ROW_TARGET) < Math.abs(total + ratio(p) - ROW_TARGET)) {
-          rows.push([row, total]);
-          row = [];
-          total = 0;
-        }
-        row.push(i);
-        total += ratio(p);
-      });
-      if (row.length) rows.push([row, total]);
-      grid.replaceChildren(...rows.map(([members, total], n) => {
+      const blocks = planBlocks();
+      grid.replaceChildren(...blocks.map((columns, n) => {
         const div = document.createElement('div');
-        div.className = 'row';
-        if (n === rows.length - 1 && total < ROW_TARGET * 0.75) {
-          div.classList.add('loose');
-          div.style.setProperty('--fill', `${(total / ROW_TARGET * 100).toFixed(2)}%`);
-        }
-        for (const i of members) {
-          const p = photos[i];
-          const fig = document.createElement('figure');
-          fig.className = 'work';
-          fig.style.setProperty('--r', ratio(p).toFixed(4));
-          const a = document.createElement('a');
-          a.className = 'ph ld';
-          a.href = `#${i + 1}`;
-          // Straight to full screen: requested here, while the click still counts as one.
-          a.addEventListener('click', e => {
-            if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-            pushed = true;
-            directFull = true;
-            setImmersive(true);
-          });
-          const im = document.createElement('img');
-          if (n > 1) im.loading = 'lazy';  // the first two rows load right away
-          im.decoding = 'async';
-          im.width = p.w;
-          im.height = p.h;
-          im.alt = captionOf(p);
-          im.sizes = '(max-width: 768px) 100vw, 34vw';
-          im.srcset = srcset(p);
-          im.src = file(p, '-sm');
-          const done = () => a.classList.remove('ld');  // fade in once loaded
-          im.addEventListener('load', done);
-          im.addEventListener('error', done);
-          a.append(im);
-          fig.append(a);
-          div.append(fig);
+        div.className = 'block';
+        for (const members of columns) {
+          const col = document.createElement('div');
+          col.className = 'col';
+          for (const i of members) {
+            const p = photos[i];
+            const fig = document.createElement('figure');
+            fig.className = 'work';
+            fig.dataset.r = ratio(p).toFixed(6);
+            fig.style.setProperty('--r', ratio(p).toFixed(4));
+            const a = document.createElement('a');
+            a.className = 'ph ld';
+            a.href = `#${i + 1}`;
+            // Straight to full screen: requested here, while the click still counts as one.
+            a.addEventListener('click', e => {
+              if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              pushed = true;
+              directFull = true;
+              setImmersive(true);
+            });
+            const im = document.createElement('img');
+            if (n > 1) im.loading = 'lazy';  // the first two blocks load right away
+            im.decoding = 'async';
+            im.width = p.w;
+            im.height = p.h;
+            im.alt = captionOf(p);
+            im.sizes = '(max-width: 768px) 100vw, 50vw';
+            im.srcset = srcset(p);
+            im.src = file(p, '-sm');
+            const done = () => a.classList.remove('ld');  // fade in once loaded
+            im.addEventListener('load', done);
+            im.addEventListener('error', done);
+            a.append(im);
+            fig.append(a);
+            col.append(fig);
+          }
+          div.append(col);
         }
         return div;
       }));
+      layoutGrid();
       tiles = [...grid.querySelectorAll('.ph')];
       thumbButtons = photos.map((p, i) => {
         const b = document.createElement('button');
