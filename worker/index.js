@@ -4,6 +4,7 @@
 //   /tracker   the tracker, "consume" (index.html, which keeps its name because the weekly
 //              Bookmeter Action and its scripts update it)
 //   /pictures  the photo page's old address: redirects to / (a #admin or #photo stays on)
+//   /sitemap.xml  every public page, and every photo for image search (from pictures.json)
 //   /api/*     below
 //
 // Clicks on the photos (counted in the PictureClicks Durable Object, never the owner's):
@@ -42,6 +43,7 @@ export default {
     if (url.pathname === '/') return asset(request, env, '/pictures');
     if (url.pathname === '/tracker') return asset(request, env, '/');
     if (url.pathname === '/pictures') return Response.redirect(new URL('/' + url.search, url).toString(), 301);
+    if (url.pathname === '/sitemap.xml') return sitemap(env, url);
     if (url.pathname === '/api/click' || url.pathname === '/api/top') {
       try {
         return url.pathname === '/api/top' ? await top(env) : await click(request, env, url);
@@ -237,6 +239,24 @@ function asset(request, env, path) {
   const url = new URL(request.url);
   url.pathname = path;
   return env.ASSETS.fetch(new Request(url.toString(), request));
+}
+
+// The public pages, by the address each answers at without a redirect. The private ones (the daily
+// log, /log, goals) stay out, as they stay noindex.
+const SITE = 'https://dcdnt.xyz';
+const PAGES = ['/', '/tracker', '/stats', '/listening', '/anime', '/manga', '/tv', '/recommendations',
+  '/reading-list', '/index-grouped-by-month', '/roadtrip/'];
+
+async function sitemap(env, url) {
+  const res = await env.ASSETS.fetch(new Request(`${url.origin}/pictures.json`));
+  const photos = res.ok ? (await res.json()).photos || [] : [];
+  const images = photos.map(p => `<image:image><image:loc>${SITE}/images/ricoh/${p.id}.jpg</image:loc></image:image>`).join('');
+  const urls = PAGES.map(path => `<url><loc>${SITE}${path}</loc>${path === '/' ? images : ''}</url>`).join('\n');
+  return new Response(
+    '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n' +
+    `${urls}\n</urlset>\n`,
+    { headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' } });
 }
 
 // ---- clicks -----------------------------------------------------------------------------------

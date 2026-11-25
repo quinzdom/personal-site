@@ -359,7 +359,15 @@ async function generateHtml(books, movies, bookCovers, movieCovers, archive) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>recommendations</title>
+  <title>recommendations — dcdnt</title>
+  <meta name="description" content="Books to read next, picked from what I&#x27;ve read and liked.">
+  <link rel="canonical" href="https://dcdnt.xyz/recommendations">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="dcdnt">
+  <meta property="og:title" content="recommendations — dcdnt">
+  <meta property="og:description" content="Books to read next, picked from what I&#x27;ve read and liked.">
+  <meta property="og:url" content="https://dcdnt.xyz/recommendations">
+  <meta name="twitter:card" content="summary">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
