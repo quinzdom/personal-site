@@ -2,6 +2,26 @@
  "version": 1,
  "photos": [
   {
+   "id": "r0004412",
+   "label": "",
+   "month": "2025-12",
+   "place": "Bucharest",
+   "w": 1000,
+   "h": 667,
+   "tw": 240,
+   "th": 160
+  },
+  {
+   "id": "r0004370",
+   "label": "",
+   "month": "2025-12",
+   "place": "Bucharest",
+   "w": 1000,
+   "h": 667,
+   "tw": 240,
+   "th": 160
+  },
+  {
    "id": "r0004368",
    "label": "",
    "month": "2025-12",
