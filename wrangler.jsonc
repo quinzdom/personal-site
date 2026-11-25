@@ -13,8 +13,12 @@
   "assets": {
     "directory": ".",
     "binding": "ASSETS",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/api/*", "/", "/tracker", "/pictures"]
   },
+  "durable_objects": {
+    "bindings": [{ "name": "CLICKS", "class_name": "PictureClicks" }]
+  },
+  "migrations": [{ "tag": "clicks-v1", "new_sqlite_classes": ["PictureClicks"] }],
   // Where admin mode commits pictures.json. Secrets (ADMIN_PASSWORD, GITHUB_TOKEN) are set in
   // the Cloudflare dashboard, never here.
   "vars": {

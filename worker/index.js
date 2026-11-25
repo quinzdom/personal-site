@@ -1,7 +1,22 @@
-// dcdnt.xyz Worker. Static files are served straight from the assets (wrangler.jsonc sends only
-// /api/* here first), so the rest of the site works exactly as a plain static site.
+// dcdnt.xyz Worker. Static files are served straight from the assets; wrangler.jsonc sends only
+// these here first:
+//   /          the photos (pictures.html): the photo page is the home page
+//   /tracker   the tracker, "consume" (index.html, which keeps its name because the weekly
+//              Bookmeter Action and its scripts update it)
+//   /pictures  the photo page's old address: redirects to / (a #admin or #photo stays on)
+//   /api/*     below
 //
-// /api/admin/* is the photo page's admin mode (dcdnt.xyz/pictures#admin):
+// Clicks on the photos (counted in the PictureClicks Durable Object, never the owner's):
+//   POST /api/click  {id}  -> counts a click on photo id: once per visitor, photo and day; not
+//                             while signed in to admin mode (the page itself never sends them
+//                             from a browser that has ever signed in)
+//   GET  /api/top          -> {top: [id, ...]}: the most-clicked photos, most first (the page
+//                             puts them at the top and shuffles the rest)
+//   GET  /api/admin/clicks -> {clicks: [{id, n, last}], total}: every count, signed in only
+// No IP address is stored: a visitor is a hash of the day, the IP and the browser, keyed with a
+// secret, kept for two days to stop repeat counting, then deleted.
+//
+// /api/admin/* is the photo page's admin mode (dcdnt.xyz/#admin):
 //   POST /api/admin/login     {password}            -> signs in with a 30-day HttpOnly cookie
 //   POST /api/admin/logout                          -> signs out
 //   GET  /api/admin/me                              -> {admin: true|false}
@@ -14,13 +29,27 @@
 //   GITHUB_TOKEN    a fine-grained GitHub token for this repo with Contents: read and write
 // Admin mode stays off until ADMIN_PASSWORD is set.
 
+import { DurableObject } from 'cloudflare:workers';
+
 const COOKIE = 'pictures_admin';
 const MAX_AGE = 60 * 60 * 24 * 30; // seconds: stay signed in for 30 days
 const LABEL_MAX = 120;
+const TOP = 6; // how many of the most-clicked photos go at the top of the page
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === '/') return asset(request, env, '/pictures');
+    if (url.pathname === '/tracker') return asset(request, env, '/');
+    if (url.pathname === '/pictures') return Response.redirect(new URL('/' + url.search, url).toString(), 301);
+    if (url.pathname === '/api/click' || url.pathname === '/api/top') {
+      try {
+        return url.pathname === '/api/top' ? await top(env) : await click(request, env, url);
+      } catch (err) {
+        console.error('clicks error', err && err.stack || err);
+        return url.pathname === '/api/top' ? json({ top: [] }) : new Response(null, { status: 204 });
+      }
+    }
     if (url.pathname.startsWith('/api/admin/')) {
       try {
         return await admin(request, env, url);
@@ -58,7 +87,15 @@ async function admin(request, env, url) {
     return json({ ok: true }, 200, { 'Set-Cookie': cookie(token, MAX_AGE) });
   }
   if (route === 'logout' && method === 'POST') {
-    return json({ ok: true }, 200, { 'Set-Cookie': cookie('', 0) });
+    const res = json({ ok: true });
+    res.headers.append('Set-Cookie', cookie('', 0));
+    res.headers.append('Set-Cookie', `${COOKIE}=; Path=/api/admin; Max-Age=0; HttpOnly; Secure; SameSite=Strict`); // the old path
+    return res;
+  }
+  if (route === 'clicks' && method === 'GET') {
+    if (!(await signedIn(request, env))) return json({ error: 'Your admin session ended. Sign in again.' }, 401);
+    const clicks = await counter(env).all();
+    return json({ clicks, total: clicks.reduce((sum, c) => sum + c.n, 0) });
   }
   if (route === 'pictures') {
     if (!(await signedIn(request, env))) return json({ error: 'Your admin session ended. Sign in again.' }, 401);
@@ -177,8 +214,10 @@ async function signToken(env, exp) {
   return `${exp}.${base64url(new Uint8Array(mac))}`;
 }
 
+// Path=/api, so the click counter can tell the owner's clicks too (cookies from before this
+// change have Path=/api/admin and still work for admin mode).
 function cookie(value, maxAge) {
-  return `${COOKIE}=${value}; Path=/api/admin; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Strict`;
+  return `${COOKIE}=${value}; Path=/api; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Strict`;
 }
 
 // Compares two strings in constant time (hashing first makes the lengths equal).
@@ -189,6 +228,84 @@ async function sameSecret(a, b) {
 
 async function sha256(text) {
   return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+}
+
+// ---- pages ------------------------------------------------------------------------------------
+
+// Serves the asset at `path` for this request (GET or HEAD), as if it had been asked for.
+function asset(request, env, path) {
+  const url = new URL(request.url);
+  url.pathname = path;
+  return env.ASSETS.fetch(new Request(url.toString(), request));
+}
+
+// ---- clicks -----------------------------------------------------------------------------------
+
+const counter = env => env.CLICKS.get(env.CLICKS.idFromName('pictures'));
+
+let known = { at: 0, ids: new Set() }; // the photos on the page, read from pictures.json each minute
+async function photoIds(env, origin) {
+  if (Date.now() - known.at > 60_000) {
+    const res = await env.ASSETS.fetch(new Request(`${origin}/pictures.json`));
+    const data = res.ok ? await res.json() : { photos: [] };
+    known = { at: Date.now(), ids: new Set((data.photos || []).map(p => p.id)) };
+  }
+  return known.ids;
+}
+
+async function click(request, env, url) {
+  const done = new Response(null, { status: 204 });
+  if (request.method !== 'POST') return json({ error: 'Not found.' }, 404);
+  if (request.headers.get('Origin') !== url.origin) return done; // only the site's own page counts
+  const ua = request.headers.get('User-Agent') || '';
+  if (!ua || /bot|crawl|spider|slurp|preview|headless|lighthouse/i.test(ua)) return done;
+  const body = await request.json().catch(() => ({}));
+  const id = typeof body.id === 'string' ? body.id : '';
+  if (!/^[a-z0-9_-]{1,80}$/.test(id) || !(await photoIds(env, url.origin)).has(id)) return done;
+  if (env.ADMIN_PASSWORD && (await signedIn(request, env))) return done; // the owner's clicks don't count
+  const day = Math.floor(Date.now() / 86_400_000);
+  const ip = request.headers.get('CF-Connecting-IP') || '';
+  const visitor = base64url(new Uint8Array(await sha256(`clicks:${env.ADMIN_PASSWORD || ''}:${day}:${ip}:${ua}`))).slice(0, 22);
+  await counter(env).click(id, visitor, day);
+  return done;
+}
+
+// Kept here for 30 seconds, so a busy page doesn't ask the counter on every visit; browsers
+// don't keep it (a list they kept from before the first clicks would hide them).
+let topCache = { at: 0, ids: [] };
+async function top(env) {
+  if (Date.now() - topCache.at > 30_000) topCache = { at: Date.now(), ids: await counter(env).top(TOP) };
+  return json({ top: topCache.ids });
+}
+
+// One instance ("pictures") holds every count, in its own SQLite database.
+export class PictureClicks extends DurableObject {
+  constructor(ctx, env) {
+    super(ctx, env);
+    this.sql = ctx.storage.sql;
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS clicks (id TEXT PRIMARY KEY, n INTEGER NOT NULL DEFAULT 0, last INTEGER NOT NULL)`);
+    this.sql.exec(`CREATE TABLE IF NOT EXISTS seen (key TEXT PRIMARY KEY, day INTEGER NOT NULL)`);
+  }
+
+  // Counts a click unless this visitor already clicked this photo today. True if it counted.
+  click(id, visitor, day) {
+    this.sql.exec('DELETE FROM seen WHERE day < ?', day - 1);
+    const key = `${day}:${visitor}:${id}`;
+    if (this.sql.exec('SELECT 1 FROM seen WHERE key = ?', key).toArray().length) return false;
+    this.sql.exec('INSERT INTO seen (key, day) VALUES (?, ?)', key, day);
+    this.sql.exec(
+      'INSERT INTO clicks (id, n, last) VALUES (?, 1, ?) ON CONFLICT(id) DO UPDATE SET n = n + 1, last = excluded.last',
+      id, Date.now());
+    return true;
+  }
+
+  top(k) {
+    return this.sql.exec('SELECT id FROM clicks ORDER BY n DESC, last DESC LIMIT ?', k).toArray().map(r => r.id);
+  }
+
+  all() {
+    return this.sql.exec('SELECT id, n, last FROM clicks ORDER BY n DESC, last DESC').toArray();
+  }
 }
 
 // ---- helpers ----------------------------------------------------------------------------------

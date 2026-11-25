@@ -100,6 +100,10 @@
     :root.immersive .bar, :root.immersive .thumbs { display: none; }
     :root.immersive .frame { padding: 0; }
     :root.immersive.idle, :root.immersive.idle * { cursor: none !important; }
+    /* Full screen's first two seconds: a quiet note on how to move between photos. */
+    .fs-hint { position: fixed; left: 50%; bottom: 28px; z-index: 12; transform: translateX(-50%); padding: 7px 14px; border-radius: 999px; background: rgba(0, 0, 0, 0.45); color: rgba(255, 255, 255, 0.78); font-weight: 400; font-size: 0.85rem; letter-spacing: 0.02em; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.5s ease; }
+    .fs-hint.show { opacity: 1; transition-duration: 0.25s; }
+    :root:not(.immersive) .fs-hint { display: none; }
     /* Phones without real full screen get a small way out, since the bar is hidden. */
     .fs-close { display: none; position: absolute; top: 10px; right: 10px; z-index: 3; width: 40px; height: 40px; padding: 12px; border: 0; background: rgba(0, 0, 0, 0.4); border-radius: 50%; }
     .fs-close svg { width: 16px; height: 16px; stroke: #fff; stroke-width: 1.5; fill: none; }
@@ -154,13 +158,13 @@
     .ed-big .acts { flex: none; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 8px 22px; padding: 14px var(--side) 18px; }
     .ed-big .acts .what { color: var(--muted); }
     .toast { position: fixed; left: 50%; bottom: 24px; z-index: 30; transform: translateX(-50%); max-width: calc(100% - 2 * var(--side)); padding: 10px 16px; background: var(--ink); color: var(--bg); font-weight: 400; font-size: 0.95rem; }
-    @media (prefers-reduced-motion: reduce) { .ph img, .frame img, .thumbs button { transition: none; } }
+    @media (prefers-reduced-motion: reduce) { .ph img, .frame img, .thumbs button, .fs-hint { transition: none; } }
   </style>
 </head>
 <body>
   <header class="hd">
     <a class="mark" href="pictures">Pictures</a>
-    <nav><a id="edit-link" href="#admin" hidden>Edit</a><a href="index.html">Home</a></nav>
+    <nav><a id="edit-link" href="#admin" hidden>Edit</a><a href="/tracker">Tracker</a></nav>
   </header>
 
   <main class="wrap" id="wrap">
@@ -178,7 +182,8 @@
       <button class="text-btn" id="ed-cancel" type="button">Cancel</button>
       <button class="text-btn" id="ed-logout" type="button">Log out</button>
     </div>
-    <p class="ed-hint">Click a photo to see it big. Drag photos to reorder them, or use the arrows. Type a caption under a photo; the month is added for you. × takes a photo off the page. New photos still come from the Photo Manager on the Mac. Saving updates the live page in about a minute.</p>
+    <p class="ed-hint">Click a photo to see it big. The page itself puts the most-clicked photos first and shuffles the rest, so the order here only sets the order of this list. Drag photos to reorder them, or use the arrows. Type a caption under a photo; the month is added for you. × takes a photo off the page. New photos still come from the Photo Manager on the Mac. Saving updates the live page in about a minute.</p>
+    <p class="ed-hint" id="ed-clicks"></p>
     <div class="ed-grid" id="ed-grid"></div>
     <div class="ed-removed" id="ed-removed-wrap" hidden>
       <h2>Taken off the page</h2>
@@ -211,6 +216,7 @@
   </div>
 
   <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Photo" tabindex="-1">
+    <div class="fs-hint" id="fs-hint" aria-hidden="true"></div>
     <div class="frame">
       <img id="photo" alt="" sizes="100vw">
       <button class="hit prev" data-step="-1" aria-label="Previous photo" tabindex="-1"></button>
@@ -324,10 +330,11 @@
             fig.style.setProperty('--r', ratio(p).toFixed(4));
             const a = document.createElement('a');
             a.className = 'ph ld';
-            a.href = `#${i + 1}`;
+            a.href = `#${p.id}`;
             // Straight to full screen: requested here, while the click still counts as one.
             a.addEventListener('click', e => {
               if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              countClick(p.id);
               pushed = true;
               directFull = true;
               setImmersive(true);
@@ -387,7 +394,7 @@
       const p = photos[want];
       caption.textContent = captionOf(p);
       count.textContent = `${want + 1} / ${photos.length}`;
-      history.replaceState(history.state, '', '#' + (want + 1));
+      history.replaceState(history.state, '', '#' + p.id);
       if (previous >= 0) thumbButtons[previous]?.removeAttribute('aria-current');
       thumbButtons[want].setAttribute('aria-current', 'true');
       thumbButtons[want].scrollIntoView({ block: 'nearest', inline: 'center', behavior: smooth ? 'smooth' : 'auto' });
@@ -432,8 +439,12 @@
     function sync() {
       if (location.hash === '#admin') { closeViewer(); enterAdmin(); return; }
       if (editing()) leaveEditor();
-      const n = parseInt(location.hash.slice(1), 10);
-      if (n >= 1 && n <= photos.length) openViewer(n - 1); else closeViewer();
+      // #<photo id> opens that photo; #<number> (older links) the photo at that place.
+      const h = decodeURIComponent(location.hash.slice(1));
+      let at = photos.findIndex(p => p.id === h);
+      const n = Number(h);
+      if (at < 0 && Number.isInteger(n) && n >= 1 && n <= photos.length) at = n - 1;
+      if (at >= 0) openViewer(at); else closeViewer();
     }
 
     // Full screen shows nothing but the photo: the browser's real full screen where it exists,
@@ -446,8 +457,20 @@
     // goes back to the grid. (F from there shows the viewer with its thumbnails instead.)
     let directFull = false;
     const exitFull = () => (directFull && isOpen() ? leave() : setImmersive(false));
+    // Shown for a moment each time full screen starts, then gone: full screen is the photo only.
+    const fsHint = $('fs-hint');
+    let fsHintTimer = 0;
+    function flashHint() {
+      fsHint.textContent = matchMedia('(hover: none)').matches ? 'Tap the sides to change photos' : '← → to change photos';
+      fsHint.classList.add('show');
+      clearTimeout(fsHintTimer);
+      fsHintTimer = setTimeout(() => fsHint.classList.remove('show'), 2200);
+    }
     function setImmersive(on) {
+      const was = root.classList.contains('immersive');
       root.classList.toggle('immersive', on);
+      if (on && !was) flashHint();
+      if (!on) { clearTimeout(fsHintTimer); fsHint.classList.remove('show'); }
       fullButton.setAttribute('aria-label', on ? 'Exit full screen (Esc)' : 'Full screen (F)');
       fullButton.title = fullButton.getAttribute('aria-label');
       if (on && !fsElement()) {
@@ -496,14 +519,28 @@
       else if (dy > 80) root.classList.contains('immersive') ? exitFull() : leave();  // swipe down
     });
 
-    // ---- admin mode (dcdnt.xyz/pictures#admin). The Worker checks the password and keeps an
+    // ---- admin mode (dcdnt.xyz/#admin). The Worker checks the password and keeps an
     // HttpOnly session cookie; this page only remembers that it may show the Edit link.
     const ADMIN_HINT = 'pictures-admin';
     const hint = {
       get() { try { return localStorage.getItem(ADMIN_HINT) === '1'; } catch { return false; } },
       set(on) { try { on ? localStorage.setItem(ADMIN_HINT, '1') : localStorage.removeItem(ADMIN_HINT); } catch {} },
     };
-    const ed = { sha: null, items: [], removed: [], dirty: false, busy: false, dragFrom: null, scroll: 0 };
+    const ed = { sha: null, items: [], removed: [], dirty: false, busy: false, dragFrom: null, scroll: 0, clicks: null };
+
+    // Clicks on the grid's photos are counted on the server (worker/index.js), but never the
+    // owner's: a browser that has ever signed in to admin mode doesn't send them.
+    const OWNER = 'dcdnt-owner';
+    const owner = {
+      get() { try { return localStorage.getItem(OWNER) === '1'; } catch { return false; } },
+      set() { try { localStorage.setItem(OWNER, '1'); } catch {} },
+    };
+    if (hint.get()) owner.set();  // signed in here before this was added
+    function countClick(id) {
+      if (owner.get()) return;
+      fetch('/api/click', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id }) }).catch(() => {});
+    }
     const editing = () => !$('editor').hidden;
 
     async function api(path, options = {}) {
@@ -527,7 +564,7 @@
       if (editing()) return;
       try {
         const me = await api('me');
-        if (me.admin) openEditor(); else showLogin();
+        if (me.admin) { owner.set(); openEditor(); } else showLogin();
       } catch (err) {
         showLogin(err.message);
       }
@@ -553,6 +590,7 @@
       try {
         await api('login', { method: 'POST', body: JSON.stringify({ password: $('pw').value }) });
         hint.set(true);
+        owner.set();
         $('edit-link').hidden = false;
         $('login').hidden = true;
         // Signed out mid-edit (the session ran out): keep the unsaved changes on screen.
@@ -587,9 +625,32 @@
         ed.items = res.data.photos.map(p => ({ ...p }));
         renderEditor();
         status('');
+        loadClicks();
       } catch (err) {
         if (err.status === 401) { hint.set(false); leaveEditor(); showLogin(err.message); return; }
         status(err.message, true);
+      }
+    }
+
+    // How many times each photo was clicked (not counting the owner), under its card, and the
+    // most-clicked ones in a line above.
+    async function loadClicks() {
+      try {
+        const res = await api('clicks');
+        ed.clicks = new Map(res.clicks.map(c => [c.id, c.n]));
+        // Named by their numbers here (and captions, where they have one).
+        const top = res.clicks.slice(0, 5).map(c => {
+          const i = ed.items.findIndex(q => q.id === c.id);
+          if (i < 0) return null;
+          const label = ed.items[i].label ? ` “${ed.items[i].label}”` : '';
+          return `no. ${i + 1}${label} (${c.n})`;
+        }).filter(Boolean);
+        $('ed-clicks').textContent = res.total
+          ? `Clicks by visitors, not you: ${res.total} in all. Most clicked: ${top.join(', ')}. The page puts the most-clicked photos at the top and shuffles the rest on every visit.`
+          : 'No clicks by visitors yet. The page puts the most-clicked photos at the top and shuffles the rest on every visit.';
+        renderEditor();
+      } catch {
+        $('ed-clicks').textContent = '';
       }
     }
 
@@ -644,7 +705,9 @@
         input.addEventListener('blur', () => { card.draggable = true; });
         const when = document.createElement('span');
         when.className = 'when';
-        when.textContent = month(p);
+        const clicks = ed.clicks ? ed.clicks.get(p.id) || 0 : null;
+        when.textContent = [month(p), clicks === null ? '' : `${clicks} click${clicks === 1 ? '' : 's'}`].filter(Boolean).join(' · ');
+        when.classList.toggle('hot', clicks > 0);
         const tools = document.createElement('div');
         tools.className = 'tools';
         const button = (label, title, cls, action) => {
@@ -723,7 +786,7 @@
         });
         ed.sha = res.sha;
         ed.dirty = false;
-        photos = res.data.photos;
+        photos = arrange(res.data.photos, topIds);
         renderGrid();
         leaveEditor();
         toast('Saved. The live page updates in about a minute.');
@@ -821,9 +884,25 @@
       }
       sync();
     });
-    fetch('pictures.json', { cache: 'no-cache' })
-      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(data => { photos = data.photos || []; renderGrid(); sync(); })
+    // The order on the page: the most-clicked photos first (/api/top), then the rest shuffled,
+    // anew on every visit. Without the counts (offline, a preview on the Mac), it's all shuffled.
+    let topIds = [];
+    function arrange(list, top) {
+      const byId = new Map(list.map(p => [p.id, p]));
+      const first = top.map(id => byId.get(id)).filter(Boolean);
+      const rest = list.filter(p => !top.includes(p.id));
+      for (let i = rest.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rest[i], rest[j]] = [rest[j], rest[i]];
+      }
+      return [...first, ...rest];
+    }
+    const topRequest = fetch('/api/top').then(r => (r.ok ? r.json() : { top: [] })).then(d => d.top || [], () => []);
+    Promise.all([
+      fetch('pictures.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
+      Promise.race([topRequest, new Promise(r => setTimeout(() => r([]), 1500))]),
+    ])
+      .then(([data, top]) => { topIds = top; photos = arrange(data.photos || [], top); renderGrid(); sync(); })
       .catch(() => {
         const p = document.createElement('p');
         p.className = 'note';
