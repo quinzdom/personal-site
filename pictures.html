@@ -72,6 +72,11 @@
     .block:last-child { margin-bottom: 0; }
     .col { display: flex; flex-direction: column; gap: var(--g); }
     .work { width: var(--w, 100%); margin: 0; }
+    .crow { display: flex; gap: var(--g); }
+    .cover img { display: block; width: 100%; height: auto; aspect-ratio: var(--r); object-fit: cover; background: var(--ph); }
+    .more { margin: 22px 0 0; }
+    .more a { color: var(--muted); }
+    .more a:hover { color: var(--pink); }
     .ph { display: block; background: var(--ph); cursor: zoom-in; }
     .ph img { display: block; width: 100%; height: auto; aspect-ratio: var(--r); object-fit: cover; transition: opacity 0.35s ease; }
     .ph.ld img { opacity: 0; }
@@ -86,6 +91,8 @@
       /* Phones: one photo per line. */
       .block, .col { display: block; }
       .work { width: auto; margin: 0 0 var(--g); }
+      .crow { margin: 0 0 var(--g); }
+      .crow .cover { flex: 1 1 0; margin: 0; }
       .block:last-child .col:last-child .work:last-child { margin-bottom: 0; }
     }
 
@@ -180,8 +187,8 @@
 </head>
 <body>
   <header class="hd">
-    <a class="mark" href="pictures">Pictures</a>
-    <nav><a id="edit-link" href="#admin" hidden>Edit</a><a href="/tracker">Tracker</a></nav>
+    <a class="mark" href="/">Pictures</a>
+    <nav><a id="edit-link" href="#admin" hidden>Edit</a><a href="/everything">Everything</a><a href="/tracker">Tracker</a></nav>
   </header>
 
   <main class="wrap" id="wrap">
@@ -261,6 +268,7 @@
   </div>
 
   <script>
+    const MODE = 'pictures';  // 'everything' on /everything: the same grid with book and movie covers
     const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const $ = id => document.getElementById(id);
     const root = document.documentElement;
@@ -281,102 +289,169 @@
 
     // ---- the grid: Mondrian-like blocks. A big photo with two small ones stacked beside it
     // (left, then right), with plain pairs in between: three sizes, about two photos across
-    // anywhere, and no cropping. layoutGrid works out each block's size so every photo keeps
-    // its own shape exactly, gaps included. Phones get one photo per line.
+    // anywhere, and no cropping. On /everything a big photo has a block of book and movie covers
+    // beside it instead (two rows of three, newest first). layoutGrid works out each block's
+    // size so every photo keeps its own shape exactly, gaps included. Phones get one photo per
+    // line (and covers three to a line).
     const PATTERN = ['big-left', 'pair', 'big-right', 'pair'];
     const portrait = i => ratio(photos[i]) < 1;
+    const COVER_RATIO = 2 / 3, COVERS_PER_ROW = 3, COVER_ROWS = 2;
 
-    // Blocks of columns of photo indexes, in page order (left to right, top to bottom).
+    // The tracker's books and movies (items_data.js, loaded on /everything only), newest first.
+    function recentCovers() {
+      if (MODE !== 'everything' || typeof items === 'undefined') return [];
+      return items.filter(it => it.cover).sort((x, y) => (y.date_read || '').localeCompare(x.date_read || ''));
+    }
+
+    // Blocks of columns of rows of tiles, in page order (left to right, top to bottom). A tile is
+    // {i: photo index} or {cover: item}; a row holds one photo or a few covers side by side.
     function planBlocks() {
       const blocks = [];
+      const photo = i => [[{ i }]];  // a column holding one photo
+      const covers = recentCovers();
+      let c = 0;
+      const coversLeft = () => covers.length - c >= COVERS_PER_ROW * COVER_ROWS;
+      const takeCovers = () => Array.from({ length: COVER_ROWS }, () => covers.slice(c, c += COVERS_PER_ROW).map(item => ({ cover: item })));
       for (let i = 0, n = 0; i < photos.length; n++) {
         let kind = PATTERN[n % PATTERN.length];
+        if (kind !== 'pair' && covers.length) {
+          if (coversLeft() && !portrait(i)) {
+            const big = photo(i), side = takeCovers();
+            blocks.push(kind === 'big-left' ? [big, side] : [side, big]);
+            i += 1;
+            continue;
+          }
+          kind = 'pair';
+        }
         const big = kind === 'big-left' ? i : i + 2;
         // A portrait as the big one would make a very tall block: it goes in a pair instead.
         if (kind !== 'pair' && (photos.length - i < 3 || portrait(big))) kind = 'pair';
-        if (kind === 'big-left') { blocks.push([[i], [i + 1, i + 2]]); i += 3; }
-        else if (kind === 'big-right') { blocks.push([[i, i + 1], [i + 2]]); i += 3; }
-        else if (photos.length - i >= 2) { blocks.push([[i], [i + 1]]); i += 2; }
-        else { blocks.push([[i]]); i += 1; }  // a lone last photo: shown the size of one of a pair
+        if (kind === 'big-left') { blocks.push([photo(i), [[{ i: i + 1 }], [{ i: i + 2 }]]]); i += 3; }
+        else if (kind === 'big-right') { blocks.push([[[{ i }], [{ i: i + 1 }]], photo(i + 2)]); i += 3; }
+        else if (photos.length - i >= 2) { blocks.push([photo(i), photo(i + 1)]); i += 2; }
+        else { blocks.push([photo(i)]); i += 1; }  // a lone last photo: shown the size of one of a pair
       }
       return blocks;
     }
 
-    // Sizes every block to the grid's width. A block of columns j, each holding k_j photos whose
-    // 1/ratio add up to S_j, at height H: column j is (H - (k_j - 1)g) / S_j wide, and the
-    // widths plus the gaps fill the row, which gives H.
+    // Sizes every block to the grid's width. Column j holds rows i, each with n_i tiles whose
+    // ratios add up to R_i; at width w a row is (w - (n_i - 1)g) / R_i tall. So with
+    // S_j = Σ 1/R_i, K_j = Σ (n_i - 1)/R_i and m_j rows, a column H tall is
+    // w_j = (H - (m_j - 1)g + g·K_j) / S_j wide, and the widths plus the gaps filling the row
+    // give H.
     function layoutGrid() {
       const W = grid.clientWidth;
       if (!W) return;
       const g = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--g')) || 5;
       const narrow = matchMedia('(max-width: 768px)').matches;
-      for (const block of grid.children) {
-        const cols = [...block.children].map(c => [...c.children]);
-        const S = cols.map(fs => fs.reduce((s, f) => s + 1 / Number(f.dataset.r), 0));
-        const k = cols.map(fs => fs.length);
+      for (const block of grid.querySelectorAll('.block')) {
+        const cols = [...block.children].map(col => [...col.children].map(row => row.classList.contains('crow') ? [...row.children] : [row]));
+        const R = cols.map(rows => rows.map(fs => fs.reduce((s, f) => s + Number(f.dataset.r), 0)));
+        const S = R.map(rs => rs.reduce((s, x) => s + 1 / x, 0));
+        const K = cols.map((rows, j) => rows.reduce((s, fs, k) => s + (fs.length - 1) / R[j][k], 0));
+        const M = cols.map(rows => rows.length);
         let widths;
-        if (cols.length === 1 && k[0] === 1) {
+        if (cols.length === 1 && M[0] === 1 && cols[0][0].length === 1) {
           widths = [(W - g) / 2];
         } else {
-          const C2 = S.reduce((s, x) => s + 1 / x, 0);
-          const C1 = -(cols.length - 1) * g + g * k.reduce((s, kj, j) => s + (kj - 1) / S[j], 0);
-          const H = (W + C1) / C2;
-          widths = S.map((Sj, j) => (H - (k[j] - 1) * g) / Sj);
+          const off = S.reduce((s, Sj, j) => s + (g * K[j] - (M[j] - 1) * g) / Sj, 0);
+          const H = (W - (cols.length - 1) * g - off) / S.reduce((s, x) => s + 1 / x, 0);
+          widths = S.map((Sj, j) => (H - (M[j] - 1) * g + g * K[j]) / Sj);
         }
-        cols.forEach((fs, j) => fs.forEach(f => {
-          f.style.setProperty('--w', `${widths[j].toFixed(2)}px`);
-          f.querySelector('img').sizes = narrow ? '100vw' : `${Math.ceil(widths[j])}px`;
+        cols.forEach((rows, j) => rows.forEach((fs, k) => {
+          const h = (widths[j] - (fs.length - 1) * g) / R[j][k];  // this row's height
+          for (const f of fs) {
+            const w = h * Number(f.dataset.r);
+            f.style.setProperty('--w', `${w.toFixed(2)}px`);
+            if (f.classList.contains('photo')) f.querySelector('img').sizes = narrow ? '100vw' : `${Math.ceil(w)}px`;
+          }
         }));
       }
     }
     let laidOut = 0;
     new ResizeObserver(() => { cancelAnimationFrame(laidOut); laidOut = requestAnimationFrame(layoutGrid); }).observe(grid);
 
+    function photoTile(i, eager) {
+      const p = photos[i];
+      const fig = document.createElement('figure');
+      fig.className = 'work photo';
+      fig.dataset.r = ratio(p).toFixed(6);
+      fig.style.setProperty('--r', ratio(p).toFixed(4));
+      const a = document.createElement('a');
+      a.className = 'ph ld';
+      a.href = `#${p.id}`;
+      // Straight to full screen: requested here, while the click still counts as one.
+      a.addEventListener('click', e => {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        countClick(p.id);
+        pushed = true;
+        directFull = true;
+        setImmersive(true);
+      });
+      const im = document.createElement('img');
+      if (!eager) im.loading = 'lazy';
+      im.decoding = 'async';
+      im.width = p.w;
+      im.height = p.h;
+      im.alt = altOf(p);
+      im.sizes = '(max-width: 768px) 100vw, 50vw';
+      im.srcset = srcset(p);
+      im.src = file(p, '-sm');
+      const done = () => a.classList.remove('ld');  // fade in once loaded
+      im.addEventListener('load', done);
+      im.addEventListener('error', done);
+      a.append(im);
+      fig.append(a);
+      return fig;
+    }
+
+    // A book or movie cover: its title on hover, cropped a little to 2:3 so the rows line up.
+    function coverTile(it, eager) {
+      const fig = document.createElement('figure');
+      fig.className = 'work cover';
+      fig.dataset.r = COVER_RATIO.toFixed(6);
+      fig.style.setProperty('--r', COVER_RATIO.toFixed(4));
+      const movie = it.type === 'movie';
+      const what = movie ? `${it.title} (${it.author})` : `${it.title}, by ${it.author}`;
+      fig.title = what;
+      const im = document.createElement('img');
+      if (!eager) im.loading = 'lazy';
+      im.decoding = 'async';
+      im.alt = `${movie ? 'Movie' : 'Book'}: ${what}`;
+      im.src = it.cover;
+      fig.append(im);
+      return fig;
+    }
+
     function renderGrid() {
       const blocks = planBlocks();
-      grid.replaceChildren(...blocks.map((columns, n) => {
+      const els = blocks.map((columns, n) => {
         const div = document.createElement('div');
         div.className = 'block';
-        for (const members of columns) {
+        for (const rows of columns) {
           const col = document.createElement('div');
           col.className = 'col';
-          for (const i of members) {
-            const p = photos[i];
-            const fig = document.createElement('figure');
-            fig.className = 'work';
-            fig.dataset.r = ratio(p).toFixed(6);
-            fig.style.setProperty('--r', ratio(p).toFixed(4));
-            const a = document.createElement('a');
-            a.className = 'ph ld';
-            a.href = `#${p.id}`;
-            // Straight to full screen: requested here, while the click still counts as one.
-            a.addEventListener('click', e => {
-              if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-              countClick(p.id);
-              pushed = true;
-              directFull = true;
-              setImmersive(true);
-            });
-            const im = document.createElement('img');
-            if (n > 1) im.loading = 'lazy';  // the first two blocks load right away
-            im.decoding = 'async';
-            im.width = p.w;
-            im.height = p.h;
-            im.alt = altOf(p);
-            im.sizes = '(max-width: 768px) 100vw, 50vw';
-            im.srcset = srcset(p);
-            im.src = file(p, '-sm');
-            const done = () => a.classList.remove('ld');  // fade in once loaded
-            im.addEventListener('load', done);
-            im.addEventListener('error', done);
-            a.append(im);
-            fig.append(a);
-            col.append(fig);
+          for (const row of rows) {
+            if (row[0].cover) {
+              const crow = document.createElement('div');
+              crow.className = 'crow';
+              crow.append(...row.map(t => coverTile(t.cover, n < 2)));
+              col.append(crow);
+            } else {
+              col.append(photoTile(row[0].i, n < 2));  // the first two blocks load right away
+            }
           }
           div.append(col);
         }
         return div;
-      }));
+      });
+      if (MODE === 'everything') {
+        const more = document.createElement('p');
+        more.className = 'note more';
+        more.innerHTML = '<a href="/tracker">Every book and movie →</a>';
+        els.push(more);
+      }
+      grid.replaceChildren(...els);
       layoutGrid();
       tiles = [...grid.querySelectorAll('.ph')];
       thumbButtons = photos.map((p, i) => {
@@ -455,7 +530,10 @@
     }
 
     function sync() {
-      if (location.hash === '#admin') { closeViewer(); enterAdmin(); return; }
+      if (location.hash === '#admin') {
+        if (MODE === 'everything') { location.replace('/#admin'); return; }  // the editor lives on /
+        closeViewer(); enterAdmin(); return;
+      }
       if (editing()) leaveEditor();
       // #<photo id> opens that photo; #<number> (older links) the photo at that place.
       const h = decodeURIComponent(location.hash.slice(1));
@@ -894,7 +972,7 @@
     }
 
     // ---- start: draw the grid from pictures.json, which admin saves keep up to date.
-    $('edit-link').hidden = !hint.get();
+    $('edit-link').hidden = MODE === 'everything' || !hint.get();
     window.addEventListener('hashchange', () => {
       if (editing() && location.hash !== '#admin' && ed.dirty && !confirm('Discard your changes?')) {
         history.replaceState(null, '', '#admin');

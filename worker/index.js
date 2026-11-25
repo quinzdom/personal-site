@@ -244,7 +244,7 @@ function asset(request, env, path) {
 // The public pages, by the address each answers at without a redirect. The private ones (the daily
 // log, /log, goals) stay out, as they stay noindex.
 const SITE = 'https://dcdnt.xyz';
-const PAGES = ['/', '/tracker', '/stats', '/listening', '/anime', '/manga', '/tv', '/recommendations',
+const PAGES = ['/', '/everything', '/tracker', '/stats', '/listening', '/anime', '/manga', '/tv', '/recommendations',
   '/reading-list', '/index-grouped-by-month', '/roadtrip/'];
 
 async function sitemap(env, url) {

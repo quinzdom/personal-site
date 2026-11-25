@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>everything — dcdnt</title>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8XQHBWBCK"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-G8XQHBWBCK');
+  </script>
+  <meta name="description" content="Photographs, and the covers of the books and movies I&#x27;ve read and watched lately.">
+  <link rel="canonical" href="https://dcdnt.xyz/everything">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="dcdnt">
+  <meta property="og:title" content="everything — dcdnt">
+  <meta property="og:description" content="Photographs, and the covers of the books and movies I&#x27;ve read and watched lately.">
+  <meta property="og:url" content="https://dcdnt.xyz/everything">
+  <meta property="og:image" content="https://dcdnt.xyz/images/ricoh/r0003943.jpg">
+  <meta property="og:image:width" content="2000">
+  <meta property="og:image:height" content="1333">
+  <meta property="og:image:alt" content="Istanbul, December 2025">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#000000">
+  <link rel="preload" href="pictures.json" as="fetch" crossorigin>
+  <style>
+    /* Founders Grotesk (Klim) is licensed to the owner; no font file lives in this public repo. */
+    @font-face { font-family: 'Founders Grotesk'; font-weight: 300; font-display: swap;
+      src: local('Founders Grotesk Light'), local('FoundersGrotesk-Light'); }
+    @font-face { font-family: 'Founders Grotesk'; font-weight: 400; font-display: swap;
+      src: local('Founders Grotesk Regular'), local('FoundersGrotesk-Regular'),
+           url('https://list.dcdnt.xyz/fonts/founders-grotesk-regular.woff2') format('woff2'); }
+    @font-face { font-family: 'Founders Grotesk'; font-weight: 700; font-display: swap;
+      src: local('Founders Grotesk Bold'), local('FoundersGrotesk-Bold'),
+           url('https://list.dcdnt.xyz/fonts/founders-grotesk-bold.woff2') format('woff2'); }
+    :root {
+      color-scheme: dark;
+      --bg: #000; --ink: #f2efe9; --muted: #8f8a82; --dim: #6b675f; --ph: #0d0d0d; --line: #2a2826;
+      --pink: #ff2d87;  /* hot pink, this page's one colour: the wordmark, hovers and the current photo */
+      --side: 30px;  /* the margin all round the page, phones included */
+      --g: 5px;  /* between photos, side by side and row to row */
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
+    body {
+      margin: 0; background: var(--bg); color: var(--ink);
+      font-family: 'Founders Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-weight: 300; font-size: 17px; line-height: 1.4; -webkit-font-smoothing: antialiased;
+    }
+    body.viewing { overflow: hidden; }
+    a { color: inherit; text-decoration: none; }
+    [hidden] { display: none !important; }
+    .sr { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; font: inherit; }
+    a:focus-visible, button:focus-visible, input:focus-visible { outline: 1px solid var(--ink); outline-offset: 3px; }
+
+    /* The wordmark and Home sit inside the top margin: a band as tall as the side margins, with their
+       capitals centred in it (10px above them, about 10px below), so the photos start --side from the top. */
+    .hd { max-width: 2000px; margin: 0 auto; height: var(--side); display: flex; align-items: baseline; justify-content: space-between; gap: 24px; padding: 10px var(--side) 0; line-height: 1; }
+    .mark { color: var(--pink); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.04em; text-transform: uppercase; }
+    .hd nav { display: flex; gap: 18px; }
+    .hd nav a { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
+    .hd nav a:hover { color: var(--pink); }
+
+    .wrap { max-width: 2000px; margin: 0 auto; padding: 0 var(--side) var(--side); }
+    /* Mondrian-like blocks (laid out by layoutGrid): columns of photos side by side, each
+       photo as wide as --w says, its height from its own shape, so nothing is cropped. */
+    .block { display: flex; gap: var(--g); margin: 0 0 var(--g); }
+    .block:last-child { margin-bottom: 0; }
+    .col { display: flex; flex-direction: column; gap: var(--g); }
+    .work { width: var(--w, 100%); margin: 0; }
+    .crow { display: flex; gap: var(--g); }
+    .cover img { display: block; width: 100%; height: auto; aspect-ratio: var(--r); object-fit: cover; background: var(--ph); }
+    .more { margin: 22px 0 0; }
+    .more a { color: var(--muted); }
+    .more a:hover { color: var(--pink); }
+    .ph { display: block; background: var(--ph); cursor: zoom-in; }
+    .ph img { display: block; width: 100%; height: auto; aspect-ratio: var(--r); object-fit: cover; transition: opacity 0.35s ease; }
+    .ph.ld img { opacity: 0; }
+    .ph:hover img { opacity: 0.82; }
+    .note { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
+    /* Without JavaScript (and for search engines that don't run it): every photo, in order. */
+    .nojs { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--g); }
+    .nojs figure { margin: 0; }
+    .nojs img { display: block; width: 100%; height: auto; }
+    .nojs figcaption { padding: 6px 0 10px; color: var(--muted); font-weight: 400; font-size: 0.85rem; }
+    @media (max-width: 768px) {
+      /* Phones: one photo per line. */
+      .block, .col { display: block; }
+      .work { width: auto; margin: 0 0 var(--g); }
+      .crow { margin: 0 0 var(--g); }
+      .crow .cover { flex: 1 1 0; margin: 0; }
+      .block:last-child .col:last-child .work:last-child { margin-bottom: 0; }
+    }
+
+    .viewer { position: fixed; inset: 0; z-index: 10; display: none; flex-direction: column; background: var(--bg); }
+    .viewer.open { display: flex; }
+    .frame { position: relative; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 24px var(--side) 0; }
+    .frame img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; transition: opacity 0.18s ease; }
+    .frame img.fading { opacity: 0.15; }
+    .hit { position: absolute; top: 0; bottom: 0; width: 50%; border: 0; background: transparent; -webkit-tap-highlight-color: transparent; }
+    .hit.prev { left: 0; cursor: w-resize; }
+    .hit.next { right: 0; cursor: e-resize; }
+    /* No focus outlines on the viewer itself or its two half-photo click areas: the browser
+       drew them as a blue frame round the screen and a white line down the middle. Keys still
+       work (arrows, F, Esc), and the bar's buttons keep their outline. */
+    .viewer:focus, .viewer:focus-visible, .hit:focus, .hit:focus-visible { outline: none; }
+    .bar { flex: none; display: flex; align-items: center; justify-content: center; gap: 14px; padding: 14px var(--side) 0; color: var(--muted); font-size: 15px; }
+    .bar button { display: inline-flex; align-items: center; background: none; border: 0; color: var(--muted); font: inherit; font-weight: 400; padding: 6px 10px; cursor: pointer; }
+    .bar button:hover { color: var(--pink); }
+    .bar svg { display: block; width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.4; }
+    .count { color: var(--dim); font-variant-numeric: tabular-nums; }
+    .full .exit, :root.immersive .full .enter { display: none; }
+    :root.immersive .full .exit { display: block; }
+    .thumbs { flex: none; overflow-x: auto; padding: 12px var(--side) 18px; scrollbar-width: thin; scrollbar-color: #222 transparent; }
+    .thumbs-row { display: flex; gap: 6px; width: max-content; margin: 0 auto; }
+    .thumbs button { flex: none; padding: 0 0 5px; border: 0; background: none; cursor: pointer; opacity: 0.38; transition: opacity 0.15s ease; box-shadow: inset 0 -1px 0 transparent; }
+    .thumbs button:hover, .thumbs button:focus-visible { opacity: 0.8; }
+    .thumbs button[aria-current="true"] { opacity: 1; box-shadow: inset 0 -1px 0 var(--pink); }
+    .thumbs img { display: block; height: 52px; width: auto; background: var(--ph); }
+    :root.immersive .bar, :root.immersive .thumbs { display: none; }
+    :root.immersive .frame { padding: 0; }
+    :root.immersive.idle, :root.immersive.idle * { cursor: none !important; }
+    /* Full screen's first two seconds: a quiet note on how to move between photos. */
+    .fs-hint { position: fixed; left: 50%; bottom: 28px; z-index: 12; transform: translateX(-50%); padding: 7px 14px; border-radius: 999px; background: rgba(0, 0, 0, 0.45); color: rgba(255, 255, 255, 0.78); font-weight: 400; font-size: 0.85rem; letter-spacing: 0.02em; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.5s ease; }
+    .fs-hint.show { opacity: 1; transition-duration: 0.25s; }
+    :root:not(.immersive) .fs-hint { display: none; }
+    /* Phones without real full screen get a small way out, since the bar is hidden. */
+    .fs-close { display: none; position: absolute; top: 10px; right: 10px; z-index: 3; width: 40px; height: 40px; padding: 12px; border: 0; background: rgba(0, 0, 0, 0.4); border-radius: 50%; }
+    .fs-close svg { width: 16px; height: 16px; stroke: #fff; stroke-width: 1.5; fill: none; }
+    :root.immersive.no-fs .fs-close { display: block; }
+    @media (max-width: 640px) {
+      .frame { padding: 12px 8px 0; }
+      .bar { gap: 6px; font-size: 14px; }
+      .thumbs img { height: 42px; }
+    }
+
+    /* Admin mode: underlines, no boxes; hot pink only for the one action that matters (Save). */
+    .text-btn { background: none; border: 0; padding: 4px 0; color: var(--muted); font: inherit; font-weight: 400; font-size: 0.95rem; cursor: pointer; }
+    .text-btn:hover { color: var(--ink); }
+    .text-btn.primary { color: var(--pink); }
+    .text-btn:disabled { opacity: 0.4; cursor: default; }
+    .field { width: 100%; background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; color: var(--ink); font: inherit; font-weight: 400; padding: 4px 0; }
+    .field:focus { outline: none; border-bottom-color: var(--ink); }
+    .login { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.92); padding: var(--side); }
+    .login form { width: min(320px, 100%); display: grid; gap: 14px; }
+    .login label { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
+    .login .actions { display: flex; gap: 22px; }
+    .msg { min-height: 1.4em; margin: 0; color: var(--pink); font-weight: 400; font-size: 0.95rem; }
+    .editor { max-width: 2000px; margin: 0 auto; padding: 0 var(--side) var(--side); }
+    .ed-bar { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 22px; padding: 12px 0; background: var(--bg); border-bottom: 1px solid var(--line); }
+    .ed-title { font-weight: 400; }
+    .ed-count, .ed-hint { color: var(--muted); font-weight: 400; font-size: 0.95rem; }
+    .ed-status { flex: 1; min-width: 12ch; color: var(--muted); font-weight: 400; font-size: 0.95rem; }
+    .ed-status.error { color: var(--pink); }
+    .ed-hint { margin: 14px 0 18px; max-width: 70ch; }
+    .ed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 22px 14px; }
+    .ed-grid.small { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+    .card { position: relative; cursor: grab; }
+    .card.dragging { opacity: 0.3; }
+    .card.before::before, .card.after::after { content: ''; position: absolute; top: 0; bottom: 0; width: 2px; background: var(--pink); }
+    .card.before::before { left: -8px; }
+    .card.after::after { right: -8px; }
+    .card img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: contain; background: var(--ph); pointer-events: none; }
+    .card .num { position: absolute; top: 6px; left: 6px; padding: 0 5px; background: rgba(0, 0, 0, 0.7); color: var(--ink); font-size: 0.75rem; font-weight: 400; }
+    .card .when { display: block; margin-top: 2px; color: var(--dim); font-size: 0.8rem; font-weight: 400; }
+    .card .tools { display: flex; gap: 14px; margin-top: 4px; }
+    .card .tools .text-btn { font-size: 1rem; padding: 0 2px; }
+    .card .tools .remove:hover { color: var(--pink); }
+    .gone { padding: 0; border: 0; background: none; cursor: pointer; opacity: 0.5; }
+    .gone:hover { opacity: 1; }
+    .gone img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; background: var(--ph); }
+    .ed-removed h2 { margin: 44px 0 0; font-weight: 400; font-size: 0.95rem; }
+    /* Admin: a photo clicked in the editor opens big, with what can be done about it underneath. */
+    .ed-big { position: fixed; inset: 0; z-index: 25; display: flex; flex-direction: column; background: rgba(0, 0, 0, 0.95); }
+    .ed-big[hidden] { display: none; }
+    .ed-big .pic { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 18px var(--side) 0; }
+    .ed-big img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .ed-big .acts { flex: none; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 8px 22px; padding: 14px var(--side) 18px; }
+    .ed-big .acts .what { color: var(--muted); }
+    .toast { position: fixed; left: 50%; bottom: 24px; z-index: 30; transform: translateX(-50%); max-width: calc(100% - 2 * var(--side)); padding: 10px 16px; background: var(--ink); color: var(--bg); font-weight: 400; font-size: 0.95rem; }
+    @media (prefers-reduced-motion: reduce) { .ph img, .frame img, .thumbs button, .fs-hint { transition: none; } }
+  </style>
+</head>
+<body>
+  <header class="hd">
+    <a class="mark" href="/everything">Everything</a>
+    <nav><a id="edit-link" href="#admin" hidden>Edit</a><a href="/">Pictures</a><a href="/tracker">Tracker</a></nav>
+  </header>
+
+  <main class="wrap" id="wrap">
+    <h1 class="sr">Pictures</h1>
+    <div id="grid"></div>
+    <noscript><div class="nojs"><figure><a href="images/ricoh/r0003943.jpg"><img src="images/ricoh/r0003943-sm.jpg" alt="Istanbul, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Istanbul, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003941.jpg"><img src="images/ricoh/r0003941-sm.jpg" alt="Istanbul, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Istanbul, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003938.jpg"><img src="images/ricoh/r0003938-sm.jpg" alt="Istanbul, December 2025" width="667" height="1000" loading="lazy"></a><figcaption>Istanbul, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003895.jpg"><img src="images/ricoh/r0003895-sm.jpg" alt="Istanbul, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Istanbul, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003812.jpg"><img src="images/ricoh/r0003812-sm.jpg" alt="Istanbul, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Istanbul, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003785.jpg"><img src="images/ricoh/r0003785-sm.jpg" alt="Istanbul, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Istanbul, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003780.jpg"><img src="images/ricoh/r0003780-sm.jpg" alt="Istanbul, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Istanbul, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003756.jpg"><img src="images/ricoh/r0003756-sm.jpg" alt="Istanbul, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Istanbul, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003753.jpg"><img src="images/ricoh/r0003753-sm.jpg" alt="Istanbul, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Istanbul, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003751.jpg"><img src="images/ricoh/r0003751-sm.jpg" alt="Istanbul, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Istanbul, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003736.jpg"><img src="images/ricoh/r0003736-sm.jpg" alt="Istanbul, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Istanbul, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003730.jpg"><img src="images/ricoh/r0003730-sm.jpg" alt="Istanbul, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Istanbul, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003720.jpg"><img src="images/ricoh/r0003720-sm.jpg" alt="Istanbul, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Istanbul, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003685.jpg"><img src="images/ricoh/r0003685-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003651.jpg"><img src="images/ricoh/r0003651-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003588.jpg"><img src="images/ricoh/r0003588-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003451.jpg"><img src="images/ricoh/r0003451-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003433.jpg"><img src="images/ricoh/r0003433-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003404.jpg"><img src="images/ricoh/r0003404-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003401.jpg"><img src="images/ricoh/r0003401-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003397.jpg"><img src="images/ricoh/r0003397-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003369.jpg"><img src="images/ricoh/r0003369-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003368.jpg"><img src="images/ricoh/r0003368-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003300.jpg"><img src="images/ricoh/r0003300-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003259.jpg"><img src="images/ricoh/r0003259-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003240.jpg"><img src="images/ricoh/r0003240-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003215.jpg"><img src="images/ricoh/r0003215-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003166.jpg"><img src="images/ricoh/r0003166-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003165.jpg"><img src="images/ricoh/r0003165-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003163.jpg"><img src="images/ricoh/r0003163-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003162.jpg"><img src="images/ricoh/r0003162-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003160.jpg"><img src="images/ricoh/r0003160-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003158.jpg"><img src="images/ricoh/r0003158-sm.jpg" alt="Nepal, December 2025" width="667" height="1000" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003155.jpg"><img src="images/ricoh/r0003155-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003140.jpg"><img src="images/ricoh/r0003140-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003120.jpg"><img src="images/ricoh/r0003120-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003115.jpg"><img src="images/ricoh/r0003115-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003107.jpg"><img src="images/ricoh/r0003107-sm.jpg" alt="Nepal, December 2025" width="1000" height="667" loading="lazy"></a><figcaption>Nepal, December 2025</figcaption></figure><figure><a href="images/ricoh/r0003088.jpg"><img src="images/ricoh/r0003088-sm.jpg" alt="Kabukicho host signs, November 2025" width="1000" height="667" loading="lazy"></a><figcaption>Kabukicho host signs, November 2025</figcaption></figure><figure><a href="images/ricoh/r0003087.jpg"><img src="images/ricoh/r0003087-sm.jpg" alt="Kabukicho host signs, November 2025" width="1000" height="667" loading="lazy"></a><figcaption>Kabukicho host signs, November 2025</figcaption></figure><figure><a href="images/ricoh/r0000048-2.jpg"><img src="images/ricoh/r0000048-2-sm.jpg" alt="June 2025" width="1000" height="667" loading="lazy"></a><figcaption>June 2025</figcaption></figure><figure><a href="images/ricoh/r0000026.jpg"><img src="images/ricoh/r0000026-sm.jpg" alt="June 2025" width="1000" height="667" loading="lazy"></a><figcaption>June 2025</figcaption></figure></div></noscript>
+  </main>
+
+  <section class="editor" id="editor" aria-label="Arrange the photos" hidden>
+    <div class="ed-bar">
+      <span class="ed-title">Editing</span>
+      <span class="ed-count" id="ed-count"></span>
+      <span class="ed-status" id="ed-status" role="status"></span>
+      <button class="text-btn primary" id="ed-save" type="button">Save</button>
+      <button class="text-btn" id="ed-cancel" type="button">Cancel</button>
+      <button class="text-btn" id="ed-logout" type="button">Log out</button>
+    </div>
+    <p class="ed-hint">Click a photo to see it big. Drag photos to reorder them, or use the arrows. Type a caption under a photo; the month is added for you. × takes a photo off the page. New photos still come from the Photo Manager on the Mac. Saving updates the live page in about a minute.</p>
+    <p class="ed-hint" id="ed-clicks"></p>
+    <div class="ed-grid" id="ed-grid"></div>
+    <div class="ed-removed" id="ed-removed-wrap" hidden>
+      <h2>Taken off the page</h2>
+      <p class="ed-hint">Click one to put it back at the end.</p>
+      <div class="ed-grid small" id="ed-removed"></div>
+    </div>
+  </section>
+
+  <div class="login" id="login" hidden>
+    <form id="login-form" autocomplete="on">
+      <label for="pw">Admin password</label>
+      <input class="field" id="pw" name="password" type="password" autocomplete="current-password" required>
+      <div class="actions">
+        <button class="text-btn primary" type="submit">Enter</button>
+        <button class="text-btn" type="button" id="login-cancel">Cancel</button>
+      </div>
+      <p class="msg" id="login-msg" role="alert"></p>
+    </form>
+  </div>
+
+  <div class="ed-big" id="ed-big" role="dialog" aria-modal="true" aria-label="Photo" hidden>
+    <div class="pic"><img id="ed-big-img" alt=""></div>
+    <div class="acts">
+      <button class="text-btn" id="ed-big-prev" type="button" aria-label="Previous photo">&larr;</button>
+      <span class="what" id="ed-big-what"></span>
+      <button class="text-btn" id="ed-big-next" type="button" aria-label="Next photo">&rarr;</button>
+      <button class="text-btn remove" id="ed-big-remove" type="button">Take off the page</button>
+      <button class="text-btn" id="ed-big-close" type="button">Close</button>
+    </div>
+  </div>
+
+  <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Photo" tabindex="-1">
+    <div class="fs-hint" id="fs-hint" aria-hidden="true"></div>
+    <div class="frame">
+      <img id="photo" alt="" sizes="100vw">
+      <button class="hit prev" data-step="-1" aria-label="Previous photo" tabindex="-1"></button>
+      <button class="hit next" data-step="1" aria-label="Next photo" tabindex="-1"></button>
+      <button class="fs-close" id="fs-close" aria-label="Back to all photos">
+        <svg viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14"/></svg>
+      </button>
+    </div>
+    <div class="bar">
+      <button data-step="-1" aria-label="Previous photo">&larr;</button>
+      <span id="caption"></span>
+      <span class="count" id="count"></span>
+      <button data-step="1" aria-label="Next photo">&rarr;</button>
+      <button class="full" id="full" aria-label="Full screen (F)" title="Full screen (F)">
+        <svg class="enter" viewBox="0 0 16 16"><path d="M1 5.5V1h4.5M10.5 1H15v4.5M15 10.5V15h-4.5M5.5 15H1v-4.5"/></svg>
+        <svg class="exit" viewBox="0 0 16 16"><path d="M5.5 1v4.5H1M15 5.5h-4.5V1M10.5 15v-4.5H15M1 10.5h4.5V15"/></svg>
+      </button>
+      <button id="close" aria-label="Back to all photos (Esc)" title="Back to all photos (Esc)">
+        <svg viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14"/></svg>
+      </button>
+    </div>
+    <nav class="thumbs" aria-label="All photos">
+      <div class="thumbs-row" id="thumbs"></div>
+    </nav>
+  </div>
+
+  <script src="/items_data.js"></script>
+  <script>
+    const MODE = 'everything';  // 'everything' on /everything: the same grid with book and movie covers
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const $ = id => document.getElementById(id);
+    const root = document.documentElement;
+    const grid = $('grid'), viewer = $('viewer'), img = $('photo'), caption = $('caption'), count = $('count');
+    const thumbsRow = $('thumbs');
+    let photos = [];       // pictures.json's photos, in page order
+    let tiles = [];
+    let thumbButtons = [];
+    let current = -1;
+    let pushed = false;    // true when the viewer was opened from the grid, so Back returns to it
+
+    const file = (p, size) => `images/ricoh/${p.id}${size}.jpg`;
+    const srcset = p => `${file(p, '-sm')} 1000w, ${file(p, '')} 2000w`;
+    const ratio = p => p.w / p.h;
+    const month = p => { const [y, m] = (p.month || '').split('-'); return m ? `${MONTHS[Number(m) - 1]} ${y}` : ''; };
+    const captionOf = p => [p.label, month(p)].filter(Boolean).join(' · ');
+    const altOf = p => [...new Set([p.label, p.about].filter(Boolean)), month(p)].filter(Boolean).join(', ') || 'Photograph';
+
+    // ---- the grid: Mondrian-like blocks. A big photo with two small ones stacked beside it
+    // (left, then right), with plain pairs in between: three sizes, about two photos across
+    // anywhere, and no cropping. On /everything a big photo has a block of book and movie covers
+    // beside it instead (two rows of three, newest first). layoutGrid works out each block's
+    // size so every photo keeps its own shape exactly, gaps included. Phones get one photo per
+    // line (and covers three to a line).
+    const PATTERN = ['big-left', 'pair', 'big-right', 'pair'];
+    const portrait = i => ratio(photos[i]) < 1;
+    const COVER_RATIO = 2 / 3, COVERS_PER_ROW = 3, COVER_ROWS = 2;
+
+    // The tracker's books and movies (items_data.js, loaded on /everything only), newest first.
+    function recentCovers() {
+      if (MODE !== 'everything' || typeof items === 'undefined') return [];
+      return items.filter(it => it.cover).sort((x, y) => (y.date_read || '').localeCompare(x.date_read || ''));
+    }
+
+    // Blocks of columns of rows of tiles, in page order (left to right, top to bottom). A tile is
+    // {i: photo index} or {cover: item}; a row holds one photo or a few covers side by side.
+    function planBlocks() {
+      const blocks = [];
+      const photo = i => [[{ i }]];  // a column holding one photo
+      const covers = recentCovers();
+      let c = 0;
+      const coversLeft = () => covers.length - c >= COVERS_PER_ROW * COVER_ROWS;
+      const takeCovers = () => Array.from({ length: COVER_ROWS }, () => covers.slice(c, c += COVERS_PER_ROW).map(item => ({ cover: item })));
+      for (let i = 0, n = 0; i < photos.length; n++) {
+        let kind = PATTERN[n % PATTERN.length];
+        if (kind !== 'pair' && covers.length) {
+          if (coversLeft() && !portrait(i)) {
+            const big = photo(i), side = takeCovers();
+            blocks.push(kind === 'big-left' ? [big, side] : [side, big]);
+            i += 1;
+            continue;
+          }
+          kind = 'pair';
+        }
+        const big = kind === 'big-left' ? i : i + 2;
+        // A portrait as the big one would make a very tall block: it goes in a pair instead.
+        if (kind !== 'pair' && (photos.length - i < 3 || portrait(big))) kind = 'pair';
+        if (kind === 'big-left') { blocks.push([photo(i), [[{ i: i + 1 }], [{ i: i + 2 }]]]); i += 3; }
+        else if (kind === 'big-right') { blocks.push([[[{ i }], [{ i: i + 1 }]], photo(i + 2)]); i += 3; }
+        else if (photos.length - i >= 2) { blocks.push([photo(i), photo(i + 1)]); i += 2; }
+        else { blocks.push([photo(i)]); i += 1; }  // a lone last photo: shown the size of one of a pair
+      }
+      return blocks;
+    }
+
+    // Sizes every block to the grid's width. Column j holds rows i, each with n_i tiles whose
+    // ratios add up to R_i; at width w a row is (w - (n_i - 1)g) / R_i tall. So with
+    // S_j = Σ 1/R_i, K_j = Σ (n_i - 1)/R_i and m_j rows, a column H tall is
+    // w_j = (H - (m_j - 1)g + g·K_j) / S_j wide, and the widths plus the gaps filling the row
+    // give H.
+    function layoutGrid() {
+      const W = grid.clientWidth;
+      if (!W) return;
+      const g = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--g')) || 5;
+      const narrow = matchMedia('(max-width: 768px)').matches;
+      for (const block of grid.querySelectorAll('.block')) {
+        const cols = [...block.children].map(col => [...col.children].map(row => row.classList.contains('crow') ? [...row.children] : [row]));
+        const R = cols.map(rows => rows.map(fs => fs.reduce((s, f) => s + Number(f.dataset.r), 0)));
+        const S = R.map(rs => rs.reduce((s, x) => s + 1 / x, 0));
+        const K = cols.map((rows, j) => rows.reduce((s, fs, k) => s + (fs.length - 1) / R[j][k], 0));
+        const M = cols.map(rows => rows.length);
+        let widths;
+        if (cols.length === 1 && M[0] === 1 && cols[0][0].length === 1) {
+          widths = [(W - g) / 2];
+        } else {
+          const off = S.reduce((s, Sj, j) => s + (g * K[j] - (M[j] - 1) * g) / Sj, 0);
+          const H = (W - (cols.length - 1) * g - off) / S.reduce((s, x) => s + 1 / x, 0);
+          widths = S.map((Sj, j) => (H - (M[j] - 1) * g + g * K[j]) / Sj);
+        }
+        cols.forEach((rows, j) => rows.forEach((fs, k) => {
+          const h = (widths[j] - (fs.length - 1) * g) / R[j][k];  // this row's height
+          for (const f of fs) {
+            const w = h * Number(f.dataset.r);
+            f.style.setProperty('--w', `${w.toFixed(2)}px`);
+            if (f.classList.contains('photo')) f.querySelector('img').sizes = narrow ? '100vw' : `${Math.ceil(w)}px`;
+          }
+        }));
+      }
+    }
+    let laidOut = 0;
+    new ResizeObserver(() => { cancelAnimationFrame(laidOut); laidOut = requestAnimationFrame(layoutGrid); }).observe(grid);
+
+    function photoTile(i, eager) {
+      const p = photos[i];
+      const fig = document.createElement('figure');
+      fig.className = 'work photo';
+      fig.dataset.r = ratio(p).toFixed(6);
+      fig.style.setProperty('--r', ratio(p).toFixed(4));
+      const a = document.createElement('a');
+      a.className = 'ph ld';
+      a.href = `#${p.id}`;
+      // Straight to full screen: requested here, while the click still counts as one.
+      a.addEventListener('click', e => {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        countClick(p.id);
+        pushed = true;
+        directFull = true;
+        setImmersive(true);
+      });
+      const im = document.createElement('img');
+      if (!eager) im.loading = 'lazy';
+      im.decoding = 'async';
+      im.width = p.w;
+      im.height = p.h;
+      im.alt = altOf(p);
+      im.sizes = '(max-width: 768px) 100vw, 50vw';
+      im.srcset = srcset(p);
+      im.src = file(p, '-sm');
+      const done = () => a.classList.remove('ld');  // fade in once loaded
+      im.addEventListener('load', done);
+      im.addEventListener('error', done);
+      a.append(im);
+      fig.append(a);
+      return fig;
+    }
+
+    // A book or movie cover: its title on hover, cropped a little to 2:3 so the rows line up.
+    function coverTile(it, eager) {
+      const fig = document.createElement('figure');
+      fig.className = 'work cover';
+      fig.dataset.r = COVER_RATIO.toFixed(6);
+      fig.style.setProperty('--r', COVER_RATIO.toFixed(4));
+      const movie = it.type === 'movie';
+      const what = movie ? `${it.title} (${it.author})` : `${it.title}, by ${it.author}`;
+      fig.title = what;
+      const im = document.createElement('img');
+      if (!eager) im.loading = 'lazy';
+      im.decoding = 'async';
+      im.alt = `${movie ? 'Movie' : 'Book'}: ${what}`;
+      im.src = it.cover;
+      fig.append(im);
+      return fig;
+    }
+
+    function renderGrid() {
+      const blocks = planBlocks();
+      const els = blocks.map((columns, n) => {
+        const div = document.createElement('div');
+        div.className = 'block';
+        for (const rows of columns) {
+          const col = document.createElement('div');
+          col.className = 'col';
+          for (const row of rows) {
+            if (row[0].cover) {
+              const crow = document.createElement('div');
+              crow.className = 'crow';
+              crow.append(...row.map(t => coverTile(t.cover, n < 2)));
+              col.append(crow);
+            } else {
+              col.append(photoTile(row[0].i, n < 2));  // the first two blocks load right away
+            }
+          }
+          div.append(col);
+        }
+        return div;
+      });
+      if (MODE === 'everything') {
+        const more = document.createElement('p');
+        more.className = 'note more';
+        more.innerHTML = '<a href="/tracker">Every book and movie →</a>';
+        els.push(more);
+      }
+      grid.replaceChildren(...els);
+      layoutGrid();
+      tiles = [...grid.querySelectorAll('.ph')];
+      thumbButtons = photos.map((p, i) => {
+        const b = document.createElement('button');
+        b.setAttribute('aria-label', captionOf(p));
+        const t = document.createElement('img');
+        t.loading = 'lazy';
+        t.alt = '';
+        t.width = p.tw;
+        t.height = p.th;
+        t.src = file(p, '-th');
+        b.append(t);
+        b.addEventListener('click', () => show(i));
+        return b;
+      });
+      thumbsRow.replaceChildren(...thumbButtons);
+      current = -1;
+    }
+
+    // ---- the viewer
+    function load(p) {
+      const im = new Image();
+      im.sizes = '100vw';
+      im.srcset = srcset(p);
+      im.src = file(p, '');
+      return im;
+    }
+
+    function show(i, smooth = true) {
+      const previous = current;
+      current = (i + photos.length) % photos.length;
+      const want = current;
+      const p = photos[want];
+      caption.textContent = captionOf(p);
+      count.textContent = `${want + 1} / ${photos.length}`;
+      history.replaceState(history.state, '', '#' + p.id);
+      if (previous >= 0) thumbButtons[previous]?.removeAttribute('aria-current');
+      thumbButtons[want].setAttribute('aria-current', 'true');
+      thumbButtons[want].scrollIntoView({ block: 'nearest', inline: 'center', behavior: smooth ? 'smooth' : 'auto' });
+      img.classList.add('fading');
+      const next = load(p);
+      const swap = () => {
+        if (want !== current || photos[want] !== p) return;  // a later click already moved on
+        img.srcset = srcset(p);
+        img.src = file(p, '');
+        img.classList.remove('fading');
+      };
+      next.decode().then(swap, swap);
+      load(photos[(want + 1) % photos.length]);
+      load(photos[(want - 1 + photos.length) % photos.length]);
+    }
+
+    const isOpen = () => viewer.classList.contains('open');
+    function openViewer(i) {
+      if (!isOpen()) {
+        viewer.classList.add('open');
+        document.body.classList.add('viewing');
+        viewer.focus({ preventScroll: true });
+      }
+      show(i, false);
+    }
+
+    function closeViewer() {
+      if (!isOpen()) return;
+      directFull = false;
+      if (root.classList.contains('immersive')) setImmersive(false);
+      viewer.classList.remove('open');
+      document.body.classList.remove('viewing');
+      tiles[current]?.scrollIntoView({ block: 'center' });
+      tiles[current]?.focus({ preventScroll: true });
+    }
+
+    function leave() {
+      if (pushed) { pushed = false; history.back(); }  // the hashchange closes the viewer
+      else { history.replaceState(null, '', location.pathname + location.search); closeViewer(); }
+    }
+
+    function sync() {
+      if (location.hash === '#admin') {
+        if (MODE === 'everything') { location.replace('/#admin'); return; }  // the editor lives on /
+        closeViewer(); enterAdmin(); return;
+      }
+      if (editing()) leaveEditor();
+      // #<photo id> opens that photo; #<number> (older links) the photo at that place.
+      const h = decodeURIComponent(location.hash.slice(1));
+      let at = photos.findIndex(p => p.id === h);
+      const n = Number(h);
+      if (at < 0 && Number.isInteger(n) && n >= 1 && n <= photos.length) at = n - 1;
+      if (at >= 0) openViewer(at); else closeViewer();
+    }
+
+    // Full screen shows nothing but the photo: the browser's real full screen where it exists,
+    // plus a CSS mode that hides everything else (the only option on iPhone Safari).
+    const fullButton = $('full');
+    if (!root.requestFullscreen && !root.webkitRequestFullscreen) root.classList.add('no-fs');
+    $('fs-close').addEventListener('click', e => { e.stopPropagation(); leave(); });
+    const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
+    // A photo clicked in the grid opens straight into full screen, and leaving full screen then
+    // goes back to the grid. (F from there shows the viewer with its thumbnails instead.)
+    let directFull = false;
+    const exitFull = () => (directFull && isOpen() ? leave() : setImmersive(false));
+    // Shown for a moment each time full screen starts, then gone: full screen is the photo only.
+    const fsHint = $('fs-hint');
+    let fsHintTimer = 0;
+    function flashHint() {
+      fsHint.textContent = matchMedia('(hover: none)').matches ? 'Tap the sides to change photos' : '← → to change photos';
+      fsHint.classList.add('show');
+      clearTimeout(fsHintTimer);
+      fsHintTimer = setTimeout(() => fsHint.classList.remove('show'), 2200);
+    }
+    function setImmersive(on) {
+      const was = root.classList.contains('immersive');
+      root.classList.toggle('immersive', on);
+      if (on && !was) flashHint();
+      if (!on) { clearTimeout(fsHintTimer); fsHint.classList.remove('show'); }
+      fullButton.setAttribute('aria-label', on ? 'Exit full screen (Esc)' : 'Full screen (F)');
+      fullButton.title = fullButton.getAttribute('aria-label');
+      if (on && !fsElement()) {
+        const request = root.requestFullscreen || root.webkitRequestFullscreen;
+        if (request) Promise.resolve(request.call(root)).catch(() => {});
+      } else if (!on && fsElement()) {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen;
+        Promise.resolve(exit.call(document)).catch(() => {});
+      }
+    }
+    const toggleFull = () => {
+      const on = !root.classList.contains('immersive');
+      if (!on) directFull = false;  // F chose the viewer: Esc then closes it
+      setImmersive(on);
+    };
+    fullButton.addEventListener('click', toggleFull);
+    const leftFullscreen = () => { if (!fsElement() && root.classList.contains('immersive')) exitFull(); };
+    document.addEventListener('fullscreenchange', leftFullscreen);
+    document.addEventListener('webkitfullscreenchange', leftFullscreen);
+    let idleTimer;
+    document.addEventListener('mousemove', () => {
+      root.classList.remove('idle');
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => root.classList.add('idle'), 1500);
+    });
+
+    viewer.querySelectorAll('[data-step]').forEach(b =>
+      b.addEventListener('click', () => show(current + Number(b.dataset.step))));
+    $('close').addEventListener('click', leave);
+    document.addEventListener('keydown', e => {
+      if (!isOpen() || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === 'ArrowRight') show(current + 1);
+      else if (e.key === 'ArrowLeft') show(current - 1);
+      else if (e.key === 'f' || e.key === 'F') toggleFull();
+      else if (e.key === 'Escape') root.classList.contains('immersive') ? exitFull() : leave();
+    });
+    let touchX = null, touchY = null;
+    const frame = viewer.querySelector('.frame');
+    frame.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }, { passive: true });
+    frame.addEventListener('touchend', e => {
+      if (touchX === null) return;
+      const dx = e.changedTouches[0].clientX - touchX;
+      const dy = e.changedTouches[0].clientY - touchY;
+      touchX = touchY = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) show(current + (dx < 0 ? 1 : -1));
+      else if (dy > 80) root.classList.contains('immersive') ? exitFull() : leave();  // swipe down
+    });
+
+    // ---- admin mode (dcdnt.xyz/#admin). The Worker checks the password and keeps an
+    // HttpOnly session cookie; this page only remembers that it may show the Edit link.
+    const ADMIN_HINT = 'pictures-admin';
+    const hint = {
+      get() { try { return localStorage.getItem(ADMIN_HINT) === '1'; } catch { return false; } },
+      set(on) { try { on ? localStorage.setItem(ADMIN_HINT, '1') : localStorage.removeItem(ADMIN_HINT); } catch {} },
+    };
+    const ed = { sha: null, items: [], removed: [], dirty: false, busy: false, dragFrom: null, scroll: 0, clicks: null };
+
+    // Clicks on the grid's photos are counted on the server (worker/index.js), but never the
+    // owner's: a browser that has ever signed in to admin mode doesn't send them.
+    const OWNER = 'dcdnt-owner';
+    const owner = {
+      get() { try { return localStorage.getItem(OWNER) === '1'; } catch { return false; } },
+      set() { try { localStorage.setItem(OWNER, '1'); } catch {} },
+    };
+    if (hint.get()) owner.set();  // signed in here before this was added
+    function countClick(id) {
+      if (owner.get()) return;
+      fetch('/api/click', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id }) }).catch(() => {});
+    }
+    const editing = () => !$('editor').hidden;
+
+    async function api(path, options = {}) {
+      let res;
+      try {
+        res = await fetch(`/api/admin/${path}`, {
+          credentials: 'same-origin',
+          ...options,
+          headers: options.body ? { 'Content-Type': 'application/json' } : {},
+        });
+      } catch {
+        throw new Error('Couldn’t reach the server. Check your connection.');
+      }
+      const data = await res.json().catch(() => null);
+      if (!data) throw Object.assign(new Error('Admin mode only works on dcdnt.xyz.'), { status: res.status });
+      if (!res.ok) throw Object.assign(new Error(data.error || `Error ${res.status}`), { status: res.status });
+      return data;
+    }
+
+    async function enterAdmin() {
+      if (editing()) return;
+      try {
+        const me = await api('me');
+        if (me.admin) { owner.set(); openEditor(); } else showLogin();
+      } catch (err) {
+        showLogin(err.message);
+      }
+    }
+
+    function showLogin(message = '') {
+      $('login').hidden = false;
+      $('login-msg').textContent = message;
+      $('pw').value = '';
+      $('pw').focus();
+    }
+    function hideLogin() {
+      $('login').hidden = true;
+      if (location.hash === '#admin' && !editing()) history.replaceState(null, '', location.pathname + location.search);
+    }
+    $('login-cancel').addEventListener('click', hideLogin);
+    $('login').addEventListener('keydown', e => { if (e.key === 'Escape') hideLogin(); });
+    $('login-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const button = e.submitter || $('login-form').querySelector('[type=submit]');
+      button.disabled = true;
+      $('login-msg').textContent = '';
+      try {
+        await api('login', { method: 'POST', body: JSON.stringify({ password: $('pw').value }) });
+        hint.set(true);
+        owner.set();
+        $('edit-link').hidden = false;
+        $('login').hidden = true;
+        // Signed out mid-edit (the session ran out): keep the unsaved changes on screen.
+        if (editing() && ed.dirty) status('Signed in again. Press Save.'); else openEditor();
+      } catch (err) {
+        $('login-msg').textContent = err.message;
+        $('pw').select();
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    function status(text, error = false) {
+      $('ed-status').textContent = text;
+      $('ed-status').classList.toggle('error', error);
+    }
+
+    async function openEditor() {
+      if (location.hash !== '#admin') history.replaceState(null, '', '#admin');
+      ed.scroll = window.scrollY;
+      $('wrap').hidden = true;
+      $('editor').hidden = false;
+      window.scrollTo(0, 0);
+      ed.items = [];
+      ed.removed = [];
+      ed.dirty = false;
+      renderEditor();
+      status('Loading the latest version…');
+      try {
+        const res = await api('pictures');
+        ed.sha = res.sha;
+        ed.items = res.data.photos.map(p => ({ ...p }));
+        renderEditor();
+        status('');
+        loadClicks();
+      } catch (err) {
+        if (err.status === 401) { hint.set(false); leaveEditor(); showLogin(err.message); return; }
+        status(err.message, true);
+      }
+    }
+
+    // How many times each photo was clicked (not counting the owner), under its card, and the
+    // most-clicked ones in a line above.
+    async function loadClicks() {
+      try {
+        const res = await api('clicks');
+        ed.clicks = new Map(res.clicks.map(c => [c.id, c.n]));
+        // Named by their numbers here (and captions, where they have one).
+        const top = res.clicks.slice(0, 5).map(c => {
+          const i = ed.items.findIndex(q => q.id === c.id);
+          if (i < 0) return null;
+          const label = ed.items[i].label ? ` “${ed.items[i].label}”` : '';
+          return `no. ${i + 1}${label} (${c.n})`;
+        }).filter(Boolean);
+        $('ed-clicks').textContent = res.total
+          ? `Clicks by visitors, not you: ${res.total} in all. Most clicked: ${top.join(', ')}.`
+          : 'No clicks by visitors yet. Each photo shows its clicks here once visitors open it.';
+        renderEditor();
+      } catch {
+        $('ed-clicks').textContent = '';
+      }
+    }
+
+    function leaveEditor() {
+      closeBig();
+      $('editor').hidden = true;
+      $('wrap').hidden = false;
+      window.scrollTo(0, ed.scroll);
+      ed.dirty = false;
+      if (location.hash === '#admin') history.replaceState(null, '', location.pathname + location.search);
+    }
+
+    function markDirty() {
+      ed.dirty = true;
+      $('ed-save').disabled = ed.busy;
+      status('Unsaved changes.');
+      $('ed-count').textContent = `${ed.items.length} photo${ed.items.length === 1 ? '' : 's'}`;
+    }
+
+    function move(from, to) {
+      if (to < 0 || to >= ed.items.length || from === to) return;
+      const [p] = ed.items.splice(from, 1);
+      ed.items.splice(to, 0, p);
+      markDirty();
+      renderEditor();
+    }
+
+    function renderEditor() {
+      $('ed-save').disabled = !ed.dirty || ed.busy;  // nothing to save yet: no empty commits
+      $('ed-count').textContent = `${ed.items.length} photo${ed.items.length === 1 ? '' : 's'}`;
+      $('ed-grid').replaceChildren(...ed.items.map((p, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.draggable = true;
+        const im = document.createElement('img');
+        im.loading = 'lazy';
+        im.alt = '';
+        im.src = file(p, '-th');
+
+        const num = document.createElement('span');
+        num.className = 'num';
+        num.textContent = i + 1;
+        const input = document.createElement('input');
+        input.className = 'field';
+        input.placeholder = 'Caption';
+        input.setAttribute('aria-label', `Caption for photo ${i + 1}`);
+        input.value = p.label || '';
+        input.maxLength = 120;
+        input.addEventListener('input', () => { p.label = input.value; markDirty(); });
+        // Typing in the caption shouldn't start a drag of the whole card.
+        input.addEventListener('pointerdown', () => { card.draggable = false; });
+        input.addEventListener('blur', () => { card.draggable = true; });
+        const when = document.createElement('span');
+        when.className = 'when';
+        const clicks = ed.clicks ? ed.clicks.get(p.id) || 0 : null;
+        when.textContent = [month(p), clicks === null ? '' : `${clicks} click${clicks === 1 ? '' : 's'}`].filter(Boolean).join(' · ');
+        when.classList.toggle('hot', clicks > 0);
+        const tools = document.createElement('div');
+        tools.className = 'tools';
+        const button = (label, title, cls, action) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = `text-btn ${cls}`;
+          b.textContent = label;
+          b.title = title;
+          b.setAttribute('aria-label', title);
+          b.addEventListener('click', action);
+          return b;
+        };
+        tools.append(
+          button('←', 'Move earlier', '', () => move(i, i - 1)),
+          button('→', 'Move later', '', () => move(i, i + 1)),
+          button('×', 'Take off the page', 'remove', () => {
+            ed.removed.push(...ed.items.splice(i, 1));
+            markDirty();
+            renderEditor();
+          }));
+        card.append(im, num, input, when, tools);
+        card.title = 'Click to see it big';
+        card.addEventListener('click', e => { if (!e.target.closest('input, button')) openBig(i); });
+        card.addEventListener('dragstart', e => {
+          ed.dragFrom = i;
+          card.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', String(i));
+        });
+        card.addEventListener('dragend', () => { ed.dragFrom = null; renderEditor(); });
+        card.addEventListener('dragover', e => {
+          if (ed.dragFrom === null) return;
+          e.preventDefault();
+          const after = e.offsetX > card.clientWidth / 2;
+          card.classList.toggle('after', after);
+          card.classList.toggle('before', !after);
+        });
+        card.addEventListener('dragleave', () => card.classList.remove('before', 'after'));
+        card.addEventListener('drop', e => {
+          e.preventDefault();
+          if (ed.dragFrom === null) return;
+          let to = i + (card.classList.contains('after') ? 1 : 0);
+          if (ed.dragFrom < to) to -= 1;
+          move(ed.dragFrom, to);
+        });
+        return card;
+      }));
+      $('ed-removed-wrap').hidden = !ed.removed.length;
+      $('ed-removed').replaceChildren(...ed.removed.map((p, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'gone';
+        b.title = `Put back: ${captionOf(p)}`;
+        const im = document.createElement('img');
+        im.alt = altOf(p);
+        im.src = file(p, '-th');
+        b.append(im);
+        b.addEventListener('click', () => {
+          ed.items.push(...ed.removed.splice(i, 1));
+          markDirty();
+          renderEditor();
+        });
+        return b;
+      }));
+    }
+
+    $('ed-save').addEventListener('click', async () => {
+      if (ed.busy || !ed.sha) return;
+      ed.busy = true;
+      $('ed-save').disabled = true;
+      status('Saving…');
+      try {
+        const res = await api('pictures', {
+          method: 'PUT',
+          body: JSON.stringify({ base: ed.sha, photos: ed.items.map(({ id, label }) => ({ id, label })) }),
+        });
+        ed.sha = res.sha;
+        ed.dirty = false;
+        photos = res.data.photos;
+        renderGrid();
+        leaveEditor();
+        toast('Saved. The live page updates in about a minute.');
+      } catch (err) {
+        status(err.message, true);
+        if (err.status === 401) { hint.set(false); showLogin(err.message); }
+      } finally {
+        ed.busy = false;
+        $('ed-save').disabled = !ed.dirty;
+      }
+    });
+    $('ed-cancel').addEventListener('click', () => {
+      if (ed.dirty && !confirm('Discard your changes?')) return;
+      leaveEditor();
+    });
+    $('ed-logout').addEventListener('click', async () => {
+      if (ed.dirty && !confirm('Discard your changes and log out?')) return;
+      try { await api('logout', { method: 'POST' }); } catch {}
+      hint.set(false);
+      $('edit-link').hidden = true;
+      leaveEditor();
+    });
+    window.addEventListener('beforeunload', e => { if (editing() && ed.dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+    // ---- admin: a photo clicked in the editor opens big, to decide about it. ← → (buttons or
+    // keys) look at the others; Esc, Close or a click beside the photo goes back to the grid.
+    const big = $('ed-big'), bigImg = $('ed-big-img');
+    let bigAt = 0;
+    const bigOpen = () => !big.hidden;
+    function showBig() {
+      const p = ed.items[bigAt];
+      if (!p) { closeBig(); return; }
+      bigImg.removeAttribute('srcset');
+      bigImg.src = file(p, '-th');  // already loaded for the grid, so it shows at once
+      bigImg.alt = altOf(p);
+      const full = load(p);
+      const swap = () => { if (ed.items[bigAt] === p && bigOpen()) { bigImg.srcset = srcset(p); bigImg.sizes = '100vw'; bigImg.src = file(p, ''); } };
+      full.decode().then(swap, swap);
+      $('ed-big-what').textContent = [`${bigAt + 1} / ${ed.items.length}`, captionOf(p)].filter(Boolean).join('  ·  ');
+      for (const d of [1, -1]) { const q = ed.items[bigAt + d]; if (q) load(q); }
+    }
+    function openBig(i) {
+      if (!editing() || !ed.items[i]) return;
+      bigAt = i;
+      big.hidden = false;
+      showBig();
+      $('ed-big-close').focus();
+    }
+    function closeBig() {
+      if (!bigOpen()) return;
+      big.hidden = true;
+      $('ed-grid').children[bigAt]?.scrollIntoView({ block: 'center' });
+    }
+    function stepBig(d) {
+      const n = ed.items.length;
+      if (!n) return;
+      bigAt = (bigAt + d + n) % n;
+      showBig();
+    }
+    $('ed-big-prev').addEventListener('click', () => stepBig(-1));
+    $('ed-big-next').addEventListener('click', () => stepBig(1));
+    $('ed-big-close').addEventListener('click', closeBig);
+    $('ed-big-remove').addEventListener('click', () => {
+      ed.removed.push(...ed.items.splice(bigAt, 1));
+      markDirty();
+      renderEditor();
+      if (!ed.items.length) { closeBig(); return; }
+      bigAt = Math.min(bigAt, ed.items.length - 1);
+      showBig();
+    });
+    // A click on the dark area around the photo closes it, like Esc.
+    big.addEventListener('click', e => { if (e.target === big || e.target.classList.contains('pic')) closeBig(); });
+    document.addEventListener('keydown', e => {
+      if (!bigOpen() || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === 'Escape') { e.preventDefault(); closeBig(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); stepBig(1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); stepBig(-1); }
+    });
+
+    function toast(text) {
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.setAttribute('role', 'status');
+      t.textContent = text;
+      document.body.append(t);
+      setTimeout(() => t.remove(), 5000);
+    }
+
+    // ---- start: draw the grid from pictures.json, which admin saves keep up to date.
+    $('edit-link').hidden = MODE === 'everything' || !hint.get();
+    window.addEventListener('hashchange', () => {
+      if (editing() && location.hash !== '#admin' && ed.dirty && !confirm('Discard your changes?')) {
+        history.replaceState(null, '', '#admin');
+        return;
+      }
+      sync();
+    });
+    // The page shows pictures.json in its order: newest first. (Clicks are counted, and shown in
+    // admin mode, but don't change the order.)
+    fetch('pictures.json', { cache: 'no-cache' })
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(data => { photos = data.photos || []; renderGrid(); sync(); })
+      .catch(() => {
+        const p = document.createElement('p');
+        p.className = 'note';
+        p.textContent = 'The photos couldn’t be loaded. Try reloading the page.';
+        grid.replaceChildren(p);
+        if (location.hash === '#admin') enterAdmin();
+      });
+  </script>
+</body>
+</html>
