@@ -12,7 +12,7 @@
 //                             while signed in to admin mode (the page itself never sends them
 //                             from a browser that has ever signed in)
 //   GET  /api/top          -> {top: [id, ...]}: the most-clicked photos, most first (the page
-//                             puts them at the top and shuffles the rest)
+//                             doesn't use it now: it shows the photos newest first)
 //   GET  /api/admin/clicks -> {clicks: [{id, n, last}], total}: every count, signed in only
 // No IP address is stored: a visitor is a hash of the day, the IP and the browser, keyed with a
 // secret, kept for two days to stop repeat counting, then deleted.

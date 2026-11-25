@@ -37,7 +37,7 @@ That serves the whole site on `http://localhost:8000` and enables the AI-powered
 - `goals_data.js`: generated goal definitions and completed days
 - `daylog-k7m2.html`: private daily log page
 - `daylog_data.js`: generated daily log data used by the private log page
-- `pictures.html`, `pictures.json`, `images/ricoh/`: the photo page, which is dcdnt.xyz's home page (the Worker serves it at `/`; `/pictures` redirects there). It's still `noindex`. It's built by `photo-page/build.py` in `~/Documents/Code/RICOH GR`, and it draws itself from `pictures.json`: the most-clicked photos first, the rest shuffled on every visit
+- `pictures.html`, `pictures.json`, `images/ricoh/`: the photo page, which is dcdnt.xyz's home page (the Worker serves it at `/`; `/pictures` redirects there). It's still `noindex`. It's built by `photo-page/build.py` in `~/Documents/Code/RICOH GR`, and it draws itself from `pictures.json`, newest first (clicks are counted and shown in admin mode)
 - `worker/index.js`: the Worker script. It handles `/` (the photo page), `/tracker` (index.html), `/pictures` (a redirect to `/`) and `/api/*`: the photo page's admin mode (`/#admin`) and its click counts (`/api/click`, `/api/top`, kept in the `PictureClicks` Durable Object; the owner's clicks aren't counted, and admin mode shows the counts). Everything else is served straight from the static assets
 - `images/covers/`: local cover images
 - `data-source/`: raw source exports kept in the repo for reproducible rebuilds

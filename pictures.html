@@ -199,7 +199,7 @@
       <button class="text-btn" id="ed-cancel" type="button">Cancel</button>
       <button class="text-btn" id="ed-logout" type="button">Log out</button>
     </div>
-    <p class="ed-hint">Click a photo to see it big. The page itself puts the most-clicked photos first and shuffles the rest, so the order here only sets the order of this list. Drag photos to reorder them, or use the arrows. Type a caption under a photo; the month is added for you. × takes a photo off the page. New photos still come from the Photo Manager on the Mac. Saving updates the live page in about a minute.</p>
+    <p class="ed-hint">Click a photo to see it big. Drag photos to reorder them, or use the arrows. Type a caption under a photo; the month is added for you. × takes a photo off the page. New photos still come from the Photo Manager on the Mac. Saving updates the live page in about a minute.</p>
     <p class="ed-hint" id="ed-clicks"></p>
     <div class="ed-grid" id="ed-grid"></div>
     <div class="ed-removed" id="ed-removed-wrap" hidden>
@@ -664,8 +664,8 @@
           return `no. ${i + 1}${label} (${c.n})`;
         }).filter(Boolean);
         $('ed-clicks').textContent = res.total
-          ? `Clicks by visitors, not you: ${res.total} in all. Most clicked: ${top.join(', ')}. The page puts the most-clicked photos at the top and shuffles the rest on every visit.`
-          : 'No clicks by visitors yet. The page puts the most-clicked photos at the top and shuffles the rest on every visit.';
+          ? `Clicks by visitors, not you: ${res.total} in all. Most clicked: ${top.join(', ')}.`
+          : 'No clicks by visitors yet. Each photo shows its clicks here once visitors open it.';
         renderEditor();
       } catch {
         $('ed-clicks').textContent = '';
@@ -804,7 +804,7 @@
         });
         ed.sha = res.sha;
         ed.dirty = false;
-        photos = arrange(res.data.photos, topIds);
+        photos = res.data.photos;
         renderGrid();
         leaveEditor();
         toast('Saved. The live page updates in about a minute.');
@@ -902,25 +902,11 @@
       }
       sync();
     });
-    // The order on the page: the most-clicked photos first (/api/top), then the rest shuffled,
-    // anew on every visit. Without the counts (offline, a preview on the Mac), it's all shuffled.
-    let topIds = [];
-    function arrange(list, top) {
-      const byId = new Map(list.map(p => [p.id, p]));
-      const first = top.map(id => byId.get(id)).filter(Boolean);
-      const rest = list.filter(p => !top.includes(p.id));
-      for (let i = rest.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [rest[i], rest[j]] = [rest[j], rest[i]];
-      }
-      return [...first, ...rest];
-    }
-    const topRequest = fetch('/api/top').then(r => (r.ok ? r.json() : { top: [] })).then(d => d.top || [], () => []);
-    Promise.all([
-      fetch('pictures.json', { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
-      Promise.race([topRequest, new Promise(r => setTimeout(() => r([]), 1500))]),
-    ])
-      .then(([data, top]) => { topIds = top; photos = arrange(data.photos || [], top); renderGrid(); sync(); })
+    // The page shows pictures.json in its order: newest first. (Clicks are counted, and shown in
+    // admin mode, but don't change the order.)
+    fetch('pictures.json', { cache: 'no-cache' })
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(data => { photos = data.photos || []; renderGrid(); sync(); })
       .catch(() => {
         const p = document.createElement('p');
         p.className = 'note';
